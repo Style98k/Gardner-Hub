@@ -38,21 +38,21 @@
 
         <form id="loginForm" class="space-y-5">
           
-          <!-- School ID -->
+          <!-- Email Address -->
           <div>
-            <label for="schoolId" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              School ID
+            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Email Address
             </label>
             <div class="relative">
               <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/>
                 </svg>
               </div>
               <input
-                type="text"
-                id="schoolId"
-                placeholder="e.g., 2024-001234"
+                type="email"
+                id="email"
+                placeholder="name@gmail.com"
                 required
                 class="w-full pl-11 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-800 bg-gray-50 dark:bg-black text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-white focus:border-brand-500 dark:focus:border-gray-600 focus:bg-white dark:focus:bg-black transition-colors duration-200"
               />
@@ -128,8 +128,8 @@
       e.preventDefault();
       
       // Mock authentication - redirect to hub
-      const schoolId = document.getElementById('schoolId').value;
-      const userRole = schoolId.includes('admin') ? 'Admin' : (schoolId.includes('faculty') ? 'Faculty' : 'Student');
+      const email = document.getElementById('email').value;
+      const userRole = email.includes('admin') ? 'Admin' : (email.includes('faculty') ? 'Faculty' : 'Student');
       
       localStorage.setItem('userRole', userRole);
       localStorage.setItem('userName', userRole + ' User');
