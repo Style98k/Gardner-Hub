@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 24, 2026 at 12:44 PM
+-- Generation Time: Feb 24, 2026 at 04:12 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,22 @@ SET time_zone = "+00:00";
 --
 -- Database: `gardner_hub`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `grade_inquiries`
+--
+
+CREATE TABLE `grade_inquiries` (
+  `id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `id_proof_path` varchar(255) DEFAULT NULL,
+  `status` enum('pending','under_review','resolved') NOT NULL DEFAULT 'pending',
+  `grade_file_path` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -51,6 +67,13 @@ INSERT INTO `users` (`id`, `full_name`, `school_id`, `role`, `department_course`
 --
 
 --
+-- Indexes for table `grade_inquiries`
+--
+ALTER TABLE `grade_inquiries`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `student_id` (`student_id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -63,10 +86,26 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT for table `grade_inquiries`
+--
+ALTER TABLE `grade_inquiries`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `grade_inquiries`
+--
+ALTER TABLE `grade_inquiries`
+  ADD CONSTRAINT `grade_inquiries_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
