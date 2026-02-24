@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Gardner Hub — Register</title>
+
+  <!-- Google Font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Tailwind Configuration -->
+  <script src="js/tailwind-config.js"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="ccss/style.css">
+</head>
+
+<body class="font-sans text-gray-800 dark:text-gray-200 min-h-screen flex items-center justify-center p-4 py-12 transition-colors duration-300">
+
+  <!-- Registration Container -->
+  <div class="w-full max-w-lg relative">
+    
+    <!-- Logo & Header -->
+    <div class="text-center mb-8">
+      <a href="./index.html" class="inline-block">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-brand-900 shadow-lg mb-4 logo-float cursor-pointer hover:bg-brand-800 transition">
+          <span class="text-white font-bold text-2xl">G</span>
+        </div>
+      </a>
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Join The Gardner Hub</h1>
+      <p class="text-sm text-gray-500 dark:text-gray-400">Create your account to get started</p>
+    </div>
+
+    <!-- Registration Card -->
+    <div class="bg-white dark:bg-black rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden card-enter transition-colors duration-300">
+      <div class="p-8">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Create new account</h2>
+
+        <form id="registerForm" class="space-y-4">
+          
+          <!-- Full Name -->
+          <div>
+            <label for="fullName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Full Name
+            </label>
+            <input
+              type="text"
+              id="fullName"
+              placeholder="Juan Dela Cruz"
+              required
+              class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-black text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-brand-400 focus:border-brand-500 dark:focus:border-brand-400 focus:bg-white dark:focus:bg-black transition-colors duration-200"
+            />
+          </div>
+
+          <!-- Student ID -->
+          <div>
+            <label for="studentId" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Student ID
+            </label>
+            <input
+              type="text"
+              id="studentId"
+              placeholder="2024-001234"
+              required
+              class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-800 bg-gray-50 dark:bg-black text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-brand-400 focus:border-brand-500 dark:focus:border-brand-400 focus:bg-white dark:focus:bg-gray-900 transition-colors duration-200"
+            />
+          </div>
+
+          <!-- Department -->
+          <div>
+            <label for="department" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Department
+            </label>
+            <select
+              id="department"
+              required
+              class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-800 bg-gray-50 dark:bg-black text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-white focus:border-brand-500 dark:focus:border-gray-600 focus:bg-white dark:focus:bg-black transition-colors duration-200"
+            >
+              <option value="">Select your department</option>
+              <option value="BSIT">BS Information Technology</option>
+              <option value="BSCS">BS Computer Science</option>
+              <option value="BSBA">BS Business Administration</option>
+              <option value="BSED">BS Education</option>
+              <option value="BSEE">BS Electrical Engineering</option>
+              <option value="BSCE">BS Civil Engineering</option>
+              <option value="BSME">BS Mechanical Engineering</option>
+              <option value="BSHRM">BS Hotel & Restaurant Management</option>
+              <option value="BSTM">BS Tourism Management</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Email Address
+            </label>
+            <input
+              type="email"
+              id="email"
+              placeholder="juan.delacruz@gardner.edu.ph"
+              required
+              class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-800 bg-gray-50 dark:bg-black text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-white focus:border-brand-500 dark:focus:border-gray-600 focus:bg-white dark:focus:bg-black transition-colors duration-200"
+            />
+          </div>
+
+          <!-- Password -->
+          <div>
+            <label for="regPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Password
+            </label>
+            <input
+              type="password"
+              id="regPassword"
+              placeholder="Minimum 8 characters"
+              required
+              minlength="8"
+              class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-800 bg-gray-50 dark:bg-black text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-white focus:border-brand-500 dark:focus:border-gray-600 focus:bg-white dark:focus:bg-black transition-colors duration-200"
+            />
+          </div>
+
+          <!-- Confirm Password -->
+          <div>
+            <label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              id="confirmPassword"
+              placeholder="Re-enter password"
+              required
+              minlength="8"
+              class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-800 bg-gray-50 dark:bg-black text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-white focus:border-brand-500 dark:focus:border-gray-600 focus:bg-white dark:focus:bg-black transition-colors duration-200"
+            />
+            <p id="passwordError" class="hidden text-xs text-red-600 dark:text-red-400 mt-1">Passwords do not match</p>
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            type="submit"
+            class="w-full py-3 bg-brand-900 dark:bg-white text-white dark:text-black font-semibold rounded-lg shadow-md hover:bg-brand-800 dark:hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-white focus:ring-offset-2 dark:focus:ring-offset-black transition-colors duration-200 transform active:scale-[0.98] mt-6"
+          >
+            Create Account
+          </button>
+
+        </form>
+      </div>
+
+      <!-- Login Link -->
+      <div class="bg-gray-50 dark:bg-black px-8 py-4 border-t border-gray-100 dark:border-gray-800 text-center transition-colors duration-300">
+        <p class="text-sm text-gray-600 dark:text-gray-400">
+          Already have an account? 
+          <a href="./index.html" class="font-semibold text-brand-600 dark:text-white hover:text-brand-700 dark:hover:text-gray-200 hover:underline transition-colors duration-200">
+            Sign in here
+          </a>
+        </p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="text-center mt-8 text-xs text-gray-400 dark:text-gray-500">
+      <p>&copy; 2026 The Gardner Hub. All rights reserved.</p>
+    </div>
+
+  </div>
+
+  <!-- Theme Management -->
+  <script src="./js/theme.js"></script>
+
+  <!-- Auth JavaScript -->
+  <script src="./js/auth.js"></script>
+</body>
+</html>

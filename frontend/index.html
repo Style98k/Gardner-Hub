@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Gardner Hub — Login</title>
+
+  <!-- Google Font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Tailwind Configuration -->
+  <script src="js/tailwind-config.js"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="ccss/style.css">
+</head>
+
+<body class="font-sans text-gray-800 dark:text-gray-200 min-h-screen flex items-center justify-center p-4 transition-colors duration-300">
+
+  <!-- Login Container -->
+  <div class="w-full max-w-md relative">
+    
+    <!-- Logo & Header -->
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-brand-900 shadow-lg mb-4 logo-float">
+        <span class="text-white font-bold text-2xl">G</span>
+      </div>
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">The Gardner Hub</h1>
+      <p class="text-sm text-gray-500 dark:text-gray-400">Sign in to your school community forum</p>
+    </div>
+
+    <!-- Login Card -->
+    <div class="bg-white dark:bg-black rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden card-enter transition-colors duration-300">
+      <div class="p-8">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Login to your account</h2>
+
+        <form id="loginForm" class="space-y-5">
+          
+          <!-- School ID -->
+          <div>
+            <label for="schoolId" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              School ID
+            </label>
+            <div class="relative">
+              <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z"/>
+                </svg>
+              </div>
+              <input
+                type="text"
+                id="schoolId"
+                placeholder="e.g., 2024-001234"
+                required
+                class="w-full pl-11 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-800 bg-gray-50 dark:bg-black text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-white focus:border-brand-500 dark:focus:border-gray-600 focus:bg-white dark:focus:bg-black transition-colors duration-200"
+              />
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Password
+            </label>
+            <div class="relative">
+              <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+                </svg>
+              </div>
+              <input
+                type="password"
+                id="password"
+                placeholder="Enter your password"
+                required
+                class="w-full pl-11 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-black text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-brand-400 focus:border-brand-500 dark:focus:border-brand-400 focus:bg-white dark:focus:bg-black transition-colors duration-200"
+              />
+            </div>
+          </div>
+
+          <!-- Forgot Password -->
+          <div class="flex items-center justify-end">
+            <a href="#" class="text-sm font-medium text-brand-600 dark:text-white hover:text-brand-700 dark:hover:text-gray-200 hover:underline transition-colors duration-200">
+              Forgot password?
+            </a>
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            type="submit"
+            class="w-full py-3 bg-brand-900 dark:bg-white text-white dark:text-black font-semibold rounded-lg shadow-md hover:bg-brand-800 dark:hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-white focus:ring-offset-2 dark:focus:ring-offset-black transition-colors duration-200 transform active:scale-[0.98]"
+          >
+            Sign In
+          </button>
+
+        </form>
+      </div>
+
+      <!-- Register Link -->
+      <div class="bg-gray-50 dark:bg-black px-8 py-4 border-t border-gray-100 dark:border-gray-800 text-center transition-colors duration-300">
+        <p class="text-sm text-gray-600 dark:text-gray-400">
+          Don't have an account? 
+          <a href="./register.html" class="font-semibold text-brand-600 dark:text-white hover:text-brand-700 dark:hover:text-gray-200 hover:underline transition-colors duration-200">
+            Register here
+          </a>
+        </p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="text-center mt-8 text-xs text-gray-400">
+      <p>&copy; 2026 The Gardner Hub. All rights reserved.</p>
+    </div>
+
+  </div>
+
+  <!-- Theme Management -->
+  <script src="./js/theme.js"></script>
+
+  <!-- Auth JavaScript -->
+  <script src="./js/auth.js"></script>
+</body>
+</html>
