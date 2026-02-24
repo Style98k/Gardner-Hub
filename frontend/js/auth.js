@@ -88,14 +88,18 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
 
       const fullName = document.getElementById('fullName').value.trim();
-      const studentId = document.getElementById('studentId').value.trim();
+      const userId = document.getElementById('userId').value.trim();
       const department = document.getElementById('department').value;
       const email = document.getElementById('email').value.trim();
       const password = passwordInput.value.trim();
       const confirmPassword = confirmPasswordInput.value.trim();
+      
+      // Get the selected role from the global currentRole variable (from register.html)
+      const selectedRole = window.currentRole || 'student';
+      const roleName = selectedRole === 'student' ? 'Student' : 'Faculty';
 
       // Validation
-      if (!fullName || !studentId || !department || !email || !password || !confirmPassword) {
+      if (!fullName || !userId || !department || !email || !password || !confirmPassword) {
         alert('Please fill in all fields.');
         return;
       }
@@ -117,19 +121,20 @@ document.addEventListener('DOMContentLoaded', () => {
       // Simulate registration (dummy logic)
       console.log('Registration attempt:', {
         fullName,
-        studentId,
+        userId,
         department,
         email,
         password,
+        role: roleName
       });
 
       // Store user data (in real app, send to backend)
       const newUser = {
-        schoolId: studentId,
+        schoolId: userId,
         name: fullName,
         department: department,
         email: email,
-        role: 'Student',
+        role: roleName,
         registeredAt: new Date().toISOString(),
       };
       localStorage.setItem('gardnerHub_user', JSON.stringify(newUser));

@@ -38,6 +38,39 @@
       <div class="p-8">
         <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Create new account</h2>
 
+        <!-- Role Selector Tabs -->
+        <div class="mb-6">
+          <div class="flex gap-3 p-1.5 bg-gray-100 dark:bg-gray-900 rounded-xl">
+            <!-- Student Tab -->
+            <button
+              type="button"
+              id="studentTab"
+              class="role-tab flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 bg-white dark:bg-black text-gray-900 dark:text-white shadow-sm"
+              data-role="student"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"/>
+              </svg>
+              <span>Student</span>
+            </button>
+            
+            <!-- Faculty/Staff Tab -->
+            <button
+              type="button"
+              id="facultyTab"
+              class="role-tab flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+              data-role="faculty"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+              <span>Faculty / Staff</span>
+            </button>
+          </div>
+        </div>
+
         <form id="registerForm" class="space-y-4">
           
           <!-- Full Name -->
@@ -54,41 +87,31 @@
             />
           </div>
 
-          <!-- Student ID -->
+          <!-- Student ID / Employee ID (Dynamic) -->
           <div>
-            <label for="studentId" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label for="userId" id="userIdLabel" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Student ID
             </label>
             <input
               type="text"
-              id="studentId"
+              id="userId"
               placeholder="2024-001234"
               required
               class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-800 bg-gray-50 dark:bg-black text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-brand-400 focus:border-brand-500 dark:focus:border-brand-400 focus:bg-white dark:focus:bg-gray-900 transition-colors duration-200"
             />
           </div>
 
-          <!-- Department -->
+          <!-- Department (Dynamic) -->
           <div>
-            <label for="department" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Department
+            <label for="department" id="departmentLabel" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Course / Strands 
             </label>
             <select
               id="department"
               required
               class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-800 bg-gray-50 dark:bg-black text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-white focus:border-brand-500 dark:focus:border-gray-600 focus:bg-white dark:focus:bg-black transition-colors duration-200"
             >
-              <option value="">Select your department</option>
-              <option value="BSIT">BS Information Technology</option>
-              <option value="BSCS">BS Computer Science</option>
-              <option value="BSBA">BS Business Administration</option>
-              <option value="BSED">BS Education</option>
-              <option value="BSEE">BS Electrical Engineering</option>
-              <option value="BSCE">BS Civil Engineering</option>
-              <option value="BSME">BS Mechanical Engineering</option>
-              <option value="BSHRM">BS Hotel & Restaurant Management</option>
-              <option value="BSTM">BS Tourism Management</option>
-              <option value="OTHER">Other</option>
+              <!-- Options will be populated dynamically -->
             </select>
           </div>
 
@@ -168,6 +191,101 @@
 
   <!-- Theme Management -->
   <script src="./js/theme.js"></script>
+
+  <!-- Role Selector Logic -->
+  <script>
+    // Role selection state (exposed to window for auth.js)
+    window.currentRole = 'student';
+
+    // Department options for each role
+    const departmentOptions = {
+      student: [
+        { value: '', text: 'Select your course / strand' },
+        { value: 'BSIT', text: 'BS Information Technology' },
+        { value: 'BSCS', text: 'BS Computer Science' },
+        { value: 'BSBA', text: 'BS Business Administration' },
+        { value: 'BSCE', text: 'BS Computer Engineering' },
+        { value: 'OTHER', text: 'Other' }
+      ],
+      faculty: [
+        { value: '', text: 'Select your academic department' },
+        { value: 'REG', text: 'Registrar Office' },
+        { value: 'ADM', text: 'Administration' },
+        { value: 'OTHER', text: 'Other' }
+      ]
+    };
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const studentTab = document.getElementById('studentTab');
+      const facultyTab = document.getElementById('facultyTab');
+      
+      // Set initial role to student
+      updateRoleFields('student');
+      
+      // Add click handlers
+      studentTab.addEventListener('click', function() {
+        switchRole('student');
+      });
+      
+      facultyTab.addEventListener('click', function() {
+        switchRole('faculty');
+      });
+    });
+
+    function switchRole(role) {
+      if (currentRole === role) return;
+      
+      currentRole = role;
+      const studentTab = document.getElementById('studentTab');
+      const facultyTab = document.getElementById('facultyTab');
+      
+      // Update tab styling
+      if (role === 'student') {
+        studentTab.className = 'role-tab flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 bg-white dark:bg-black text-gray-900 dark:text-white shadow-sm';
+        facultyTab.className = 'role-tab flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white';
+      } else {
+        facultyTab.className = 'role-tab flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 bg-white dark:bg-black text-gray-900 dark:text-white shadow-sm';
+        studentTab.className = 'role-tab flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white';
+      }
+      
+      // Update form fields
+      updateRoleFields(role);
+    }
+
+    function updateRoleFields(role) {
+      const userIdLabel = document.getElementById('userIdLabel');
+      const userIdInput = document.getElementById('userId');
+      const departmentLabel = document.getElementById('departmentLabel');
+      const departmentSelect = document.getElementById('department');
+      
+      if (role === 'student') {
+        // Update Student ID field
+        userIdLabel.textContent = 'Student ID';
+        userIdInput.placeholder = '2024-001234';
+        
+        // Update Course / Strand field
+        departmentLabel.textContent = 'Course / Strand';
+        
+      } else {
+        // Update Employee ID field
+        userIdLabel.textContent = 'Employee ID';
+        userIdInput.placeholder = 'EMP-2024-567';
+        
+        // Update Academic Department field
+        departmentLabel.textContent = 'Academic Department';
+      }
+      
+      // Populate department dropdown
+      departmentSelect.innerHTML = '';
+      departmentOptions[role].forEach(option => {
+        const optElement = document.createElement('option');
+        optElement.value = option.value;
+        optElement.textContent = option.text;
+        departmentSelect.appendChild(optElement);
+      });
+    }
+  </script>
 
   <!-- Auth JavaScript -->
   <script src="./js/auth.js"></script>
