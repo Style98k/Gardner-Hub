@@ -5,12 +5,11 @@
  * ============================================================
  */
 
+const API_BASE = 'http://localhost:5000/api';
+
 // ── THEME MANAGEMENT ────────────────────────────────────────
 function initializeTheme() {
-  // Check for saved theme or default to light mode
   const savedTheme = localStorage.getItem('theme') || 'light';
-  
-  // Apply theme to document
   if (savedTheme === 'dark') {
     document.documentElement.classList.add('dark');
   } else {
@@ -20,7 +19,6 @@ function initializeTheme() {
 
 function toggleTheme() {
   const isDark = document.documentElement.classList.contains('dark');
-  
   if (isDark) {
     document.documentElement.classList.remove('dark');
     localStorage.setItem('theme', 'light');
@@ -32,59 +30,81 @@ function toggleTheme() {
 
 // ── LOGIN FORM HANDLER ─────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  // Initialize theme on page load
   initializeTheme();
-  
-  // Theme toggle button
+
   const themeToggle = document.getElementById('themeToggle');
   if (themeToggle) {
     themeToggle.addEventListener('click', toggleTheme);
   }
-  
+
   const loginForm = document.getElementById('loginForm');
   const registerForm = document.getElementById('registerForm');
 
-  // Login submit
+  // ── Login submit ──────────────────────────────────────────
   if (loginForm) {
-    loginForm.addEventListener('submit', (e) => {
+    loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const schoolId = document.getElementById('schoolId').value.trim();
+      const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
 
-      // Dummy validation
-      if (!schoolId || !password) {
+      if (!email || !password) {
         alert('Please fill in all fields.');
         return;
       }
 
-      // Simulate authentication (dummy logic)
-      console.log('Login attempt:', { schoolId, password });
+      // Disable button while loading
+      const submitBtn = loginForm.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Signing in...';
 
-      // Store session (localStorage for demo purposes)
-      const userData = {
-        schoolId: schoolId,
-        name: 'Sample User',
-        role: 'Student', // Could be Admin, Faculty, Student
-        loginTime: new Date().toISOString(),
-      };
-      localStorage.setItem('gardnerHub_user', JSON.stringify(userData));
+      try {
+        const res = await fetch(`${API_BASE}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
 
-      // Show success message
-      alert(`Welcome back, ${userData.name}!`);
+        const data = await res.json();
 
-      // Redirect to hub
-      window.location.href = './pages/forum/hub.html';
+        if (!res.ok) {
+          alert(data.message || 'Login failed.');
+          return;
+        }
+
+        // Store token & user info
+        localStorage.setItem('gardnerHub_token', data.token);
+        localStorage.setItem('gardnerHub_user', JSON.stringify(data.user));
+
+        // Redirect based on role
+        switch (data.user.role) {
+          case 'admin':
+            window.location.href = './pages/admin/dashboard.html';
+            break;
+          case 'faculty':
+            window.location.href = './pages/forum/hub.html';
+            break;
+          default:
+            window.location.href = './pages/forum/hub.html';
+        }
+      } catch (err) {
+        console.error('Login error:', err);
+        alert('Unable to connect to the server. Please try again later.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
     });
   }
 
-  // Registration submit
+  // ── Registration submit ───────────────────────────────────
   if (registerForm) {
     const passwordInput = document.getElementById('regPassword');
     const confirmPasswordInput = document.getElementById('confirmPassword');
     const passwordError = document.getElementById('passwordError');
 
-    registerForm.addEventListener('submit', (e) => {
+    registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const fullName = document.getElementById('fullName').value.trim();
@@ -93,10 +113,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const email = document.getElementById('email').value.trim();
       const password = passwordInput.value.trim();
       const confirmPassword = confirmPasswordInput.value.trim();
-      
-      // Get the selected role from the global currentRole variable (from register.html)
+
+      // Get the selected role from register.html
       const selectedRole = window.currentRole || 'student';
-      const roleName = selectedRole === 'student' ? 'Student' : 'Faculty';
 
       // Validation
       if (!fullName || !userId || !department || !email || !password || !confirmPassword) {
@@ -118,32 +137,42 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Simulate registration (dummy logic)
-      console.log('Registration attempt:', {
-        fullName,
-        userId,
-        department,
-        email,
-        password,
-        role: roleName
-      });
+      // Disable button while loading
+      const submitBtn = registerForm.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creating account...';
 
-      // Store user data (in real app, send to backend)
-      const newUser = {
-        schoolId: userId,
-        name: fullName,
-        department: department,
-        email: email,
-        role: roleName,
-        registeredAt: new Date().toISOString(),
-      };
-      localStorage.setItem('gardnerHub_user', JSON.stringify(newUser));
+      try {
+        const res = await fetch(`${API_BASE}/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            full_name: fullName,
+            school_id: userId,
+            role: selectedRole,
+            department_course: department,
+            email: email,
+            password: password,
+          }),
+        });
 
-      // Show success message
-      alert(`Account created successfully! Welcome, ${fullName}.`);
+        const data = await res.json();
 
-      // Redirect to hub
-      window.location.href = './pages/forum/hub.html';
+        if (!res.ok) {
+          alert(data.message || 'Registration failed.');
+          return;
+        }
+
+        alert('Account created successfully! You can now sign in.');
+        window.location.href = './index.html';
+      } catch (err) {
+        console.error('Registration error:', err);
+        alert('Unable to connect to the server. Please try again later.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
     });
 
     // Real-time password match validation

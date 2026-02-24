@@ -41,7 +41,7 @@
           <!-- Email Address -->
           <div>
             <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Email Address
+              Email Addressgi
             </label>
             <div class="relative">
               <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
@@ -121,21 +121,5 @@
 
   <!-- Auth JavaScript -->
   <script src="./js/auth.js"></script>
-  
-  <script>
-    // Override auth.js redirect to go to hub instead of dashboard
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      // Mock authentication - redirect to hub
-      const email = document.getElementById('email').value;
-      const userRole = email.includes('admin') ? 'Admin' : (email.includes('faculty') ? 'Faculty' : 'Student');
-      
-      localStorage.setItem('userRole', userRole);
-      localStorage.setItem('userName', userRole + ' User');
-      
-      window.location.href = './pages/forum/hub.html';
-    });
-  </script>
 </body>
 </html>
