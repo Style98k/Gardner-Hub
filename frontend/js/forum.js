@@ -15,14 +15,9 @@ const categories = [
     icon: 'megaphone',
     color: 'blue',
     tags: ['Enrollment', 'Class Schedule', 'Events', 'Suspensions'],
-    topics: 48,
-    posts: 213,
-    latestActivity: {
-      title: 'Updated Class Schedule for Q3 2026',
-      author: 'Ms. Rivera',
-      role: 'Faculty',
-      time: '25 min ago',
-    },
+    topics: 0,
+    posts: 0,
+    latestActivity: null,
   },
   {
     id: 'academic',
@@ -32,14 +27,9 @@ const categories = [
     icon: 'book',
     color: 'indigo',
     tags: ['Lessons', 'Q&A', 'School Org'],
-    topics: 124,
-    posts: 876,
-    latestActivity: {
-      title: 'Tips for the upcoming Midterm Exams',
-      author: 'John D.',
-      role: 'Student',
-      time: '1 hr ago',
-    },
+    topics: 0,
+    posts: 0,
+    latestActivity: null,
   },
   {
     id: 'materials',
@@ -49,14 +39,9 @@ const categories = [
     icon: 'folder',
     color: 'emerald',
     tags: ['PDFs', 'Handouts', 'Lecture Notes'],
-    topics: 67,
-    posts: 340,
-    latestActivity: {
-      title: 'Physics Chapter 12 — Handout uploaded',
-      author: 'Mr. Santos',
-      role: 'Faculty',
-      time: '3 hrs ago',
-    },
+    topics: 0,
+    posts: 0,
+    latestActivity: null,
   },
   {
     id: 'grades',
@@ -67,14 +52,9 @@ const categories = [
     color: 'amber',
     isPrivate: true,
     tags: ['Private', 'Secure'],
-    topics: 15,
-    posts: 42,
-    latestActivity: {
-      title: 'Consultation slots open for Feb 2026',
-      author: 'Guidance Office',
-      role: 'Admin',
-      time: '1 day ago',
-    },
+    topics: 0,
+    posts: 0,
+    latestActivity: null,
   },
 ];
 
@@ -128,7 +108,7 @@ function renderCategories(data) {
   data.forEach((cat) => {
     const c = colorMap[cat.color];
     const la = cat.latestActivity;
-    const badge = roleBadge[la.role] || 'bg-gray-100 text-gray-600';
+    const badge = la ? (roleBadge[la.role] || 'bg-gray-100 text-gray-600') : '';
 
     const card = document.createElement('div');
     card.className =
@@ -184,12 +164,15 @@ function renderCategories(data) {
           <div class="w-px h-10 bg-gray-200 dark:bg-gray-800"></div>
           <!-- Latest Activity -->
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">${la.title}</p>
-            <div class="flex items-center gap-2 mt-1">
-              <span class="text-xs text-gray-500 dark:text-gray-400">${la.author}</span>
-              <span class="inline-block text-[10px] font-semibold ${badge} px-1.5 py-0.5 rounded">${la.role}</span>
-              <span class="text-[11px] text-gray-400 dark:text-gray-500">&middot; ${la.time}</span>
-            </div>
+            ${la
+              ? `<p class="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">${la.title}</p>
+                 <div class="flex items-center gap-2 mt-1">
+                   <span class="text-xs text-gray-500 dark:text-gray-400">${la.author}</span>
+                   <span class="inline-block text-[10px] font-semibold ${badge} px-1.5 py-0.5 rounded">${la.role}</span>
+                   <span class="text-[11px] text-gray-400 dark:text-gray-500">&middot; ${la.time}</span>
+                 </div>`
+              : `<p class="text-sm text-gray-400 dark:text-gray-500 italic">No recent activity</p>`
+            }
           </div>
         </div>
       </div>
@@ -197,8 +180,11 @@ function renderCategories(data) {
       <!-- Latest Activity (mobile) -->
       <div class="lg:hidden border-t border-gray-100 dark:border-gray-800 px-5 py-3 flex items-center gap-2 bg-gray-50/60 dark:bg-gray-900/60">
         <span class="text-xs text-gray-400 dark:text-gray-500 shrink-0">Latest:</span>
-        <p class="text-xs text-gray-600 dark:text-gray-300 truncate flex-1 font-medium">${la.title}</p>
-        <span class="text-[10px] text-gray-400 dark:text-gray-500 shrink-0">${la.time}</span>
+        ${la
+          ? `<p class="text-xs text-gray-600 dark:text-gray-300 truncate flex-1 font-medium">${la.title}</p>
+             <span class="text-[10px] text-gray-400 dark:text-gray-500 shrink-0">${la.time}</span>`
+          : `<p class="text-xs text-gray-400 dark:text-gray-500 italic flex-1">No recent activity</p>`
+        }
       </div>
     `;
 

@@ -7,6 +7,7 @@ require("./config/db");
 
 // Import routes
 const authRoutes = require("./routes/authRoutes");
+const statsRoutes = require("./routes/statsRoutes");
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // ─── Routes ──────────────────────────────────────────────────────────────────
 app.use("/api/auth", authRoutes);
+app.use("/api/stats", statsRoutes);
 
 // Health check
 app.get("/", (req, res) => {

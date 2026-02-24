@@ -117,7 +117,7 @@
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Academic Discussion</h3>
         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Join conversations about coursework, assignments, and academic topics with your peers and faculty.</p>
         <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-          <span>124 active discussions</span>
+          <span>0 active discussions</span>
           <span class="flex items-center">
             <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 2L13 8h7l-5.5 4 2 6.5L10 14.5 3.5 18.5l2-6.5L0 8h7l3-6z" clip-rule="evenodd"/>
@@ -140,7 +140,7 @@
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Official Announcements</h3>
         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Stay updated with important school announcements, policy changes, and official communications.</p>
         <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-          <span>8 new announcements</span>
+          <span>0 new announcements</span>
           <span class="flex items-center">
             <span class="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></span>
             Live
@@ -168,7 +168,7 @@
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Student Grade Inquiry</h3>
         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">A secure channel to inquire about official grades, address discrepancies, and request academic records from the Registrar.</p>
         <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-          <span>3 pending inquiries</span>
+          <span>0 pending inquiries</span>
           <span class="flex items-center">
             <svg class="w-4 h-4 mr-1 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
@@ -184,23 +184,23 @@
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
       <div class="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800">
         <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Total Users</h4>
-        <p class="text-2xl font-bold text-gray-900 dark:text-white">2,847</p>
-        <p class="text-xs text-green-600 dark:text-green-400">+12% this month</p>
+        <p class="text-2xl font-bold text-gray-900 dark:text-white" id="adminStatTotalUsers">0</p>
+        <p class="text-xs text-gray-400 dark:text-gray-500">Registered accounts</p>
       </div>
       <div class="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800">
         <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Active Posts</h4>
-        <p class="text-2xl font-bold text-gray-900 dark:text-white">156</p>
-        <p class="text-xs text-blue-600 dark:text-blue-400">+8 today</p>
+        <p class="text-2xl font-bold text-gray-900 dark:text-white" id="adminStatActivePosts">0</p>
+        <p class="text-xs text-gray-400 dark:text-gray-500">No posts yet</p>
       </div>
       <div class="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800">
         <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Grade Inquiries</h4>
-        <p class="text-2xl font-bold text-gray-900 dark:text-white">94</p>
-        <p class="text-xs text-purple-600 dark:text-purple-400">23 pending</p>
+        <p class="text-2xl font-bold text-gray-900 dark:text-white" id="adminStatGradeInquiries">0</p>
+        <p class="text-xs text-gray-400 dark:text-gray-500">0 pending</p>
       </div>
       <div class="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800">
         <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Announcements</h4>
-        <p class="text-2xl font-bold text-gray-900 dark:text-white">12</p>
-        <p class="text-xs text-green-600 dark:text-green-400">2 new</p>
+        <p class="text-2xl font-bold text-gray-900 dark:text-white" id="adminStatAnnouncements">0</p>
+        <p class="text-xs text-gray-400 dark:text-gray-500">0 new</p>
       </div>
     </div>
 
@@ -233,6 +233,17 @@
           e.stopPropagation();
         });
       }
+
+      // Fetch real user count from backend
+      fetch('http://localhost:5000/api/stats/user-count')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          var el = document.getElementById('adminStatTotalUsers');
+          if (el) el.textContent = data.count;
+        })
+        .catch(function() {
+          // Backend unavailable - stat stays at 0
+        });
     });
 
     // Logout function

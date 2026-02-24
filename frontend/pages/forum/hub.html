@@ -347,19 +347,19 @@
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Community Stats</h3>
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">2,847</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white" id="statActiveStudents">0</p>
             <p class="text-sm text-gray-500 dark:text-gray-400">Active Students</p>
           </div>
           <div>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">156</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white" id="statActivePosts">0</p>
             <p class="text-sm text-gray-500 dark:text-gray-400">Active Posts</p>
           </div>
           <div>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">94</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white" id="statGradeInquiries">0</p>
             <p class="text-sm text-gray-500 dark:text-gray-400">Grade Inquiries</p>
           </div>
           <div>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">12</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white" id="statAnnouncements">0</p>
             <p class="text-sm text-gray-500 dark:text-gray-400">Announcements</p>
           </div>
         </div>
@@ -398,6 +398,17 @@
       }
 
       checkUserRole();
+
+      // Fetch real active student count from backend
+      fetch('http://localhost:5000/api/stats/user-count')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          var el = document.getElementById('statActiveStudents');
+          if (el) el.textContent = data.count;
+        })
+        .catch(function() {
+          // Backend unavailable - stat stays at 0
+        });
     });
 
     // Logout function

@@ -1,72 +1,7 @@
 // ── Student Grade Inquiry Logic ──────────────────────────────────────────────
 
 // Sample inquiries data
-const inquiriesData = [
-  {
-    id: 'GI-2026-001',
-    date: 'Feb 24, 2026',
-    term: 'Spring 2026',
-    type: 'Grade Discrepancy',
-    status: 'Under Review',
-    submittedDate: new Date('2026-02-24')
-  },
-  {
-    id: 'GI-2026-002',
-    date: 'Feb 22, 2026',
-    term: 'Fall 2025',
-    type: 'Transcript Request',
-    status: 'Resolved',
-    submittedDate: new Date('2026-02-22')
-  },
-  {
-    id: 'GI-2026-003',
-    date: 'Feb 20, 2026',
-    term: 'Fall 2025',
-    type: 'Grade Verification',
-    status: 'Resolved',
-    submittedDate: new Date('2026-02-20')
-  },
-  {
-    id: 'GI-2026-004',
-    date: 'Feb 18, 2026',
-    term: 'Summer 2025',
-    type: 'Missing Grade',
-    status: 'Under Review',
-    submittedDate: new Date('2026-02-18')
-  },
-  {
-    id: 'GI-2026-005',
-    date: 'Feb 15, 2026',
-    term: 'Spring 2025',
-    type: 'Academic Record Inquiry',
-    status: 'Resolved',
-    submittedDate: new Date('2026-02-15')
-  },
-  {
-    id: 'GI-2026-006',
-    date: 'Feb 12, 2026',
-    term: 'Fall 2024',
-    type: 'Grade Discrepancy',
-    status: 'Under Review',
-    submittedDate: new Date('2026-02-12')
-  },
-  {
-    id: 'GI-2026-007',
-    date: 'Feb 10, 2026',
-    term: 'Fall 2024',
-    type: 'Transcript Request',
-    status: 'Resolved',
-    submittedDate: new Date('2026-02-10')
-  },
-  {
-    id: 'GI-2026-008',
-    date: 'Feb 8, 2026',
-    term: 'Summer 2024',
-    type: 'Grade Verification',
-    status: 'Resolved',
-    submittedDate: new Date('2026-02-08')
-  }
-];
+const inquiriesData = [];
 
 function getStatusBadge(status) {
   if (status === 'Resolved') {
@@ -113,6 +48,21 @@ function getActionButton(inquiry) {
 
 function renderInquiriesTable() {
   const tbody = document.getElementById('inquiriesTableBody');
+
+  if (inquiriesData.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" class="px-6 py-12 text-center">
+          <svg class="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/>
+          </svg>
+          <p class="text-sm text-gray-500 dark:text-gray-400">No grade inquiries submitted yet.</p>
+          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Use the button above to submit your first inquiry.</p>
+        </td>
+      </tr>
+    `;
+    return;
+  }
 
   const rows = inquiriesData.map(inquiry => `
     <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
