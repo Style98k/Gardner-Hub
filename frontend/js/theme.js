@@ -2,25 +2,24 @@
  * ============================================================
  * THEME.JS — The Gardner Hub Theme Management
  * Vanilla JavaScript — Light/Dark mode toggle functionality
+ * Persists across all pages via localStorage
  * ============================================================
  */
 
-// ── THEME MANAGEMENT ────────────────────────────────────────
-function initializeTheme() {
-  // Check for saved theme or default to light mode
-  const savedTheme = localStorage.getItem('theme') || 'light';
-  
-  // Apply theme to document
-  if (savedTheme === 'dark') {
+// ── APPLY THEME IMMEDIATELY (prevent flash of wrong theme) ──
+(function () {
+  const saved = localStorage.getItem('theme') || 'light';
+  if (saved === 'dark') {
     document.documentElement.classList.add('dark');
   } else {
     document.documentElement.classList.remove('dark');
   }
-}
+})();
 
+// ── THEME MANAGEMENT ────────────────────────────────────────
 function toggleTheme() {
   const isDark = document.documentElement.classList.contains('dark');
-  
+
   if (isDark) {
     document.documentElement.classList.remove('dark');
     localStorage.setItem('theme', 'light');
@@ -30,12 +29,8 @@ function toggleTheme() {
   }
 }
 
-// Initialize theme when DOM is ready
+// Attach click handler once DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-  // Initialize theme on page load
-  initializeTheme();
-  
-  // Theme toggle button
   const themeToggle = document.getElementById('themeToggle');
   if (themeToggle) {
     themeToggle.addEventListener('click', toggleTheme);

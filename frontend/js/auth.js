@@ -73,8 +73,8 @@ document.addEventListener('DOMContentLoaded', () => {
       // Show success message
       alert(`Welcome back, ${userData.name}!`);
 
-      // Redirect to dashboard
-      window.location.href = './pages/forum/index.html';
+      // Redirect to hub
+      window.location.href = './pages/forum/hub.html';
     });
   }
 
@@ -137,8 +137,8 @@ document.addEventListener('DOMContentLoaded', () => {
       // Show success message
       alert(`Account created successfully! Welcome, ${fullName}.`);
 
-      // Redirect to dashboard
-      window.location.href = './pages/forum/index.html';
+      // Redirect to hub
+      window.location.href = './pages/forum/hub.html';
     });
 
     // Real-time password match validation

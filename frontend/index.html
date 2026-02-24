@@ -15,12 +15,9 @@
   
   <!-- Tailwind Configuration -->
   <script src="js/tailwind-config.js"></script>
-
-  <!-- Custom CSS -->
-  <link rel="stylesheet" href="ccss/style.css">
 </head>
 
-<body class="font-sans text-gray-800 dark:text-gray-200 min-h-screen flex items-center justify-center p-4 transition-colors duration-300">
+<body class="font-sans text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-black min-h-screen flex items-center justify-center p-4 transition-colors duration-300">
 
   <!-- Login Container -->
   <div class="w-full max-w-md relative">
@@ -124,5 +121,21 @@
 
   <!-- Auth JavaScript -->
   <script src="./js/auth.js"></script>
+  
+  <script>
+    // Override auth.js redirect to go to hub instead of dashboard
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Mock authentication - redirect to hub
+      const schoolId = document.getElementById('schoolId').value;
+      const userRole = schoolId.includes('admin') ? 'Admin' : (schoolId.includes('faculty') ? 'Faculty' : 'Student');
+      
+      localStorage.setItem('userRole', userRole);
+      localStorage.setItem('userName', userRole + ' User');
+      
+      window.location.href = './pages/forum/hub.html';
+    });
+  </script>
 </body>
 </html>
