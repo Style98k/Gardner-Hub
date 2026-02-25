@@ -53,10 +53,13 @@ CREATE TABLE IF NOT EXISTS `forum_threads` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `author_id` (`author_id`),
+  KEY `idx_category` (`category`),
   CONSTRAINT `forum_threads_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Dumping data for table gardner_hub.forum_threads: ~0 rows (approximately)
+INSERT INTO `forum_threads` (`id`, `category`, `title`, `content`, `tag`, `image_url`, `link_url`, `like_count`, `author_id`, `created_at`, `updated_at`) VALUES
+	(1, 'announcements', 'Announcements!', 'No Class March 05, 2026', 'Class Suspension', '1772024250731-166021592.png', NULL, 1, 2, '2026-02-25 12:57:30', '2026-02-25 12:58:36');
 
 -- Dumping structure for table gardner_hub.grade_inquiries
 DROP TABLE IF EXISTS `grade_inquiries`;
@@ -86,11 +89,14 @@ CREATE TABLE IF NOT EXISTS `post_comments` (
   PRIMARY KEY (`id`),
   KEY `post_id` (`post_id`),
   KEY `user_id` (`user_id`),
+  KEY `idx_post_id_covering` (`post_id`,`id`),
   CONSTRAINT `post_comments_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `forum_threads` (`id`) ON DELETE CASCADE,
   CONSTRAINT `post_comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Dumping data for table gardner_hub.post_comments: ~0 rows (approximately)
+INSERT INTO `post_comments` (`id`, `post_id`, `user_id`, `content`, `created_at`) VALUES
+	(1, 1, 1, 'Nice!', '2026-02-25 12:58:32');
 
 -- Dumping structure for table gardner_hub.post_likes
 DROP TABLE IF EXISTS `post_likes`;
@@ -103,9 +109,11 @@ CREATE TABLE IF NOT EXISTS `post_likes` (
   KEY `user_id` (`user_id`),
   CONSTRAINT `post_likes_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `forum_threads` (`id`) ON DELETE CASCADE,
   CONSTRAINT `post_likes_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Dumping data for table gardner_hub.post_likes: ~0 rows (approximately)
+INSERT INTO `post_likes` (`id`, `post_id`, `user_id`) VALUES
+	(1, 1, 1);
 
 -- Dumping structure for table gardner_hub.users
 DROP TABLE IF EXISTS `users`;
