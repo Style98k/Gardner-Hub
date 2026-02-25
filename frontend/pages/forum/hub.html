@@ -147,7 +147,7 @@
               <div class="text-xs text-gray-500 dark:text-gray-400 uppercase">POSTS</div>
             </div>
             <!-- Latest Activity -->
-            <div class="text-right text-xs">
+            <div class="text-right text-xs" id="latestAnnouncements">
               <div class="text-gray-400 dark:text-gray-500 italic">No recent activity</div>
             </div>
           </div>
@@ -190,7 +190,7 @@
               <div class="text-xs text-gray-500 dark:text-gray-400 uppercase">POSTS</div>
             </div>
             <!-- Latest Activity -->
-            <div class="text-right text-xs">
+            <div class="text-right text-xs" id="latestAcademic">
               <div class="text-gray-400 dark:text-gray-500 italic">No recent activity</div>
             </div>
           </div>
@@ -233,7 +233,7 @@
               <div class="text-xs text-gray-500 dark:text-gray-400 uppercase">POSTS</div>
             </div>
             <!-- Latest Activity -->
-            <div class="text-right text-xs">
+            <div class="text-right text-xs" id="latestMaterials">
               <div class="text-gray-400 dark:text-gray-500 italic">No recent activity</div>
             </div>
           </div>
@@ -283,7 +283,7 @@
               <div class="text-xs text-gray-500 dark:text-gray-400 uppercase">REPLIES</div>
             </div>
             <!-- Latest Activity -->
-            <div class="text-right text-xs">
+            <div class="text-right text-xs" id="latestGradeInquiry">
               <div class="text-gray-400 dark:text-gray-500 italic">No recent activity</div>
             </div>
           </div>
@@ -298,7 +298,7 @@
       <!-- Recent Activity -->
       <div class="bg-white dark:bg-black rounded-xl p-6 border border-gray-200 dark:border-gray-900">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Activity</h3>
-        <div class="space-y-3">
+        <div class="space-y-3" id="recentActivityList">
           <div class="flex items-center justify-center py-6 text-sm text-gray-400 dark:text-gray-500 italic">
             No activity yet
           </div>
@@ -370,6 +370,38 @@
   <script>
     const API_BASE = 'http://localhost:5000/api';
 
+    // ── Relative time formatting ──
+    function timeAgo(dateStr) {
+      var now = new Date();
+      var date = new Date(dateStr);
+      var seconds = Math.floor((now - date) / 1000);
+      if (seconds < 0) seconds = 0;
+      if (seconds < 60) return seconds + 's ago';
+      var minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return minutes + (minutes === 1 ? ' min ago' : ' mins ago');
+      var hours = Math.floor(minutes / 60);
+      if (hours < 24) return hours + (hours === 1 ? ' hour ago' : ' hours ago');
+      var days = Math.floor(hours / 24);
+      if (days < 30) return days + (days === 1 ? ' day ago' : ' days ago');
+      var months = Math.floor(days / 30);
+      if (months < 12) return months + (months === 1 ? ' month ago' : ' months ago');
+      var years = Math.floor(months / 12);
+      return years + (years === 1 ? ' year ago' : ' years ago');
+    }
+
+    // ── Helper: update a latest-activity DOM element ──
+    function setLatestActivity(elementId, activity) {
+      var el = document.getElementById(elementId);
+      if (!el) return;
+      if (activity && activity.title && activity.created_at) {
+        var title = activity.title.length > 30 ? activity.title.substring(0, 30) + '…' : activity.title;
+        el.innerHTML = '<div class="text-gray-600 dark:text-gray-300 font-medium truncate" title="' + activity.title.replace(/"/g, '&quot;') + '">' + title + '</div>' +
+          '<div class="text-gray-400 dark:text-gray-500 mt-0.5">' + timeAgo(activity.created_at) + '</div>';
+      } else {
+        el.innerHTML = '<div class="text-gray-400 dark:text-gray-500 italic">No recent activity</div>';
+      }
+    }
+
     // ── Get current user from localStorage ──
     function getCurrentUser() {
       try {
@@ -420,7 +452,56 @@
       initUserUI();
       fetchStats();
       fetchCategoryStats();
+      fetchRecentActivity();
     });
+
+    // ── Fetch global recent activity (sidebar) ──
+    function fetchRecentActivity() {
+      var token = localStorage.getItem('gardnerHub_token');
+      var headers = {};
+      if (token) {
+        headers['Authorization'] = 'Bearer ' + token;
+      }
+
+      fetch(API_BASE + '/stats/recent-activity', { headers: headers })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          var container = document.getElementById('recentActivityList');
+          if (!container) return;
+
+          var activities = data.activities || [];
+          if (activities.length === 0) {
+            container.innerHTML = '<div class="flex items-center justify-center py-6 text-sm text-gray-400 dark:text-gray-500 italic">No activity yet</div>';
+            return;
+          }
+
+          var dotColors = {
+            announcements: 'bg-green-500',
+            academic: 'bg-blue-500',
+            materials: 'bg-amber-500',
+            grades: 'bg-purple-500'
+          };
+
+          var html = '';
+          activities.forEach(function(item) {
+            var dotClass = dotColors[item.source] || 'bg-gray-400';
+            var label = item.label || 'Activity';
+            var time = timeAgo(item.created_at);
+            html += '<div class="flex items-start gap-3 py-2">' +
+              '<div class="mt-1.5 w-2.5 h-2.5 rounded-full flex-shrink-0 ' + dotClass + '"></div>' +
+              '<div class="flex-1 min-w-0">' +
+                '<p class="text-sm text-gray-700 dark:text-gray-300 font-medium truncate" title="' + label.replace(/"/g, '&quot;') + '">' + label + '</p>' +
+                '<p class="text-xs text-gray-400 dark:text-gray-500">' + time + '</p>' +
+              '</div>' +
+            '</div>';
+          });
+
+          container.innerHTML = html;
+        })
+        .catch(function() {
+          // Backend unavailable — keep default
+        });
+    }
 
     // ── Initialize user UI: name, role, permissions ──
     function initUserUI() {
@@ -511,6 +592,12 @@
 
           var gradeRep = document.getElementById('statGradeReplies');
           if (gradeRep) gradeRep.textContent = data.gradeInquiries.replies || 0;
+
+          // Per-category latest activity
+          setLatestActivity('latestAnnouncements', data.announcements.latestActivity);
+          setLatestActivity('latestAcademic', data.academic.latestActivity);
+          setLatestActivity('latestMaterials', data.materials.latestActivity);
+          setLatestActivity('latestGradeInquiry', data.gradeInquiries.latestActivity);
         })
         .catch(function() {
           // Backend unavailable — keep default 0 values

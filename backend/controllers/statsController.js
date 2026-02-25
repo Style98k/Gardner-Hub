@@ -77,26 +77,104 @@ exports.getCategoryStats = async (req, res) => {
       "SELECT COUNT(*) AS count FROM post_comments WHERE post_id IN (SELECT id FROM forum_threads WHERE category = 'grades')"
     );
 
+    // ── Latest activity per category ──
+    const [latestAnnouncement] = await pool.query(
+      "SELECT title, created_at FROM forum_threads WHERE category = 'announcements' ORDER BY created_at DESC LIMIT 1"
+    );
+    const [latestAcademic] = await pool.query(
+      "SELECT title, created_at FROM forum_threads WHERE category = 'academic' ORDER BY created_at DESC LIMIT 1"
+    );
+    const [latestMaterials] = await pool.query(
+      "SELECT title, created_at FROM forum_threads WHERE category = 'materials' ORDER BY created_at DESC LIMIT 1"
+    );
+
+    // Grade inquiry latest: role-dependent
+    let latestGradeInquiry = null;
+    if (userRole === 'student' && userId) {
+      const [rows] = await pool.query(
+        "SELECT status, updated_at FROM grade_inquiries WHERE student_id = ? ORDER BY updated_at DESC LIMIT 1",
+        [userId]
+      );
+      if (rows.length > 0) {
+        const statusLabel = rows[0].status.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
+        latestGradeInquiry = { title: 'Grade inquiry is now ' + statusLabel, created_at: rows[0].updated_at };
+      }
+    } else if (userId && (userRole === 'admin' || userRole === 'faculty')) {
+      const [rows] = await pool.query(
+        `SELECT gi.status, gi.updated_at, u.full_name
+         FROM grade_inquiries gi
+         JOIN users u ON gi.student_id = u.id
+         ORDER BY gi.updated_at DESC LIMIT 1`
+      );
+      if (rows.length > 0) {
+        const statusLabel = rows[0].status.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
+        latestGradeInquiry = { title: rows[0].full_name + ' — ' + statusLabel, created_at: rows[0].updated_at };
+      }
+    }
+
     res.json({
       announcements: {
         topics: Number(announcementTopics[0].count),
         posts: Number(announcementPosts[0].count),
+        latestActivity: latestAnnouncement.length > 0 ? { title: latestAnnouncement[0].title, created_at: latestAnnouncement[0].created_at } : null,
       },
       academic: {
         topics: Number(academicTopics[0].count),
         posts: Number(academicPosts[0].count),
+        latestActivity: latestAcademic.length > 0 ? { title: latestAcademic[0].title, created_at: latestAcademic[0].created_at } : null,
       },
       materials: {
         topics: Number(materialsTopics[0].count),
         posts: Number(materialsPosts[0].count),
+        latestActivity: latestMaterials.length > 0 ? { title: latestMaterials[0].title, created_at: latestMaterials[0].created_at } : null,
       },
       gradeInquiries: {
         inquiries: Number(gradeInquiries[0].count),
         replies: Number(gradeReplies[0].count),
+        latestActivity: latestGradeInquiry,
       },
     });
   } catch (error) {
     console.error('Category stats error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// ─── Get Recent Activity (global, 5 most recent across all tables) ───────────
+exports.getRecentActivity = async (req, res) => {
+  try {
+    const userId = req.user ? req.user.id : null;
+    const userRole = req.user ? req.user.role : null;
+
+    // Build UNION query parts
+    const parts = [];
+    const params = [];
+
+    // Forum threads (announcements, academic, materials)
+    // Use COLLATE to normalize collation across tables for UNION
+    parts.push(
+      `(SELECT id, category COLLATE utf8mb4_general_ci AS source, title COLLATE utf8mb4_general_ci AS label, created_at FROM forum_threads WHERE category IN ('announcements', 'academic', 'materials'))`
+    );
+
+    // Grade inquiries — role-dependent
+    if (userRole === 'student' && userId) {
+      parts.push(
+        `(SELECT gi.id, 'grades' COLLATE utf8mb4_general_ci AS source, CONCAT('Grade inquiry is now ', REPLACE(CONCAT(UPPER(LEFT(gi.status,1)), LOWER(SUBSTRING(gi.status,2))), '_', ' ')) COLLATE utf8mb4_general_ci AS label, gi.updated_at AS created_at FROM grade_inquiries gi WHERE gi.student_id = ?)`
+      );
+      params.push(userId);
+    } else if (userId && (userRole === 'admin' || userRole === 'faculty')) {
+      parts.push(
+        `(SELECT gi.id, 'grades' COLLATE utf8mb4_general_ci AS source, CONCAT(u.full_name, ' — ', REPLACE(CONCAT(UPPER(LEFT(gi.status,1)), LOWER(SUBSTRING(gi.status,2))), '_', ' ')) COLLATE utf8mb4_general_ci AS label, gi.updated_at AS created_at FROM grade_inquiries gi JOIN users u ON gi.student_id = u.id)`
+      );
+    }
+    // Unauthenticated users: no grade inquiries in the union
+
+    const query = parts.join(' UNION ALL ') + ' ORDER BY created_at DESC LIMIT 5';
+    const [rows] = await pool.query(query, params);
+
+    res.json({ activities: rows });
+  } catch (error) {
+    console.error('Recent activity error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

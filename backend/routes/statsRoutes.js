@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const { getUserCount, getCategoryStats } = require('../controllers/statsController');
+const { getUserCount, getCategoryStats, getRecentActivity } = require('../controllers/statsController');
 
 // ─── Optional auth middleware (sets req.user if token present, else continues) ─
 const optionalAuth = (req, res, next) => {
@@ -21,5 +21,6 @@ const optionalAuth = (req, res, next) => {
 
 router.get('/user-count', getUserCount);
 router.get('/category-stats', optionalAuth, getCategoryStats);
+router.get('/recent-activity', optionalAuth, getRecentActivity);
 
 module.exports = router;
