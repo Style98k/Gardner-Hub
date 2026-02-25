@@ -73,7 +73,7 @@
                   <span>Admin Panel</span>
                 </div>
               </button>
-              <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors duration-200">
+              <a id="viewProfileLink" href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors duration-200">
                 <div class="flex items-center space-x-2">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
@@ -105,12 +105,6 @@
         <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Categories</h2>
         <p class="text-gray-600 dark:text-gray-400">Browse discussion categories or start a new topic</p>
       </div>
-      <button class="flex items-center space-x-2 bg-brand-900 dark:bg-white text-white dark:text-black px-6 py-3 rounded-lg font-semibold hover:bg-brand-800 dark:hover:bg-gray-100 transition-colors duration-200 shadow-md">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-        </svg>
-        <span>New Topic</span>
-      </button>
     </div>
 
     <!-- Categories List -->
@@ -128,7 +122,14 @@
 
           <!-- Content -->
           <div class="flex-1 min-w-0">
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Official Announcements</h3>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white">Official Announcements</h3>
+              <!-- Only admin/faculty can post here -->
+              <button data-category-btn="announcements" class="hidden items-center space-x-1 bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition-colors duration-200" onclick="event.stopPropagation(); openNewTopicModal('announcements')">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                <span>New Topic</span>
+              </button>
+            </div>
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Stay updated with the latest school-wide announcements, policy changes, and important notices from the administration.</p>
             
             <!-- Tags -->
@@ -143,7 +144,7 @@
           <!-- Stats -->
           <div class="flex flex-col items-end gap-4 flex-shrink-0">
             <div class="text-right">
-              <div class="text-2xl font-bold text-gray-900 dark:text-white">0</div>
+              <div class="text-2xl font-bold text-gray-900 dark:text-white" id="statAnnouncementTopics">0</div>
               <div class="text-xs text-gray-500 dark:text-gray-400 uppercase">TOPICS</div>
             </div>
             <div class="text-right">
@@ -170,7 +171,14 @@
 
           <!-- Content -->
           <div class="flex-1 min-w-0">
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Academic Discussion</h3>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white">Academic Discussion</h3>
+              <!-- All roles can post here -->
+              <button data-category-btn="academic" class="hidden items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition-colors duration-200" onclick="event.stopPropagation(); openNewTopicModal('academic')">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                <span>New Topic</span>
+              </button>
+            </div>
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Engage in meaningful academic conversations — ask questions, share insights on lessons, and collaborate with school organizations.</p>
             
             <!-- Tags -->
@@ -211,7 +219,14 @@
 
           <!-- Content -->
           <div class="flex-1 min-w-0">
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Learning Materials</h3>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white">Learning Materials</h3>
+              <!-- Only admin/faculty can post here -->
+              <button data-category-btn="materials" class="hidden items-center space-x-1 bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition-colors duration-200" onclick="event.stopPropagation(); openNewTopicModal('materials')">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                <span>New Topic</span>
+              </button>
+            </div>
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Access and share educational resources including PDFs, handouts, lecture notes, and supplementary reading materials.</p>
             
             <!-- Tags -->
@@ -332,12 +347,72 @@
 
   </div>
 
+  <!-- New Topic Modal -->
+  <div id="newTopicModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg border border-gray-200 dark:border-gray-800 shadow-xl">
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-bold text-gray-900 dark:text-white">Create New Topic</h3>
+          <button onclick="closeNewTopicModal()" class="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <input type="hidden" id="modalCategory" value="">
+        <div class="mb-3">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+          <p class="text-sm text-gray-500 dark:text-gray-400" id="modalCategoryLabel"></p>
+        </div>
+        <div class="mb-3">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+          <input type="text" id="modalTitle" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Enter topic title...">
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content</label>
+          <textarea id="modalContent" rows="4" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Write your topic content..."></textarea>
+        </div>
+        <div class="flex justify-end space-x-3">
+          <button onclick="closeNewTopicModal()" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700">Cancel</button>
+          <button onclick="submitNewTopic()" class="px-4 py-2 text-sm font-medium text-white bg-brand-900 dark:bg-white dark:text-black rounded-lg hover:bg-brand-800 dark:hover:bg-gray-100">Post Topic</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Theme Management -->
   <script src="../../js/theme.js"></script>
 
   <!-- Hub JavaScript -->
   <script>
-    // Profile dropdown toggle
+    const API_BASE = 'http://localhost:5000/api';
+
+    // ── Get current user from localStorage ──
+    function getCurrentUser() {
+      try {
+        const raw = localStorage.getItem('gardnerHub_user');
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function getRoleLabel(role) {
+      switch (role) {
+        case 'admin': return 'Administrator';
+        case 'faculty': return 'Faculty/Staff';
+        case 'student': return 'Student';
+        default: return role;
+      }
+    }
+
+    function getProfileUrl(role) {
+      switch (role) {
+        case 'admin': return '../admin/profile.html';
+        case 'faculty': return '../faculty/profile.html';
+        default: return '../student/profile.html';
+      }
+    }
+
+    // ── Profile dropdown toggle ──
     document.addEventListener('DOMContentLoaded', function() {
       const profileMenuBtn = document.getElementById('profileMenuBtn');
       const profileDropdown = document.getElementById('profileDropdown');
@@ -347,63 +422,160 @@
           e.stopPropagation();
           profileDropdown.classList.toggle('hidden');
         });
-
-        // Close dropdown when clicking outside
         document.addEventListener('click', function(e) {
           if (!profileDropdown.classList.contains('hidden')) {
             profileDropdown.classList.add('hidden');
           }
         });
-
         profileDropdown.addEventListener('click', function(e) {
           e.stopPropagation();
         });
       }
 
-      checkUserRole();
+      initUserUI();
+      fetchStats();
+    });
 
-      // Fetch real active student count from backend
-      fetch('http://localhost:5000/api/stats/user-count')
+    // ── Initialize user UI: name, role, permissions ──
+    function initUserUI() {
+      const user = getCurrentUser();
+
+      if (!user) {
+        // Not logged in — redirect to login
+        window.location.href = '../../index.html';
+        return;
+      }
+
+      const role = user.role || 'student';
+      const name = user.full_name || 'User';
+
+      // Set header profile info
+      document.getElementById('userName').textContent = name;
+      document.getElementById('userRole').textContent = getRoleLabel(role);
+      document.getElementById('userInitial').textContent = name.charAt(0).toUpperCase();
+
+      // Set View Profile link
+      var profileLink = document.getElementById('viewProfileLink');
+      if (profileLink) profileLink.href = getProfileUrl(role);
+
+      // Show Admin Panel button if admin
+      if (role === 'admin') {
+        document.getElementById('adminDashboardBtn').classList.remove('hidden');
+      }
+
+      // ── Role-based New Topic button visibility ──
+      // announcements & materials: only admin/faculty
+      // academic: all roles
+      // grades: handled separately (links to grade inquiry page)
+      const categoryPermissions = {
+        'announcements': ['admin', 'faculty'],
+        'academic': ['student', 'faculty', 'admin'],
+        'materials': ['admin', 'faculty'],
+      };
+
+      Object.keys(categoryPermissions).forEach(function(cat) {
+        var btn = document.querySelector('[data-category-btn="' + cat + '"]');
+        if (btn && categoryPermissions[cat].includes(role)) {
+          btn.classList.remove('hidden');
+          btn.classList.add('flex');
+        }
+      });
+    }
+
+    // ── Fetch stats from backend ──
+    function fetchStats() {
+      fetch(API_BASE + '/stats/user-count')
         .then(function(res) { return res.json(); })
         .then(function(data) {
           var el = document.getElementById('statActiveStudents');
-          if (el) el.textContent = data.count;
+          if (el) el.textContent = data.studentCount || 0;
+
+          var postsEl = document.getElementById('statActivePosts');
+          if (postsEl) postsEl.textContent = (data.threadCount || 0) + (data.postCount || 0);
+
+          var inqEl = document.getElementById('statGradeInquiries');
+          if (inqEl) inqEl.textContent = data.inquiryCount || 0;
+
+          var annEl = document.getElementById('statAnnouncements');
+          if (annEl) annEl.textContent = data.announcementCount || 0;
         })
         .catch(function() {
-          // Backend unavailable - stat stays at 0
+          // Backend unavailable
         });
-    });
+    }
 
-    // Logout function
+    // ── Logout ──
     function logout() {
+      localStorage.removeItem('gardnerHub_user');
+      localStorage.removeItem('gardnerHub_token');
       localStorage.removeItem('userRole');
       localStorage.removeItem('userName');
       window.location.href = '../../index.html';
     }
 
-    // Check user role and show admin button if needed
-    function checkUserRole() {
-      // Mock role detection - in real app this would come from authentication
-      const userRole = localStorage.getItem('userRole') || 'Student';
-      const userName = localStorage.getItem('userName') || 'Student User';
-      
-      document.getElementById('userName').textContent = userName;
-      document.getElementById('userRole').textContent = userRole;
-      document.getElementById('userInitial').textContent = userName.charAt(0).toUpperCase();
-      
-      if (userRole === 'Admin') {
-        document.getElementById('adminDashboardBtn').classList.remove('hidden');
-      }
+    // ── New Topic Modal ──
+    var categoryLabels = {
+      'announcements': 'Official Announcements',
+      'academic': 'Academic Discussion',
+      'materials': 'Learning Materials',
+      'grades': 'Student Grade Inquiry'
+    };
+
+    function openNewTopicModal(category) {
+      document.getElementById('modalCategory').value = category;
+      document.getElementById('modalCategoryLabel').textContent = categoryLabels[category] || category;
+      document.getElementById('modalTitle').value = '';
+      document.getElementById('modalContent').value = '';
+      document.getElementById('newTopicModal').classList.remove('hidden');
     }
 
-    // Navigation functions
+    function closeNewTopicModal() {
+      document.getElementById('newTopicModal').classList.add('hidden');
+    }
+
+    function submitNewTopic() {
+      var category = document.getElementById('modalCategory').value;
+      var title = document.getElementById('modalTitle').value.trim();
+      var content = document.getElementById('modalContent').value.trim();
+      var token = localStorage.getItem('gardnerHub_token');
+
+      if (!title || !content) {
+        alert('Please fill in both title and content.');
+        return;
+      }
+
+      fetch(API_BASE + '/forum/threads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ category: category, title: title, content: content })
+      })
+      .then(function(res) { return res.json().then(function(d) { return { ok: res.ok, data: d }; }); })
+      .then(function(result) {
+        if (!result.ok) {
+          alert(result.data.message || 'Failed to create topic.');
+          return;
+        }
+        alert('Topic created successfully!');
+        closeNewTopicModal();
+        // Navigate to the category
+        navigateToCategory(category === 'announcements' ? 'announcements' : category === 'materials' ? 'materials' : 'academic');
+      })
+      .catch(function() {
+        alert('Unable to connect to server.');
+      });
+    }
+
+    // ── Navigation functions ──
     function navigateToCategory(type) {
       if (type === 'academic') {
-        window.location.href = 'category-view.html?category=academic-discussion';
+        window.location.href = 'category-view.html?category=academic';
       } else if (type === 'announcements') {
-        window.location.href = 'category-view.html?category=official-announcements';
+        window.location.href = 'category-view.html?category=announcements';
       } else if (type === 'materials') {
-        window.location.href = 'category-view.html?category=learning-materials';
+        window.location.href = 'category-view.html?category=materials';
       }
     }
 

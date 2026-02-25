@@ -81,7 +81,7 @@
 
             <!-- Dropdown Menu -->
             <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-black rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 py-1 z-50">
-              <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors duration-200">
+              <a id="viewProfileLink" href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors duration-200">
                 <div class="flex items-center space-x-2">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
@@ -128,7 +128,7 @@
             </select>
           </div>
           
-          <button class="flex items-center space-x-2 bg-brand-900 dark:bg-white text-white dark:text-black px-4 py-2 rounded-lg font-medium hover:bg-brand-800 dark:hover:bg-gray-100 transition-colors duration-200">
+          <button id="newPostBtn" class="hidden items-center space-x-2 bg-brand-900 dark:bg-white text-white dark:text-black px-4 py-2 rounded-lg font-medium hover:bg-brand-800 dark:hover:bg-gray-100 transition-colors duration-200" onclick="openNewPostModal()">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
             </svg>
@@ -145,13 +145,80 @@
     </div>
   </div>
 
+  <!-- New Post Modal -->
+  <div id="newPostModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg border border-gray-200 dark:border-gray-800 shadow-xl">
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-bold text-gray-900 dark:text-white">Create New Topic</h3>
+          <button onclick="closeNewPostModal()" class="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="mb-3">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+          <input type="text" id="postTitle" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Enter topic title...">
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content</label>
+          <textarea id="postContent" rows="4" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Write your content..."></textarea>
+        </div>
+        <div class="flex justify-end space-x-3">
+          <button onclick="closeNewPostModal()" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700">Cancel</button>
+          <button onclick="submitNewPost()" class="px-4 py-2 text-sm font-medium text-white bg-brand-900 dark:bg-white dark:text-black rounded-lg hover:bg-brand-800 dark:hover:bg-gray-100">Post Topic</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Theme Management -->
   <script src="../../js/theme.js"></script>
 
   <!-- Category View JavaScript -->
   <script>
+    const API_BASE = 'http://localhost:5000/api';
+
+    function getCurrentUser() {
+      try {
+        var raw = localStorage.getItem('gardnerHub_user');
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) { return null; }
+    }
+
+    function getProfileUrl(role) {
+      switch (role) {
+        case 'admin': return '../admin/profile.html';
+        case 'faculty': return '../faculty/profile.html';
+        default: return '../student/profile.html';
+      }
+    }
+
+    // Category permissions
+    var categoryPermissions = {
+      'announcements': ['admin', 'faculty'],
+      'academic': ['student', 'faculty', 'admin'],
+      'materials': ['admin', 'faculty'],
+      'grades': ['student', 'faculty', 'admin']
+    };
+
+    var currentCategory = '';
+
     // Profile dropdown toggle
     document.addEventListener('DOMContentLoaded', function() {
+      var user = getCurrentUser();
+      if (!user) {
+        window.location.href = '../../index.html';
+        return;
+      }
+
+      // Set user initial
+      var initialEl = document.querySelector('#profileMenuBtn .font-semibold');
+      if (initialEl) initialEl.textContent = (user.full_name || 'U').charAt(0).toUpperCase();
+
+      // Set View Profile link
+      var profileLink = document.getElementById('viewProfileLink');
+      if (profileLink) profileLink.href = getProfileUrl(user.role);
+
       const profileMenuBtn = document.getElementById('profileMenuBtn');
       const profileDropdown = document.getElementById('profileDropdown');
 
@@ -160,148 +227,179 @@
           e.stopPropagation();
           profileDropdown.classList.toggle('hidden');
         });
-
-        // Close dropdown when clicking outside
         document.addEventListener('click', function(e) {
           if (!profileDropdown.classList.contains('hidden')) {
             profileDropdown.classList.add('hidden');
           }
         });
-
         profileDropdown.addEventListener('click', function(e) {
           e.stopPropagation();
         });
       }
 
-      loadCategory();
+      loadCategory(user);
     });
 
     // Logout function
     function logout() {
+      localStorage.removeItem('gardnerHub_user');
+      localStorage.removeItem('gardnerHub_token');
       localStorage.removeItem('userRole');
       localStorage.removeItem('userName');
       window.location.href = '../../index.html';
     }
 
-    // Sample post data
-    const postsData = {
-      'academic-discussion': [],
-      'official-announcements': [],
-      'learning-materials': []
-    };
-
     function getUrlParameter(name) {
-      const urlParams = new URLSearchParams(window.location.search);
+      var urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(name);
     }
 
     function getRoleBadgeClass(role) {
       switch(role) {
-        case 'Faculty': return 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300';
-        case 'Admin': return 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300';
+        case 'faculty': return 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300';
+        case 'admin': return 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300';
         default: return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300';
       }
     }
 
-    function renderPost(post) {
-      const roleBadgeClass = getRoleBadgeClass(post.role);
-      
-      return `
-        <div class="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800 hover:shadow-lg transition-shadow duration-200 cursor-pointer">
-          <div class="flex items-start justify-between mb-4">
-            <div class="flex-1">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 hover:text-brand-600 dark:hover:text-brand-400 transition-colors duration-200">${post.title}</h3>
-              <div class="flex items-center space-x-3 text-sm text-gray-600 dark:text-gray-400">
-                <div class="flex items-center space-x-2">
-                  <div class="w-6 h-6 rounded-full bg-brand-900 dark:bg-white flex items-center justify-center">
-                    <span class="text-white dark:text-black font-semibold text-xs">${post.author.charAt(0)}</span>
-                  </div>
-                  <span>${post.author}</span>
-                  <span class="px-2 py-1 rounded-full text-xs font-medium ${roleBadgeClass}">${post.role}</span>
-                </div>
-                <span>•</span>
-                <span>${post.date}</span>
-              </div>
-            </div>
-            <div class="text-right text-sm text-gray-500 dark:text-gray-400">
-              <div class="flex items-center space-x-1 mb-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
-                </svg>
-                <span>${post.comments}</span>
-              </div>
-              <div class="flex items-center space-x-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/>
-                </svg>
-                <span>${post.votes}</span>
-              </div>
-            </div>
-          </div>
-          
-          ${post.tags && post.tags.length > 0 ? `
-            <div class="flex flex-wrap gap-2 mt-3">
-              ${post.tags.map(tag => `
-                <span class="tag-badge text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-1 rounded-full">#${tag}</span>
-              `).join('')}
-            </div>
-          ` : ''}
-        </div>
-      `;
+    function getRoleLabel(role) {
+      switch (role) {
+        case 'admin': return 'Admin';
+        case 'faculty': return 'Faculty';
+        default: return 'Student';
+      }
     }
 
-    function loadCategory() {
-      const category = getUrlParameter('category') || 'academic-discussion';
-      const posts = postsData[category] || postsData['academic-discussion'];
+    function formatDate(dateStr) {
+      var d = new Date(dateStr);
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function renderThread(thread) {
+      var roleBadgeClass = getRoleBadgeClass(thread.author_role);
+      var roleLabel = getRoleLabel(thread.author_role);
+      var verifiedIcon = thread.author_role === 'faculty' ? '<svg class="w-3.5 h-3.5 text-blue-500 inline ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>' : '';
       
-      // Update titles and descriptions
-      const categoryTitles = {
-        'academic-discussion': {
-          title: 'Academic Discussion',
-          description: 'Join conversations about coursework, assignments, and academic topics'
-        },
-        'official-announcements': {
-          title: 'Official Announcements', 
-          description: 'Stay updated with important school announcements and official communications'
-        },
-        'learning-materials': {
-          title: 'Learning Materials',
-          description: 'Access and share educational resources including PDFs, handouts, and lecture notes'
-        },
-        'general': {
-          title: 'General Discussion',
-          description: 'Open discussions about campus life and general topics'
-        }
+      return '<div class="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800 hover:shadow-lg transition-shadow duration-200 cursor-pointer" onclick="viewThread(' + thread.id + ')">' +
+        '<div class="flex items-start justify-between mb-4">' +
+          '<div class="flex-1">' +
+            '<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 hover:text-brand-600 dark:hover:text-brand-400 transition-colors duration-200">' + escapeHtml(thread.title) + '</h3>' +
+            '<div class="flex items-center space-x-3 text-sm text-gray-600 dark:text-gray-400">' +
+              '<div class="flex items-center space-x-2">' +
+                '<div class="w-6 h-6 rounded-full bg-brand-900 dark:bg-white flex items-center justify-center">' +
+                  '<span class="text-white dark:text-black font-semibold text-xs">' + (thread.author_name || 'U').charAt(0) + '</span>' +
+                '</div>' +
+                '<span>' + escapeHtml(thread.author_name) + verifiedIcon + '</span>' +
+                '<span class="px-2 py-1 rounded-full text-xs font-medium ' + roleBadgeClass + '">' + roleLabel + '</span>' +
+              '</div>' +
+              '<span>&bull;</span>' +
+              '<span>' + formatDate(thread.created_at) + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="text-right text-sm text-gray-500 dark:text-gray-400">' +
+            '<div class="flex items-center space-x-1">' +
+              '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>' +
+              '<span>' + (thread.post_count || 0) + '</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">' + escapeHtml(thread.content.substring(0, 200)) + '</p>' +
+      '</div>';
+    }
+
+    function escapeHtml(text) {
+      var div = document.createElement('div');
+      div.appendChild(document.createTextNode(text));
+      return div.innerHTML;
+    }
+
+    function loadCategory(user) {
+      currentCategory = getUrlParameter('category') || 'academic';
+
+      var categoryTitles = {
+        'academic': { title: 'Academic Discussion', description: 'Join conversations about coursework, assignments, and academic topics' },
+        'announcements': { title: 'Official Announcements', description: 'Stay updated with important school announcements and official communications' },
+        'materials': { title: 'Learning Materials', description: 'Access and share educational resources including PDFs, handouts, and lecture notes' },
+        'grades': { title: 'Student Grade Inquiry', description: 'Private grade inquiries and academic records requests' }
       };
 
-      const categoryInfo = categoryTitles[category] || categoryTitles['academic-discussion'];
+      var categoryInfo = categoryTitles[currentCategory] || categoryTitles['academic'];
       
       document.getElementById('categoryTitle').textContent = categoryInfo.title;
       document.getElementById('mainCategoryTitle').textContent = categoryInfo.title;
       document.getElementById('categoryDescription').textContent = categoryInfo.description;
-      
-      // Update active category
-      document.querySelectorAll('.category-link').forEach(link => {
-        link.classList.remove('bg-brand-100', 'dark:bg-brand-900/20');
-        if (link.dataset.category === category) {
-          link.classList.add('bg-brand-100', 'dark:bg-brand-900/20');
-        }
-      });
 
-      // Render posts
-      const postsFeed = document.getElementById('postsFeed');
-      if (posts.length > 0) {
-        postsFeed.innerHTML = posts.map(post => renderPost(post)).join('');
-      } else {
-        postsFeed.innerHTML = `
-          <div class="text-center py-12">
-            <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-            </svg>
-            <p class="text-gray-500 dark:text-gray-400">No posts in this category yet.</p>
-          </div>
-        `;
+      // Show/hide New Post button based on role permissions
+      var allowed = categoryPermissions[currentCategory] || [];
+      var newPostBtn = document.getElementById('newPostBtn');
+      if (newPostBtn && allowed.includes(user.role)) {
+        newPostBtn.classList.remove('hidden');
+        newPostBtn.classList.add('flex');
       }
+
+      // Fetch threads from API
+      fetch(API_BASE + '/forum/threads?category=' + currentCategory)
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          var postsFeed = document.getElementById('postsFeed');
+          var threads = data.threads || [];
+          if (threads.length > 0) {
+            postsFeed.innerHTML = threads.map(renderThread).join('');
+          } else {
+            postsFeed.innerHTML = '<div class="text-center py-12"><svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg><p class="text-gray-500 dark:text-gray-400">No posts in this category yet.</p></div>';
+          }
+        })
+        .catch(function() {
+          document.getElementById('postsFeed').innerHTML = '<div class="text-center py-12"><p class="text-gray-500 dark:text-gray-400">Unable to load posts. Server may be offline.</p></div>';
+        });
+    }
+
+    function viewThread(threadId) {
+      window.location.href = 'thread.html?id=' + threadId;
+    }
+
+    // New Post Modal
+    function openNewPostModal() {
+      document.getElementById('postTitle').value = '';
+      document.getElementById('postContent').value = '';
+      document.getElementById('newPostModal').classList.remove('hidden');
+    }
+
+    function closeNewPostModal() {
+      document.getElementById('newPostModal').classList.add('hidden');
+    }
+
+    function submitNewPost() {
+      var title = document.getElementById('postTitle').value.trim();
+      var content = document.getElementById('postContent').value.trim();
+      var token = localStorage.getItem('gardnerHub_token');
+
+      if (!title || !content) {
+        alert('Please fill in both title and content.');
+        return;
+      }
+
+      fetch(API_BASE + '/forum/threads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ category: currentCategory, title: title, content: content })
+      })
+      .then(function(res) { return res.json().then(function(d) { return { ok: res.ok, data: d }; }); })
+      .then(function(result) {
+        if (!result.ok) {
+          alert(result.data.message || 'Failed to create topic.');
+          return;
+        }
+        alert('Topic created successfully!');
+        closeNewPostModal();
+        loadCategory(getCurrentUser());
+      })
+      .catch(function() {
+        alert('Unable to connect to server.');
+      });
     }
 
     function goBack() {

@@ -10,6 +10,7 @@ require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const statsRoutes = require("./routes/statsRoutes");
 const inquiryRoutes = require("./routes/inquiryRoutes");
+const forumRoutes = require("./routes/forumRoutes");
 
 const app = express();
 
@@ -21,10 +22,14 @@ app.use(express.urlencoded({ extended: true }));
 // Serve uploaded ID proofs as static files (grade files are served via secure download)
 app.use("/uploads/id_proofs", express.static(path.join(__dirname, "uploads", "id_proofs")));
 
+// Serve profile photos
+app.use("/uploads/profile_photos", express.static(path.join(__dirname, "uploads", "profile_photos")));
+
 // ─── Routes ──────────────────────────────────────────────────────────────────
 app.use("/api/auth", authRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/inquiries", inquiryRoutes);
+app.use("/api/forum", forumRoutes);
 
 // Health check
 app.get("/", (req, res) => {

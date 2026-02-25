@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Faculty Profile — The Gardner Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="../../js/tailwind-config.js"></script>
+</head>
+<body class="font-sans text-gray-800 dark:text-gray-200 min-h-screen bg-gray-50 dark:bg-black transition-colors duration-300">
+
+  <!-- Header -->
+  <header class="bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50 transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center space-x-4">
+          <a href="../forum/hub.html" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200" title="Back to Hub">
+            <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </a>
+          <div class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-brand-900 dark:bg-white shadow-md">
+            <span class="text-white dark:text-black font-bold text-lg">G</span>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white">The Gardner Hub</h1>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Faculty Profile</p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-4">
+          <button id="themeToggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200" title="Toggle theme">
+            <svg class="w-5 h-5 text-yellow-500 hidden dark:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+            <svg class="w-5 h-5 text-gray-600 block dark:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+            </svg>
+          </button>
+          <button onclick="logout()" class="px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-200">Logout</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Profile Card -->
+    <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden mb-8">
+      <div class="h-32 bg-gradient-to-r from-emerald-700 to-teal-500"></div>
+
+      <div class="px-6 pb-6">
+        <div class="flex flex-col sm:flex-row items-start sm:items-end gap-4 -mt-12">
+          <!-- Profile Photo -->
+          <div class="relative">
+            <div id="profilePhoto" class="w-24 h-24 rounded-full border-4 border-white dark:border-gray-900 bg-emerald-700 dark:bg-emerald-600 flex items-center justify-center shadow-lg overflow-hidden">
+              <span id="profileInitial" class="text-white font-bold text-3xl"></span>
+              <img id="profileImg" src="" alt="" class="hidden w-full h-full object-cover" />
+            </div>
+            <label for="photoUpload" class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 flex items-center justify-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm">
+              <svg class="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+            </label>
+            <input type="file" id="photoUpload" accept="image/*" class="hidden" onchange="uploadPhoto(this)" />
+          </div>
+
+          <!-- Name + Role Badge -->
+          <div class="flex-1">
+            <div class="flex items-center gap-2">
+              <h2 id="profileName" class="text-2xl font-bold text-gray-900 dark:text-white"></h2>
+              <!-- Verified Badge -->
+              <svg class="w-6 h-6 text-blue-500 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor" title="Verified Faculty">
+                <path d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.307 4.491 4.491 0 01-1.307-3.497A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"/>
+              </svg>
+            </div>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 mt-1">
+              <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+              Faculty / Staff
+            </span>
+          </div>
+        </div>
+
+        <!-- Info Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+          <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase mb-1">Email</p>
+            <p id="profileEmail" class="text-sm font-medium text-gray-900 dark:text-white"></p>
+          </div>
+          <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase mb-1">Department</p>
+            <p id="profileDepartment" class="text-sm font-medium text-gray-900 dark:text-white"></p>
+          </div>
+          <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase mb-1">School ID</p>
+            <p id="profileSchoolId" class="text-sm font-medium text-gray-900 dark:text-white"></p>
+          </div>
+          <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase mb-1">Member Since</p>
+            <p id="profileJoined" class="text-sm font-medium text-gray-900 dark:text-white"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+      <a href="../forum/hub.html" class="flex items-center gap-3 p-4 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors">
+        <div class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
+          <svg class="w-5 h-5 text-emerald-700 dark:text-emerald-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-gray-900 dark:text-white">Community Hub</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Post announcements & materials</p>
+        </div>
+      </a>
+      <a href="../student/grade-inquiry.html" class="flex items-center gap-3 p-4 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors">
+        <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
+          <svg class="w-5 h-5 text-blue-700 dark:text-blue-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-gray-900 dark:text-white">Grade Inquiries</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Review student inquiries</p>
+        </div>
+      </a>
+    </div>
+
+    <!-- My Forum Posts -->
+    <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">My Forum Posts</h3>
+      <div id="postsList" class="space-y-3">
+        <div class="text-center py-8 text-sm text-gray-400 dark:text-gray-500 italic">Loading posts...</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="../../js/theme.js"></script>
+
+  <script>
+    var API_BASE = 'http://localhost:5000/api';
+
+    function getCurrentUser() {
+      try {
+        var raw = localStorage.getItem('gardnerHub_user');
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) { return null; }
+    }
+
+    function getToken() {
+      return localStorage.getItem('gardnerHub_token');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var user = getCurrentUser();
+      if (!user || user.role !== 'faculty') {
+        window.location.href = '../../index.html';
+        return;
+      }
+
+      loadProfile(user);
+      loadMyPosts(user.id);
+    });
+
+    function loadProfile(user) {
+      document.getElementById('profileName').textContent = user.full_name || 'Faculty';
+      document.getElementById('profileEmail').textContent = user.email || '';
+      document.getElementById('profileDepartment').textContent = user.department_course || 'N/A';
+      document.getElementById('profileSchoolId').textContent = user.school_id || '';
+      document.getElementById('profileInitial').textContent = (user.full_name || 'F').charAt(0).toUpperCase();
+
+      if (user.created_at) {
+        document.getElementById('profileJoined').textContent = new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      } else {
+        document.getElementById('profileJoined').textContent = 'N/A';
+      }
+
+      if (user.profile_photo) {
+        var img = document.getElementById('profileImg');
+        img.src = API_BASE.replace('/api', '') + '/uploads/profile_photos/' + user.profile_photo;
+        img.classList.remove('hidden');
+        document.getElementById('profileInitial').classList.add('hidden');
+      }
+
+      // Fetch fresh data
+      fetch(API_BASE + '/auth/profile', {
+        headers: { 'Authorization': 'Bearer ' + getToken() }
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data.user) {
+          var storedUser = getCurrentUser();
+          Object.assign(storedUser, data.user);
+          localStorage.setItem('gardnerHub_user', JSON.stringify(storedUser));
+
+          document.getElementById('profileName').textContent = data.user.full_name;
+          document.getElementById('profileEmail').textContent = data.user.email;
+          document.getElementById('profileDepartment').textContent = data.user.department_course || 'N/A';
+          document.getElementById('profileSchoolId').textContent = data.user.school_id;
+
+          if (data.user.created_at) {
+            document.getElementById('profileJoined').textContent = new Date(data.user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+          }
+
+          if (data.user.profile_photo) {
+            var img2 = document.getElementById('profileImg');
+            img2.src = API_BASE.replace('/api', '') + '/uploads/profile_photos/' + data.user.profile_photo;
+            img2.classList.remove('hidden');
+            document.getElementById('profileInitial').classList.add('hidden');
+          }
+        }
+      })
+      .catch(function() {});
+    }
+
+    function loadMyPosts(userId) {
+      var categories = ['announcements', 'academic', 'materials', 'grades'];
+      var allThreads = [];
+      var completed = 0;
+
+      categories.forEach(function(cat) {
+        fetch(API_BASE + '/forum/threads?category=' + cat)
+          .then(function(res) { return res.json(); })
+          .then(function(data) {
+            var threads = data.threads || [];
+            threads.forEach(function(t) {
+              if (t.author_id === userId) {
+                t._category = cat;
+                allThreads.push(t);
+              }
+            });
+          })
+          .catch(function() {})
+          .finally(function() {
+            completed++;
+            if (completed === categories.length) renderPosts(allThreads);
+          });
+      });
+    }
+
+    function renderPosts(threads) {
+      var container = document.getElementById('postsList');
+      if (threads.length === 0) {
+        container.innerHTML = '<div class="text-center py-8 text-sm text-gray-400 dark:text-gray-500 italic">No forum posts yet.</div>';
+        return;
+      }
+
+      // Sort by newest first
+      threads.sort(function(a, b) { return new Date(b.created_at) - new Date(a.created_at); });
+
+      var catLabels = { announcements: 'Official Announcements', academic: 'Academic Discussion', materials: 'Learning Materials', grades: 'Grade Inquiries' };
+      var catColors = {
+        announcements: 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300',
+        academic: 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300',
+        materials: 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300',
+        grades: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300'
+      };
+
+      container.innerHTML = threads.map(function(t) {
+        return '<a href="../forum/thread.html?id=' + t.id + '" class="block p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">' +
+          '<div class="flex items-center justify-between">' +
+            '<p class="text-sm font-medium text-gray-900 dark:text-white">' + escapeHtml(t.title) + '</p>' +
+            '<span class="px-2 py-1 rounded-full text-xs font-medium ' + (catColors[t._category] || '') + '">' + (catLabels[t._category] || t._category) + '</span>' +
+          '</div>' +
+          '<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">' + new Date(t.created_at).toLocaleDateString() + '</p>' +
+        '</a>';
+      }).join('');
+    }
+
+    function escapeHtml(str) {
+      var div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function uploadPhoto(input) {
+      if (!input.files || !input.files[0]) return;
+      var file = input.files[0];
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File must be under 5MB.');
+        return;
+      }
+
+      var formData = new FormData();
+      formData.append('photo', file);
+
+      fetch(API_BASE + '/auth/profile/photo', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + getToken() },
+        body: formData
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data.profile_photo) {
+          var img = document.getElementById('profileImg');
+          img.src = API_BASE.replace('/api', '') + '/uploads/profile_photos/' + data.profile_photo;
+          img.classList.remove('hidden');
+          document.getElementById('profileInitial').classList.add('hidden');
+
+          var user = getCurrentUser();
+          user.profile_photo = data.profile_photo;
+          localStorage.setItem('gardnerHub_user', JSON.stringify(user));
+          alert('Profile photo updated!');
+        }
+      })
+      .catch(function() {
+        alert('Failed to upload photo.');
+      });
+    }
+
+    function logout() {
+      localStorage.removeItem('gardnerHub_user');
+      localStorage.removeItem('gardnerHub_token');
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('userName');
+      window.location.href = '../../index.html';
+    }
+  </script>
+</body>
+</html>

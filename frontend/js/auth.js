@@ -188,9 +188,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// ── LOGOUT HELPER (for future use) ─────────────────────────
+// ── LOGOUT HELPER ───────────────────────────────────────────
 function logout() {
   localStorage.removeItem('gardnerHub_user');
+  localStorage.removeItem('gardnerHub_token');
+  // Legacy keys cleanup
+  localStorage.removeItem('userRole');
+  localStorage.removeItem('userName');
   window.location.href = '../index.html';
 }
 
@@ -201,4 +205,24 @@ function checkAuth() {
     window.location.href = '../index.html';
   }
   return JSON.parse(user);
+}
+
+// ── HELPER: Get role display label ─────────────────────────
+function getRoleLabel(role) {
+  switch (role) {
+    case 'admin': return 'Administrator';
+    case 'faculty': return 'Faculty/Staff';
+    case 'student': return 'Student';
+    default: return role;
+  }
+}
+
+// ── HELPER: Get profile page URL based on role ─────────────
+function getProfileUrl(role, fromRoot) {
+  const prefix = fromRoot ? './pages/' : '../';
+  switch (role) {
+    case 'admin': return prefix + 'admin/profile.html';
+    case 'faculty': return prefix + 'faculty/profile.html';
+    default: return prefix + 'student/profile.html';
+  }
 }

@@ -1,113 +1,103 @@
--- phpMyAdmin SQL Dump
--- version 5.2.1
--- https://www.phpmyadmin.net/
---
--- Host: 127.0.0.1
--- Generation Time: Feb 24, 2026 at 04:12 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
-
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
-SET time_zone = "+00:00";
-
+-- --------------------------------------------------------
+-- Host:                         127.0.0.1
+-- Server version:               8.4.3 - MySQL Community Server - GPL
+-- Server OS:                    Win64
+-- HeidiSQL Version:             12.8.0.6908
+-- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
+/*!40101 SET NAMES utf8 */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
---
--- Database: `gardner_hub`
---
 
--- --------------------------------------------------------
+-- Dumping database structure for gardner_hub
+DROP DATABASE IF EXISTS `gardner_hub`;
+CREATE DATABASE IF NOT EXISTS `gardner_hub` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `gardner_hub`;
 
---
--- Table structure for table `grade_inquiries`
---
+-- Dumping structure for table gardner_hub.forum_posts
+DROP TABLE IF EXISTS `forum_posts`;
+CREATE TABLE IF NOT EXISTS `forum_posts` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `thread_id` int NOT NULL,
+  `author_id` int NOT NULL,
+  `content` text NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `thread_id` (`thread_id`),
+  KEY `author_id` (`author_id`),
+  CONSTRAINT `forum_posts_ibfk_1` FOREIGN KEY (`thread_id`) REFERENCES `forum_threads` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `forum_posts_ibfk_2` FOREIGN KEY (`author_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `grade_inquiries` (
-  `id` int(11) NOT NULL,
-  `student_id` int(11) NOT NULL,
-  `id_proof_path` varchar(255) DEFAULT NULL,
-  `status` enum('pending','under_review','resolved') NOT NULL DEFAULT 'pending',
-  `grade_file_path` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+-- Dumping data for table gardner_hub.forum_posts: ~0 rows (approximately)
+
+-- Dumping structure for table gardner_hub.forum_threads
+DROP TABLE IF EXISTS `forum_threads`;
+CREATE TABLE IF NOT EXISTS `forum_threads` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `category` enum('announcements','academic','materials','grades') NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `author_id` int NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `author_id` (`author_id`),
+  CONSTRAINT `forum_threads_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Dumping data for table gardner_hub.forum_threads: ~0 rows (approximately)
+
+-- Dumping structure for table gardner_hub.grade_inquiries
+DROP TABLE IF EXISTS `grade_inquiries`;
+CREATE TABLE IF NOT EXISTS `grade_inquiries` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `student_id` int NOT NULL,
+  `id_proof_path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `status` enum('pending','under_review','resolved') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'pending',
+  `grade_file_path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `student_id` (`student_id`),
+  CONSTRAINT `grade_inquiries_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
+-- Dumping data for table gardner_hub.grade_inquiries: ~0 rows (approximately)
 
---
--- Table structure for table `users`
---
+-- Dumping structure for table gardner_hub.users
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `full_name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `school_id` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `role` enum('student','faculty','admin') COLLATE utf8mb4_general_ci NOT NULL,
+  `department_course` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `email` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `status` enum('active','pending','approved') COLLATE utf8mb4_general_ci DEFAULT 'approved',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `profile_photo` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `show_school_id` tinyint(1) DEFAULT '1',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `school_id` (`school_id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `users` (
-  `id` int(11) NOT NULL,
-  `full_name` varchar(100) NOT NULL,
-  `school_id` varchar(50) NOT NULL,
-  `role` enum('student','faculty') NOT NULL,
-  `department_course` varchar(100) DEFAULT NULL,
-  `email` varchar(100) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `status` enum('active','pending','approved') DEFAULT 'approved',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+-- Dumping data for table gardner_hub.users: ~3 rows (approximately)
+INSERT INTO `users` (`id`, `full_name`, `school_id`, `role`, `department_course`, `email`, `password`, `status`, `created_at`, `profile_photo`, `show_school_id`) VALUES
+	(1, 'Blady', 'GCD 2023 T111434', 'student', 'BSCS', 'blady@gmail.com', '$2b$10$UA2l5fGpW3BU5Sd30rLUVuCSfmOqSl/BjIFCovj2yfs2NVDUSxoxe', 'approved', '2026-02-24 10:13:40', NULL, 1),
+	(2, 'Charles', 'GCD 2022 T1136543', 'faculty', 'ADM', 'charles@gmail.com', '$2b$10$fBmhBh6oTI4DDshv5ZgJteEQbbyI0J2vcp9tOTNmWcc32.DDh9RpC', 'approved', '2026-02-25 04:22:02', NULL, 1),
+	(3, 'System Administrator', 'ADMIN-001', 'admin', 'Administration', 'admin@gmail.com', '$2b$10$Fd09OFM31XjX5mYbszxj3.PwZxfYMzSoepw77nV.WpCwNbe1ut7Vy', 'approved', '2026-02-25 05:17:26', NULL, 1);
 
---
--- Dumping data for table `users`
---
-
-INSERT INTO `users` (`id`, `full_name`, `school_id`, `role`, `department_course`, `email`, `password`, `status`, `created_at`) VALUES
-(1, 'Blady', 'GCD 2023 T111434', 'student', 'BSCS', 'blady@gmail.com', '$2b$10$UA2l5fGpW3BU5Sd30rLUVuCSfmOqSl/BjIFCovj2yfs2NVDUSxoxe', 'approved', '2026-02-24 10:13:40');
-
---
--- Indexes for dumped tables
---
-
---
--- Indexes for table `grade_inquiries`
---
-ALTER TABLE `grade_inquiries`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `student_id` (`student_id`);
-
---
--- Indexes for table `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `school_id` (`school_id`),
-  ADD UNIQUE KEY `email` (`email`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `grade_inquiries`
---
-ALTER TABLE `grade_inquiries`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `users`
---
-ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `grade_inquiries`
---
-ALTER TABLE `grade_inquiries`
-  ADD CONSTRAINT `grade_inquiries_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-COMMIT;
-
+/*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
+/*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
+/*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=IFNULL(@OLD_SQL_NOTES, 1) */;

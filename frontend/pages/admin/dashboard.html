@@ -56,10 +56,10 @@
           <div class="relative pl-4 border-l border-gray-200 dark:border-gray-700">
             <button id="profileMenuBtn" class="flex items-center space-x-3 hover:opacity-80 transition-opacity duration-200">
               <div class="w-8 h-8 rounded-full bg-brand-900 dark:bg-white flex items-center justify-center">
-                <span class="text-white dark:text-black font-semibold text-sm">A</span>
+                <span class="text-white dark:text-black font-semibold text-sm" id="adminInitial">A</span>
               </div>
               <div class="text-sm text-left">
-                <p class="font-medium text-gray-900 dark:text-white">Admin User</p>
+                <p class="font-medium text-gray-900 dark:text-white" id="adminName">Admin User</p>
                 <p class="text-gray-500 dark:text-gray-400">Administrator</p>
               </div>
               <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -69,7 +69,7 @@
 
             <!-- Dropdown Menu -->
             <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-black rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 py-1 z-50">
-              <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors duration-200">
+              <a id="viewProfileLink" href="profile.html" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors duration-200">
                 <div class="flex items-center space-x-2">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
@@ -211,8 +211,32 @@
 
   <!-- Dashboard JavaScript -->
   <script>
+    const API_BASE = 'http://localhost:5000/api';
+
+    // Auth guard: only admins allowed
+    function getCurrentUser() {
+      try {
+        var raw = localStorage.getItem('gardnerHub_user');
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
     // Profile dropdown toggle
     document.addEventListener('DOMContentLoaded', function() {
+      var user = getCurrentUser();
+      if (!user || user.role !== 'admin') {
+        window.location.href = '../../index.html';
+        return;
+      }
+
+      // Set admin name
+      var nameEl = document.getElementById('adminName');
+      var initialEl = document.getElementById('adminInitial');
+      if (nameEl) nameEl.textContent = user.full_name || 'Admin';
+      if (initialEl) initialEl.textContent = (user.full_name || 'A').charAt(0).toUpperCase();
+
       const profileMenuBtn = document.getElementById('profileMenuBtn');
       const profileDropdown = document.getElementById('profileDropdown');
 
@@ -234,20 +258,31 @@
         });
       }
 
-      // Fetch real user count from backend
-      fetch('http://localhost:5000/api/stats/user-count')
+      // Fetch stats from backend
+      fetch(API_BASE + '/stats/user-count')
         .then(function(res) { return res.json(); })
         .then(function(data) {
           var el = document.getElementById('adminStatTotalUsers');
-          if (el) el.textContent = data.count;
+          if (el) el.textContent = data.totalCount || 0;
+
+          var postsEl = document.getElementById('adminStatActivePosts');
+          if (postsEl) postsEl.textContent = (data.threadCount || 0) + (data.postCount || 0);
+
+          var inqEl = document.getElementById('adminStatGradeInquiries');
+          if (inqEl) inqEl.textContent = data.inquiryCount || 0;
+
+          var annEl = document.getElementById('adminStatAnnouncements');
+          if (annEl) annEl.textContent = data.announcementCount || 0;
         })
         .catch(function() {
-          // Backend unavailable - stat stays at 0
+          // Backend unavailable - stats stay at 0
         });
     });
 
     // Logout function
     function logout() {
+      localStorage.removeItem('gardnerHub_user');
+      localStorage.removeItem('gardnerHub_token');
       localStorage.removeItem('userRole');
       localStorage.removeItem('userName');
       window.location.href = '../../index.html';
@@ -256,9 +291,9 @@
     // Navigation functions
     function navigateToCategory(type) {
       if (type === 'academic') {
-        window.location.href = '../forum/category-view.html?category=academic-discussion';
+        window.location.href = '../forum/category-view.html?category=academic';
       } else if (type === 'announcements') {
-        window.location.href = '../forum/category-view.html?category=official-announcements';
+        window.location.href = '../forum/category-view.html?category=announcements';
       }
     }
 
