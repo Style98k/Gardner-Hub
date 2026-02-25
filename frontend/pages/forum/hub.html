@@ -423,7 +423,7 @@
 
     function getProfileUrl(role) {
       switch (role) {
-        case 'admin': return '../admin/profile.html';
+        case 'admin': return '../admin/panel.html';
         case 'faculty': return '../faculty/profile.html';
         default: return '../student/profile.html';
       }
@@ -525,9 +525,11 @@
       var profileLink = document.getElementById('viewProfileLink');
       if (profileLink) profileLink.href = getProfileUrl(role);
 
-      // Show Admin Panel button if admin
+      // Show Admin Panel button if admin & hide separate profile link
       if (role === 'admin') {
         document.getElementById('adminDashboardBtn').classList.remove('hidden');
+        // Admin doesn't need a separate View Profile — everything is in the Command Center
+        if (profileLink) profileLink.style.display = 'none';
       }
 
     }
@@ -684,7 +686,7 @@
     }
 
     function navigateToAdminDashboard() {
-      window.location.href = '../admin/dashboard.html';
+      window.location.href = '../admin/panel.html';
     }
   </script>
 

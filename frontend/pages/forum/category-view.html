@@ -187,7 +187,7 @@
 
     function getProfileUrl(role) {
       switch (role) {
-        case 'admin': return '../admin/profile.html';
+        case 'admin': return '../admin/panel.html';
         case 'faculty': return '../faculty/profile.html';
         default: return '../student/profile.html';
       }
@@ -218,6 +218,9 @@
       // Set View Profile link
       var profileLink = document.getElementById('viewProfileLink');
       if (profileLink) profileLink.href = getProfileUrl(user.role);
+
+      // Hide separate View Profile link for admin — Command Center has everything
+      if (user.role === 'admin' && profileLink) profileLink.style.display = 'none';
 
       const profileMenuBtn = document.getElementById('profileMenuBtn');
       const profileDropdown = document.getElementById('profileDropdown');

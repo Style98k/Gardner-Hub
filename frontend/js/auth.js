@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Redirect based on role
         switch (data.user.role) {
           case 'admin':
-            window.location.href = './pages/admin/dashboard.html';
+            window.location.href = './pages/admin/panel.html';
             break;
           case 'faculty':
             window.location.href = './pages/forum/hub.html';
@@ -221,7 +221,7 @@ function getRoleLabel(role) {
 function getProfileUrl(role, fromRoot) {
   const prefix = fromRoot ? './pages/' : '../';
   switch (role) {
-    case 'admin': return prefix + 'admin/profile.html';
+    case 'admin': return prefix + 'admin/panel.html';
     case 'faculty': return prefix + 'faculty/profile.html';
     default: return prefix + 'student/profile.html';
   }

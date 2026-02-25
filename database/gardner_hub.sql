@@ -92,6 +92,7 @@ CREATE TABLE IF NOT EXISTS `grade_inquiries` (
   KEY `idx_grade_inquiries_created_at` (`created_at` DESC),
   KEY `idx_grade_inquiries_updated_at` (`updated_at` DESC),
   KEY `idx_student_updated` (`student_id`,`updated_at` DESC),
+  KEY `idx_grade_inquiries_status` (`status`,`created_at` DESC),
   CONSTRAINT `grade_inquiries_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -167,7 +168,8 @@ CREATE TABLE IF NOT EXISTS `users` (
   `show_school_id` tinyint(1) DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `school_id` (`school_id`),
-  UNIQUE KEY `email` (`email`)
+  UNIQUE KEY `email` (`email`),
+  KEY `idx_users_created_at` (`created_at` DESC)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table gardner_hub.users: ~1 rows (approximately)

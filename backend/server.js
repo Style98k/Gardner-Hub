@@ -12,6 +12,7 @@ const statsRoutes = require("./routes/statsRoutes");
 const inquiryRoutes = require("./routes/inquiryRoutes");
 const forumRoutes = require("./routes/forumRoutes");
 const postRoutes = require("./routes/postRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.use("/api/stats", statsRoutes);
 app.use("/api/inquiries", inquiryRoutes);
 app.use("/api/forum", forumRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api/admin", adminRoutes);
 
 // Health check
 app.get("/", (req, res) => {

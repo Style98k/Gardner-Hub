@@ -309,7 +309,7 @@
 
     function getProfileUrl(role) {
       switch (role) {
-        case 'admin': return '../admin/profile.html';
+        case 'admin': return '../admin/panel.html';
         case 'faculty': return '../faculty/profile.html';
         default: return '../student/profile.html';
       }
@@ -378,6 +378,9 @@
       document.getElementById('userInitial').textContent = (user.full_name || 'U').charAt(0).toUpperCase();
       var profileLink = document.getElementById('viewProfileLink');
       if (profileLink) profileLink.href = getProfileUrl(user.role);
+
+      // Hide separate View Profile link for admin — Command Center has everything
+      if (user.role === 'admin' && profileLink) profileLink.style.display = 'none';
 
       // Show New Post button only for admin/faculty
       if (user.role === 'admin' || user.role === 'faculty') {
