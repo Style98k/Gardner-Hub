@@ -124,11 +124,6 @@
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between mb-2">
               <h3 class="text-xl font-bold text-gray-900 dark:text-white">Official Announcements</h3>
-              <!-- Only admin/faculty can post here -->
-              <button data-category-btn="announcements" class="hidden items-center space-x-1 bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition-colors duration-200" onclick="event.stopPropagation(); openNewTopicModal('announcements')">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                <span>New Topic</span>
-              </button>
             </div>
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Stay updated with the latest school-wide announcements, policy changes, and important notices from the administration.</p>
             
@@ -148,7 +143,7 @@
               <div class="text-xs text-gray-500 dark:text-gray-400 uppercase">TOPICS</div>
             </div>
             <div class="text-right">
-              <div class="text-2xl font-bold text-gray-900 dark:text-white">0</div>
+              <div class="text-2xl font-bold text-gray-900 dark:text-white" id="statAnnouncementPosts">0</div>
               <div class="text-xs text-gray-500 dark:text-gray-400 uppercase">POSTS</div>
             </div>
             <!-- Latest Activity -->
@@ -173,11 +168,6 @@
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between mb-2">
               <h3 class="text-xl font-bold text-gray-900 dark:text-white">Academic Discussion</h3>
-              <!-- All roles can post here -->
-              <button data-category-btn="academic" class="hidden items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition-colors duration-200" onclick="event.stopPropagation(); openNewTopicModal('academic')">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                <span>New Topic</span>
-              </button>
             </div>
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Engage in meaningful academic conversations — ask questions, share insights on lessons, and collaborate with school organizations.</p>
             
@@ -192,11 +182,11 @@
           <!-- Stats -->
           <div class="flex flex-col items-end gap-4 flex-shrink-0">
             <div class="text-right">
-              <div class="text-2xl font-bold text-gray-900 dark:text-white">0</div>
+              <div class="text-2xl font-bold text-gray-900 dark:text-white" id="statAcademicTopics">0</div>
               <div class="text-xs text-gray-500 dark:text-gray-400 uppercase">TOPICS</div>
             </div>
             <div class="text-right">
-              <div class="text-2xl font-bold text-gray-900 dark:text-white">0</div>
+              <div class="text-2xl font-bold text-gray-900 dark:text-white" id="statAcademicPosts">0</div>
               <div class="text-xs text-gray-500 dark:text-gray-400 uppercase">POSTS</div>
             </div>
             <!-- Latest Activity -->
@@ -221,11 +211,6 @@
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between mb-2">
               <h3 class="text-xl font-bold text-gray-900 dark:text-white">Learning Materials</h3>
-              <!-- Only admin/faculty can post here -->
-              <button data-category-btn="materials" class="hidden items-center space-x-1 bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition-colors duration-200" onclick="event.stopPropagation(); openNewTopicModal('materials')">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                <span>New Topic</span>
-              </button>
             </div>
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Access and share educational resources including PDFs, handouts, lecture notes, and supplementary reading materials.</p>
             
@@ -240,11 +225,11 @@
           <!-- Stats -->
           <div class="flex flex-col items-end gap-4 flex-shrink-0">
             <div class="text-right">
-              <div class="text-2xl font-bold text-gray-900 dark:text-white">0</div>
+              <div class="text-2xl font-bold text-gray-900 dark:text-white" id="statMaterialsTopics">0</div>
               <div class="text-xs text-gray-500 dark:text-gray-400 uppercase">TOPICS</div>
             </div>
             <div class="text-right">
-              <div class="text-2xl font-bold text-gray-900 dark:text-white">0</div>
+              <div class="text-2xl font-bold text-gray-900 dark:text-white" id="statMaterialsPosts">0</div>
               <div class="text-xs text-gray-500 dark:text-gray-400 uppercase">POSTS</div>
             </div>
             <!-- Latest Activity -->
@@ -290,11 +275,11 @@
           <!-- Stats -->
           <div class="flex flex-col items-end gap-4 flex-shrink-0">
             <div class="text-right">
-              <div class="text-2xl font-bold text-gray-900 dark:text-white">0</div>
+              <div class="text-2xl font-bold text-gray-900 dark:text-white" id="statGradeInquiriesCount">0</div>
               <div class="text-xs text-gray-500 dark:text-gray-400 uppercase">INQUIRIES</div>
             </div>
             <div class="text-right">
-              <div class="text-2xl font-bold text-gray-900 dark:text-white">0</div>
+              <div class="text-2xl font-bold text-gray-900 dark:text-white" id="statGradeReplies">0</div>
               <div class="text-xs text-gray-500 dark:text-gray-400 uppercase">REPLIES</div>
             </div>
             <!-- Latest Activity -->
@@ -434,6 +419,7 @@
 
       initUserUI();
       fetchStats();
+      fetchCategoryStats();
     });
 
     // ── Initialize user UI: name, role, permissions ──
@@ -463,23 +449,6 @@
         document.getElementById('adminDashboardBtn').classList.remove('hidden');
       }
 
-      // ── Role-based New Topic button visibility ──
-      // announcements & materials: only admin/faculty
-      // academic: all roles
-      // grades: handled separately (links to grade inquiry page)
-      const categoryPermissions = {
-        'announcements': ['admin', 'faculty'],
-        'academic': ['student', 'faculty', 'admin'],
-        'materials': ['admin', 'faculty'],
-      };
-
-      Object.keys(categoryPermissions).forEach(function(cat) {
-        var btn = document.querySelector('[data-category-btn="' + cat + '"]');
-        if (btn && categoryPermissions[cat].includes(role)) {
-          btn.classList.remove('hidden');
-          btn.classList.add('flex');
-        }
-      });
     }
 
     // ── Fetch stats from backend ──
@@ -501,6 +470,50 @@
         })
         .catch(function() {
           // Backend unavailable
+        });
+    }
+
+    // ── Fetch category stats from backend ──
+    function fetchCategoryStats() {
+      var token = localStorage.getItem('gardnerHub_token');
+      var headers = {};
+      if (token) {
+        headers['Authorization'] = 'Bearer ' + token;
+      }
+
+      fetch(API_BASE + '/stats/category-stats', { headers: headers })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          // Announcements
+          var annTopics = document.getElementById('statAnnouncementTopics');
+          if (annTopics) annTopics.textContent = data.announcements.topics || 0;
+
+          var annPosts = document.getElementById('statAnnouncementPosts');
+          if (annPosts) annPosts.textContent = data.announcements.posts || 0;
+
+          // Academic
+          var acaTopics = document.getElementById('statAcademicTopics');
+          if (acaTopics) acaTopics.textContent = data.academic.topics || 0;
+
+          var acaPosts = document.getElementById('statAcademicPosts');
+          if (acaPosts) acaPosts.textContent = data.academic.posts || 0;
+
+          // Materials
+          var matTopics = document.getElementById('statMaterialsTopics');
+          if (matTopics) matTopics.textContent = data.materials.topics || 0;
+
+          var matPosts = document.getElementById('statMaterialsPosts');
+          if (matPosts) matPosts.textContent = data.materials.posts || 0;
+
+          // Grade Inquiries
+          var gradeInq = document.getElementById('statGradeInquiriesCount');
+          if (gradeInq) gradeInq.textContent = data.gradeInquiries.inquiries || 0;
+
+          var gradeRep = document.getElementById('statGradeReplies');
+          if (gradeRep) gradeRep.textContent = data.gradeInquiries.replies || 0;
+        })
+        .catch(function() {
+          // Backend unavailable — keep default 0 values
         });
     }
 
