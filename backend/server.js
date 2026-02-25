@@ -11,6 +11,7 @@ const authRoutes = require("./routes/authRoutes");
 const statsRoutes = require("./routes/statsRoutes");
 const inquiryRoutes = require("./routes/inquiryRoutes");
 const forumRoutes = require("./routes/forumRoutes");
+const postRoutes = require("./routes/postRoutes");
 
 const app = express();
 
@@ -25,11 +26,15 @@ app.use("/uploads/id_proofs", express.static(path.join(__dirname, "uploads", "id
 // Serve profile photos
 app.use("/uploads/profile_photos", express.static(path.join(__dirname, "uploads", "profile_photos")));
 
+// Serve announcement images
+app.use("/uploads/announcements", express.static(path.join(__dirname, "uploads", "announcements")));
+
 // ─── Routes ──────────────────────────────────────────────────────────────────
 app.use("/api/auth", authRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/inquiries", inquiryRoutes);
 app.use("/api/forum", forumRoutes);
+app.use("/api/posts", postRoutes);
 
 // Health check
 app.get("/", (req, res) => {

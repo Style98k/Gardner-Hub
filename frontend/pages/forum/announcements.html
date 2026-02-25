@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Official Announcements — The Gardner Hub</title>
+
+  <!-- Google Font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Tailwind Configuration -->
+  <script src="../../js/tailwind-config.js"></script>
+
+  <style>
+    @keyframes slideUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+    .slide-up { animation: slideUp .3s ease-out forwards; }
+    @keyframes modalSlideUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+    .modal-slide-up { animation: modalSlideUp .25s ease-out forwards; }
+    .line-clamp-3 { display:-webkit-box; -webkit-line-clamp:3; line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width:6px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:#d1d5db; border-radius:3px; }
+    .dark ::-webkit-scrollbar-thumb { background:#374151; }
+    /* Tab active state */
+    .tab-active { border-color: #18181b; color: #18181b; font-weight:600; }
+    .dark .tab-active { border-color: #fff; color: #fff; }
+    /* Flair colors */
+    .flair-enrollment { background:#dbeafe; color:#1d4ed8; }
+    .dark .flair-enrollment { background:rgba(59,130,246,.2); color:#93c5fd; }
+    .flair-class-schedule { background:#dcfce7; color:#15803d; }
+    .dark .flair-class-schedule { background:rgba(34,197,94,.2); color:#86efac; }
+    .flair-class-suspension { background:#fee2e2; color:#b91c1c; }
+    .dark .flair-class-suspension { background:rgba(239,68,68,.2); color:#fca5a5; }
+    .flair-events { background:#f3e8ff; color:#7e22ce; }
+    .dark .flair-events { background:rgba(168,85,247,.2); color:#d8b4fe; }
+    /* Toast */
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); z-index:9999; padding:10px 24px; border-radius:10px; font-size:14px; font-weight:500; box-shadow:0 4px 24px rgba(0,0,0,.15); transition:opacity .3s, transform .3s; }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+    .toast.hide { opacity:0; transform:translateX(-50%) translateY(16px); }
+  </style>
+</head>
+
+<body class="font-sans text-gray-800 dark:text-gray-200 min-h-screen bg-gray-50 dark:bg-black transition-colors duration-300">
+
+  <!-- Header -->
+  <header class="bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50 transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+
+        <!-- Back + Brand -->
+        <div class="flex items-center space-x-4">
+          <button onclick="goBack()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+            <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <div class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-brand-900 dark:bg-white shadow-md">
+            <span class="text-white dark:text-black font-bold text-lg">G</span>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white">The Gardner Hub</h1>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Official Announcements</p>
+          </div>
+        </div>
+
+        <!-- Right side -->
+        <div class="flex items-center space-x-3">
+          <!-- Theme Toggle -->
+          <button id="themeToggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200" title="Toggle theme">
+            <svg class="w-5 h-5 text-yellow-500 hidden dark:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+            <svg class="w-5 h-5 text-gray-600 block dark:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+            </svg>
+          </button>
+          <!-- Profile Dropdown -->
+          <div class="relative">
+            <button id="profileMenuBtn" class="flex items-center space-x-2 hover:opacity-80 transition-opacity duration-200">
+              <div class="w-8 h-8 rounded-full bg-brand-900 dark:bg-white flex items-center justify-center">
+                <span class="text-white dark:text-black font-semibold text-sm" id="userInitial">U</span>
+              </div>
+              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-black rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 py-1 z-50">
+              <a id="viewProfileLink" href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors duration-200">
+                <div class="flex items-center space-x-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                  <span>View Profile</span>
+                </div>
+              </a>
+              <button onclick="logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors duration-200">
+                <div class="flex items-center space-x-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                  <span>Logout</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- Page Header -->
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center space-x-3">
+        <div class="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+          <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Official Announcements</h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Important school-wide updates from the administration</p>
+        </div>
+      </div>
+
+      <!-- + New Post button (hidden for students) -->
+      <button id="newPostBtn" class="hidden items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors duration-200 shadow-sm" onclick="openComposer()">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+        <span>New Post</span>
+      </button>
+    </div>
+
+    <!-- Filter Tags -->
+    <div class="flex items-center space-x-2 mb-6 overflow-x-auto pb-1">
+      <button onclick="filterByTag('')" class="filter-tag px-3 py-1.5 text-xs font-medium rounded-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" data-tag="">All</button>
+      <button onclick="filterByTag('Enrollment')" class="filter-tag px-3 py-1.5 text-xs font-medium rounded-full border border-blue-200 dark:border-blue-800 flair-enrollment hover:opacity-80 transition-colors" data-tag="Enrollment">Enrollment</button>
+      <button onclick="filterByTag('Class Schedule')" class="filter-tag px-3 py-1.5 text-xs font-medium rounded-full border border-green-200 dark:border-green-800 flair-class-schedule hover:opacity-80 transition-colors" data-tag="Class Schedule">Class Schedule</button>
+      <button onclick="filterByTag('Class Suspension')" class="filter-tag px-3 py-1.5 text-xs font-medium rounded-full border border-red-200 dark:border-red-800 flair-class-suspension hover:opacity-80 transition-colors" data-tag="Class Suspension">Class Suspension</button>
+      <button onclick="filterByTag('Events')" class="filter-tag px-3 py-1.5 text-xs font-medium rounded-full border border-purple-200 dark:border-purple-800 flair-events hover:opacity-80 transition-colors" data-tag="Events">Events</button>
+    </div>
+
+    <!-- Announcements Feed -->
+    <div class="space-y-4" id="announcementsFeed">
+      <div class="text-center py-12">
+        <div class="inline-block w-8 h-8 border-2 border-gray-300 dark:border-gray-600 border-t-brand-900 dark:border-t-white rounded-full animate-spin"></div>
+        <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">Loading announcements...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Reddit-Style Composer Modal ─────────────────────────────────────── -->
+  <div id="composerModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="modal-slide-up bg-white dark:bg-gray-900 rounded-2xl w-full max-w-4xl border border-gray-200 dark:border-gray-800 shadow-2xl max-h-[90vh] overflow-hidden flex flex-col">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Create an Official Announcement</h3>
+        <button onclick="closeComposer()" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Modal Body: Two-column layout -->
+      <div class="flex flex-1 overflow-hidden">
+        
+        <!-- Left: Composer Form (~70%) -->
+        <div class="flex-1 p-6 overflow-y-auto">
+
+          <!-- Tabs: Post | Image & Video | Link -->
+          <div class="flex border-b border-gray-200 dark:border-gray-700 mb-5">
+            <button onclick="switchTab('post')" id="tabPost" class="tab-btn flex items-center space-x-2 px-4 py-2.5 text-sm border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors tab-active">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+              <span>Post</span>
+            </button>
+            <button onclick="switchTab('image')" id="tabImage" class="tab-btn flex items-center space-x-2 px-4 py-2.5 text-sm border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              <span>Image &amp; Video</span>
+            </button>
+            <button onclick="switchTab('link')" id="tabLink" class="tab-btn flex items-center space-x-2 px-4 py-2.5 text-sm border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+              <span>Link</span>
+            </button>
+          </div>
+
+          <!-- Tag/Flair Selector (Required) -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Post Flair <span class="text-red-500">*</span></label>
+            <div class="flex flex-wrap gap-2" id="flairSelector">
+              <button type="button" onclick="selectFlair('Enrollment')" data-flair="Enrollment" class="flair-btn px-3 py-1.5 text-xs font-medium rounded-full border-2 border-transparent flair-enrollment opacity-60 hover:opacity-100 transition-all">Enrollment</button>
+              <button type="button" onclick="selectFlair('Class Schedule')" data-flair="Class Schedule" class="flair-btn px-3 py-1.5 text-xs font-medium rounded-full border-2 border-transparent flair-class-schedule opacity-60 hover:opacity-100 transition-all">Class Schedule</button>
+              <button type="button" onclick="selectFlair('Class Suspension')" data-flair="Class Suspension" class="flair-btn px-3 py-1.5 text-xs font-medium rounded-full border-2 border-transparent flair-class-suspension opacity-60 hover:opacity-100 transition-all">Class Suspension</button>
+              <button type="button" onclick="selectFlair('Events')" data-flair="Events" class="flair-btn px-3 py-1.5 text-xs font-medium rounded-full border-2 border-transparent flair-events opacity-60 hover:opacity-100 transition-all">Events</button>
+            </div>
+            <input type="hidden" id="composerTag" value="">
+          </div>
+
+          <!-- Title -->
+          <div class="mb-4">
+            <input type="text" id="composerTitle" maxlength="300" class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 placeholder-gray-400" placeholder="Title *">
+          </div>
+
+          <!-- Tab Content: Post -->
+          <div id="tabContentPost" class="tab-content">
+            <textarea id="composerContent" rows="6" class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 placeholder-gray-400 resize-y" placeholder="Write your announcement content here..."></textarea>
+          </div>
+
+          <!-- Tab Content: Image -->
+          <div id="tabContentImage" class="tab-content hidden">
+            <div id="imageDropZone" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-green-400 dark:hover:border-green-500 transition-colors">
+              <svg class="w-10 h-10 mx-auto text-gray-400 dark:text-gray-500 mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Drag and drop an image or <span class="text-green-600 dark:text-green-400 font-medium">browse</span></p>
+              <p class="text-xs text-gray-400 dark:text-gray-500">JPEG, PNG, GIF, WebP · Max 5MB</p>
+              <input type="file" id="composerImage" accept="image/jpeg,image/png,image/gif,image/webp" class="hidden">
+            </div>
+            <div id="imagePreview" class="hidden mt-3 relative">
+              <img id="imagePreviewImg" src="" alt="Preview" class="w-full max-h-64 object-contain rounded-lg border border-gray-200 dark:border-gray-700">
+              <button onclick="removeImage()" class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div class="mt-3">
+              <textarea id="composerContentImage" rows="3" class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 placeholder-gray-400 resize-y" placeholder="Add a description (optional)..."></textarea>
+            </div>
+          </div>
+
+          <!-- Tab Content: Link -->
+          <div id="tabContentLink" class="tab-content hidden">
+            <div class="mb-3">
+              <input type="url" id="composerLinkUrl" class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 placeholder-gray-400" placeholder="Paste URL here...">
+            </div>
+            <textarea id="composerContentLink" rows="3" class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 placeholder-gray-400 resize-y" placeholder="Add a description (optional)..."></textarea>
+          </div>
+
+          <!-- Submit Row -->
+          <div class="flex justify-end space-x-3 mt-5 pt-4 border-t border-gray-200 dark:border-gray-800">
+            <button onclick="closeComposer()" class="px-5 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+            <button onclick="submitAnnouncement()" id="composerSubmitBtn" class="px-5 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Post</button>
+          </div>
+        </div>
+
+        <!-- Right: Rules Sidebar (~30%) -->
+        <div class="w-72 border-l border-gray-200 dark:border-gray-800 p-5 bg-gray-50 dark:bg-gray-950 overflow-y-auto flex-shrink-0 hidden md:block">
+          <div class="flex items-center space-x-2 mb-4">
+            <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            <h4 class="font-semibold text-gray-900 dark:text-white text-sm">Official Posting Rules</h4>
+          </div>
+          <ul class="space-y-3 text-xs text-gray-600 dark:text-gray-400">
+            <li class="flex items-start space-x-2">
+              <span class="mt-0.5 w-4 h-4 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center flex-shrink-0 text-green-600 dark:text-green-400 text-[10px] font-bold">1</span>
+              <span>Only verified <strong class="text-gray-800 dark:text-gray-200">Faculty</strong> and <strong class="text-gray-800 dark:text-gray-200">Administrators</strong> may post announcements.</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <span class="mt-0.5 w-4 h-4 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center flex-shrink-0 text-green-600 dark:text-green-400 text-[10px] font-bold">2</span>
+              <span>Select an appropriate <strong class="text-gray-800 dark:text-gray-200">tag/flair</strong> for every announcement.</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <span class="mt-0.5 w-4 h-4 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center flex-shrink-0 text-green-600 dark:text-green-400 text-[10px] font-bold">3</span>
+              <span>Keep announcements <strong class="text-gray-800 dark:text-gray-200">professional</strong> and relevant to the school community.</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <span class="mt-0.5 w-4 h-4 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center flex-shrink-0 text-green-600 dark:text-green-400 text-[10px] font-bold">4</span>
+              <span>Attach supporting images or links when applicable.</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <span class="mt-0.5 w-4 h-4 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center flex-shrink-0 text-green-600 dark:text-green-400 text-[10px] font-bold">5</span>
+              <span>Misleading or spam content will be removed and may result in account action.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Expanded Post / Detail Modal ──────────────────────────────────────── -->
+  <div id="detailModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm overflow-y-auto">
+    <div class="modal-slide-up bg-white dark:bg-gray-900 rounded-2xl w-full max-w-3xl border border-gray-200 dark:border-gray-800 shadow-2xl my-8">
+      <div id="detailContent">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Theme Management -->
+  <script src="../../js/theme.js"></script>
+
+  <!-- ─── Announcements Page JavaScript ─────────────────────────────────────── -->
+  <script>
+    const API_BASE = 'http://localhost:5000/api';
+    let allAnnouncements = [];
+    let activeFilter = '';
+    let currentTab = 'post';
+    let selectedFile = null;
+
+    // ─── Utility ───────────────────────────────────────────────────────────────
+    function getCurrentUser() {
+      try {
+        var raw = localStorage.getItem('gardnerHub_user');
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) { return null; }
+    }
+
+    function getToken() {
+      return localStorage.getItem('gardnerHub_token');
+    }
+
+    function getProfileUrl(role) {
+      switch (role) {
+        case 'admin': return '../admin/profile.html';
+        case 'faculty': return '../faculty/profile.html';
+        default: return '../student/profile.html';
+      }
+    }
+
+    function escapeHtml(text) {
+      var div = document.createElement('div');
+      div.appendChild(document.createTextNode(text || ''));
+      return div.innerHTML;
+    }
+
+    function timeAgo(dateStr) {
+      var now = new Date();
+      var then = new Date(dateStr);
+      var diff = Math.floor((now - then) / 1000);
+      if (diff < 60) return 'just now';
+      if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+      if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+      if (diff < 2592000) return Math.floor(diff / 86400) + 'd ago';
+      return then.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function getFlairClass(tag) {
+      switch (tag) {
+        case 'Enrollment': return 'flair-enrollment';
+        case 'Class Schedule': return 'flair-class-schedule';
+        case 'Class Suspension': return 'flair-class-suspension';
+        case 'Events': return 'flair-events';
+        default: return 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400';
+      }
+    }
+
+    function getRoleBadgeClass(role) {
+      switch(role) {
+        case 'faculty': return 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300';
+        case 'admin': return 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300';
+        default: return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300';
+      }
+    }
+
+    function getRoleLabel(role) {
+      switch (role) {
+        case 'admin': return 'Admin';
+        case 'faculty': return 'Faculty';
+        default: return 'Student';
+      }
+    }
+
+    function showToast(msg, type) {
+      var existing = document.querySelector('.toast');
+      if (existing) existing.remove();
+      var toast = document.createElement('div');
+      toast.className = 'toast hide ' + (type === 'error' ? 'bg-red-600 text-white' : 'bg-gray-900 dark:bg-white text-white dark:text-black');
+      toast.textContent = msg;
+      document.body.appendChild(toast);
+      requestAnimationFrame(function() { toast.classList.remove('hide'); toast.classList.add('show'); });
+      setTimeout(function() { toast.classList.remove('show'); toast.classList.add('hide'); setTimeout(function() { toast.remove(); }, 300); }, 2500);
+    }
+
+    // ─── Init ──────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+      var user = getCurrentUser();
+      if (!user) { window.location.href = '../../index.html'; return; }
+
+      // Set header UI
+      document.getElementById('userInitial').textContent = (user.full_name || 'U').charAt(0).toUpperCase();
+      var profileLink = document.getElementById('viewProfileLink');
+      if (profileLink) profileLink.href = getProfileUrl(user.role);
+
+      // Show New Post button only for admin/faculty
+      if (user.role === 'admin' || user.role === 'faculty') {
+        var btn = document.getElementById('newPostBtn');
+        btn.classList.remove('hidden');
+        btn.classList.add('flex');
+      }
+
+      // Profile dropdown
+      var profileMenuBtn = document.getElementById('profileMenuBtn');
+      var profileDropdown = document.getElementById('profileDropdown');
+      profileMenuBtn.addEventListener('click', function(e) { e.stopPropagation(); profileDropdown.classList.toggle('hidden'); });
+      document.addEventListener('click', function() { profileDropdown.classList.add('hidden'); });
+      profileDropdown.addEventListener('click', function(e) { e.stopPropagation(); });
+
+      // Image upload handlers
+      var dropZone = document.getElementById('imageDropZone');
+      var fileInput = document.getElementById('composerImage');
+      dropZone.addEventListener('click', function() { fileInput.click(); });
+      dropZone.addEventListener('dragover', function(e) { e.preventDefault(); dropZone.classList.add('border-green-400','dark:border-green-500'); });
+      dropZone.addEventListener('dragleave', function() { dropZone.classList.remove('border-green-400','dark:border-green-500'); });
+      dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dropZone.classList.remove('border-green-400','dark:border-green-500');
+        if (e.dataTransfer.files.length > 0) handleImageFile(e.dataTransfer.files[0]);
+      });
+      fileInput.addEventListener('change', function() { if (fileInput.files.length > 0) handleImageFile(fileInput.files[0]); });
+
+      // Close detail modal on backdrop click
+      document.getElementById('detailModal').addEventListener('click', function(e) {
+        if (e.target === this) closeDetail();
+      });
+
+      // Close composer modal on backdrop click
+      document.getElementById('composerModal').addEventListener('click', function(e) {
+        if (e.target === this) closeComposer();
+      });
+
+      loadAnnouncements();
+    });
+
+    // ─── Load Announcements ────────────────────────────────────────────────────
+    function loadAnnouncements() {
+      var token = getToken();
+      var headers = {};
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+
+      fetch(API_BASE + '/posts/announcements', { headers: headers })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          allAnnouncements = data.announcements || [];
+          renderAnnouncements();
+        })
+        .catch(function() {
+          document.getElementById('announcementsFeed').innerHTML =
+            '<div class="text-center py-12"><p class="text-gray-500 dark:text-gray-400">Unable to load announcements. Server may be offline.</p></div>';
+        });
+    }
+
+    // ─── Render Announcements ──────────────────────────────────────────────────
+    function renderAnnouncements() {
+      var feed = document.getElementById('announcementsFeed');
+      var filtered = activeFilter ? allAnnouncements.filter(function(a) { return a.tag === activeFilter; }) : allAnnouncements;
+
+      if (filtered.length === 0) {
+        feed.innerHTML = '<div class="text-center py-12">' +
+          '<svg class="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>' +
+          '<p class="text-gray-500 dark:text-gray-400 font-medium">No announcements yet</p>' +
+          '<p class="text-sm text-gray-400 dark:text-gray-500 mt-1">Check back later for updates from the administration</p></div>';
+        return;
+      }
+
+      feed.innerHTML = filtered.map(function(a, i) { return renderCard(a, i); }).join('');
+    }
+
+    function renderCard(a, idx) {
+      var flairClass = getFlairClass(a.tag);
+      var roleBadge = getRoleBadgeClass(a.author_role);
+      var roleLabel = getRoleLabel(a.author_role);
+      var liked = a.liked && a.liked > 0;
+      var verifiedIcon = (a.author_role === 'faculty' || a.author_role === 'admin')
+        ? '<svg class="w-3.5 h-3.5 text-blue-500 inline ml-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>'
+        : '';
+
+      var imageHtml = '';
+      if (a.image_url) {
+        imageHtml = '<div class="mt-3 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">' +
+          '<img src="' + API_BASE.replace('/api', '') + '/uploads/announcements/' + escapeHtml(a.image_url) + '" alt="Announcement image" class="w-full max-h-72 object-cover" loading="lazy">' +
+          '</div>';
+      }
+
+      var linkHtml = '';
+      if (a.link_url) {
+        linkHtml = '<div class="mt-3 flex items-center space-x-2 text-sm">' +
+          '<svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>' +
+          '<a href="' + escapeHtml(a.link_url) + '" target="_blank" rel="noopener noreferrer" class="text-green-600 dark:text-green-400 hover:underline truncate" onclick="event.stopPropagation()">' + escapeHtml(a.link_url) + '</a></div>';
+      }
+
+      return '<div class="slide-up bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden" style="animation-delay:' + (idx * 50) + 'ms" onclick="openDetail(' + a.id + ')">' +
+        '<div class="p-5">' +
+          // Flair Tag
+          '<div class="flex items-center justify-between mb-3">' +
+            '<span class="px-3 py-1 text-xs font-semibold rounded-full ' + flairClass + '">' + escapeHtml(a.tag) + '</span>' +
+            '<span class="text-xs text-gray-400 dark:text-gray-500">' + timeAgo(a.created_at) + '</span>' +
+          '</div>' +
+          // Author Info
+          '<div class="flex items-center space-x-2 mb-3">' +
+            '<div class="w-7 h-7 rounded-full bg-brand-900 dark:bg-white flex items-center justify-center flex-shrink-0">' +
+              '<span class="text-white dark:text-black font-semibold text-xs">' + (a.author_name || 'U').charAt(0) + '</span>' +
+            '</div>' +
+            '<span class="text-sm font-medium text-gray-800 dark:text-gray-200">' + escapeHtml(a.author_name) + verifiedIcon + '</span>' +
+            '<span class="px-2 py-0.5 rounded-full text-[10px] font-medium ' + roleBadge + '">' + roleLabel + '</span>' +
+          '</div>' +
+          // Title
+          '<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 leading-snug">' + escapeHtml(a.title) + '</h3>' +
+          // Content preview
+          '<p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-3">' + escapeHtml(a.content) + '</p>' +
+          // Image
+          imageHtml +
+          // Link
+          linkHtml +
+        '</div>' +
+        // Interaction Bar
+        '<div class="px-5 py-3 border-t border-gray-100 dark:border-gray-800 flex items-center space-x-6" onclick="event.stopPropagation()">' +
+          // Like
+          '<button onclick="toggleLike(' + a.id + ', this)" class="flex items-center space-x-1.5 text-sm transition-colors ' + (liked ? 'text-red-500' : 'text-gray-500 dark:text-gray-400 hover:text-red-500') + '">' +
+            (liked
+              ? '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'
+              : '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>') +
+            '<span class="like-count-' + a.id + '">' + (a.like_count || 0) + '</span>' +
+          '</button>' +
+          // Comment count
+          '<button onclick="openDetail(' + a.id + ')" class="flex items-center space-x-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-blue-500 transition-colors">' +
+            '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>' +
+            '<span>' + (a.comment_count || 0) + '</span>' +
+          '</button>' +
+          // Share
+          '<button onclick="sharePost(' + a.id + ')" class="flex items-center space-x-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors">' +
+            '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>' +
+            '<span>Share</span>' +
+          '</button>' +
+        '</div>' +
+      '</div>';
+    }
+
+    // ─── Filter ────────────────────────────────────────────────────────────────
+    function filterByTag(tag) {
+      activeFilter = tag;
+      // Update active filter button styles
+      document.querySelectorAll('.filter-tag').forEach(function(btn) {
+        if (btn.getAttribute('data-tag') === tag) {
+          btn.classList.add('ring-2', 'ring-offset-1', 'ring-green-500');
+        } else {
+          btn.classList.remove('ring-2', 'ring-offset-1', 'ring-green-500');
+        }
+      });
+      renderAnnouncements();
+    }
+
+    // ─── Like Toggle ───────────────────────────────────────────────────────────
+    function toggleLike(postId, btnEl) {
+      var token = getToken();
+      if (!token) { showToast('Please log in to like posts.', 'error'); return; }
+
+      fetch(API_BASE + '/posts/announcements/' + postId + '/like', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token }
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        // Update the local data
+        for (var i = 0; i < allAnnouncements.length; i++) {
+          if (allAnnouncements[i].id === postId) {
+            allAnnouncements[i].liked = data.liked ? 1 : 0;
+            allAnnouncements[i].like_count = data.like_count;
+            break;
+          }
+        }
+
+        // Update button visual
+        if (data.liked) {
+          btnEl.classList.remove('text-gray-500', 'dark:text-gray-400');
+          btnEl.classList.add('text-red-500');
+          btnEl.querySelector('svg').outerHTML = '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+        } else {
+          btnEl.classList.add('text-gray-500', 'dark:text-gray-400');
+          btnEl.classList.remove('text-red-500');
+          btnEl.querySelector('svg').outerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>';
+        }
+
+        // Update count everywhere
+        document.querySelectorAll('.like-count-' + postId).forEach(function(el) { el.textContent = data.like_count; });
+      })
+      .catch(function() { showToast('Failed to update like.', 'error'); });
+    }
+
+    // ─── Share ─────────────────────────────────────────────────────────────────
+    function sharePost(postId) {
+      var url = window.location.origin + window.location.pathname + '?highlight=' + postId;
+      navigator.clipboard.writeText(url).then(function() {
+        showToast('Link copied to clipboard!');
+      }).catch(function() {
+        showToast('Failed to copy link.', 'error');
+      });
+    }
+
+    // ─── Detail Modal ──────────────────────────────────────────────────────────
+    function openDetail(postId) {
+      var token = getToken();
+      var headers = {};
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+
+      // Fetch announcement detail + comments in parallel
+      Promise.all([
+        fetch(API_BASE + '/posts/announcements/' + postId, { headers: headers }).then(function(r) { return r.json(); }),
+        fetch(API_BASE + '/posts/announcements/' + postId + '/comments').then(function(r) { return r.json(); })
+      ]).then(function(results) {
+        var a = results[0].announcement;
+        var comments = results[1].comments || [];
+        if (!a) { showToast('Announcement not found.', 'error'); return; }
+        renderDetail(a, comments);
+        document.getElementById('detailModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      }).catch(function() { showToast('Failed to load announcement.', 'error'); });
+    }
+
+    function closeDetail() {
+      document.getElementById('detailModal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    function renderDetail(a, comments) {
+      var flairClass = getFlairClass(a.tag);
+      var roleBadge = getRoleBadgeClass(a.author_role);
+      var roleLabel = getRoleLabel(a.author_role);
+      var liked = a.liked && a.liked > 0;
+      var user = getCurrentUser();
+      var verifiedIcon = (a.author_role === 'faculty' || a.author_role === 'admin')
+        ? '<svg class="w-4 h-4 text-blue-500 inline ml-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>'
+        : '';
+
+      var imageHtml = '';
+      if (a.image_url) {
+        imageHtml = '<div class="mt-4 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">' +
+          '<img src="' + API_BASE.replace('/api', '') + '/uploads/announcements/' + escapeHtml(a.image_url) + '" alt="Announcement image" class="w-full object-contain max-h-96">' +
+          '</div>';
+      }
+
+      var linkHtml = '';
+      if (a.link_url) {
+        linkHtml = '<div class="mt-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center space-x-2">' +
+          '<svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>' +
+          '<a href="' + escapeHtml(a.link_url) + '" target="_blank" rel="noopener noreferrer" class="text-green-600 dark:text-green-400 hover:underline text-sm truncate">' + escapeHtml(a.link_url) + '</a></div>';
+      }
+
+      var commentsHtml = comments.map(function(c) {
+        return '<div class="flex items-start space-x-3 py-3">' +
+          '<div class="w-7 h-7 rounded-full bg-brand-900 dark:bg-white flex items-center justify-center flex-shrink-0">' +
+            '<span class="text-white dark:text-black font-semibold text-xs">' + (c.author_name || 'U').charAt(0) + '</span>' +
+          '</div>' +
+          '<div class="flex-1 min-w-0">' +
+            '<div class="flex items-center space-x-2 mb-0.5">' +
+              '<span class="text-sm font-medium text-gray-800 dark:text-gray-200">' + escapeHtml(c.author_name) + '</span>' +
+              '<span class="px-1.5 py-0.5 rounded-full text-[10px] font-medium ' + getRoleBadgeClass(c.author_role) + '">' + getRoleLabel(c.author_role) + '</span>' +
+              '<span class="text-xs text-gray-400 dark:text-gray-500">' + timeAgo(c.created_at) + '</span>' +
+            '</div>' +
+            '<p class="text-sm text-gray-700 dark:text-gray-300">' + escapeHtml(c.content) + '</p>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+
+      var html = '' +
+        // Header
+        '<div class="p-6">' +
+          // Close button
+          '<div class="flex items-center justify-between mb-4">' +
+            '<span class="px-3 py-1 text-xs font-semibold rounded-full ' + flairClass + '">' + escapeHtml(a.tag) + '</span>' +
+            '<button onclick="closeDetail()" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">' +
+              '<svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>' +
+            '</button>' +
+          '</div>' +
+          // Author row
+          '<div class="flex items-center space-x-3 mb-4">' +
+            '<div class="w-9 h-9 rounded-full bg-brand-900 dark:bg-white flex items-center justify-center">' +
+              '<span class="text-white dark:text-black font-semibold text-sm">' + (a.author_name || 'U').charAt(0) + '</span>' +
+            '</div>' +
+            '<div>' +
+              '<div class="flex items-center space-x-2">' +
+                '<span class="text-sm font-semibold text-gray-900 dark:text-white">' + escapeHtml(a.author_name) + verifiedIcon + '</span>' +
+                '<span class="px-2 py-0.5 rounded-full text-[10px] font-medium ' + roleBadge + '">' + roleLabel + '</span>' +
+              '</div>' +
+              '<span class="text-xs text-gray-400 dark:text-gray-500">' + timeAgo(a.created_at) + '</span>' +
+            '</div>' +
+          '</div>' +
+          // Title
+          '<h2 class="text-xl font-bold text-gray-900 dark:text-white mb-3">' + escapeHtml(a.title) + '</h2>' +
+          // Full content
+          '<div class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">' + escapeHtml(a.content) + '</div>' +
+          imageHtml +
+          linkHtml +
+          // Interaction bar
+          '<div class="mt-5 pt-4 border-t border-gray-200 dark:border-gray-800 flex items-center space-x-6">' +
+            '<button onclick="toggleLikeDetail(' + a.id + ', this)" class="flex items-center space-x-1.5 text-sm transition-colors ' + (liked ? 'text-red-500' : 'text-gray-500 dark:text-gray-400 hover:text-red-500') + '">' +
+              (liked
+                ? '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'
+                : '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>') +
+              '<span class="like-count-' + a.id + '">' + (a.like_count || 0) + '</span>' +
+            '</button>' +
+            '<div class="flex items-center space-x-1.5 text-sm text-gray-500 dark:text-gray-400">' +
+              '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>' +
+              '<span id="detailCommentCount">' + comments.length + '</span>' +
+            '</div>' +
+            '<button onclick="sharePost(' + a.id + ')" class="flex items-center space-x-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors">' +
+              '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>' +
+              '<span>Share</span>' +
+            '</button>' +
+          '</div>' +
+        '</div>' +
+        // Comment Section
+        '<div class="border-t border-gray-200 dark:border-gray-800 p-6">' +
+          '<h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">Comments</h4>' +
+          // Comment input
+          (user ? '<div class="flex items-start space-x-3 mb-4">' +
+            '<div class="w-7 h-7 rounded-full bg-brand-900 dark:bg-white flex items-center justify-center flex-shrink-0">' +
+              '<span class="text-white dark:text-black font-semibold text-xs">' + (user.full_name || 'U').charAt(0) + '</span>' +
+            '</div>' +
+            '<div class="flex-1">' +
+              '<textarea id="commentInput" rows="2" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-green-500 placeholder-gray-400 resize-none" placeholder="Write a comment..."></textarea>' +
+              '<div class="flex justify-end mt-2">' +
+                '<button onclick="submitComment(' + a.id + ')" class="px-4 py-1.5 text-xs font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors">Comment</button>' +
+              '</div>' +
+            '</div>' +
+          '</div>' : '') +
+          // Comments list
+          '<div id="commentsList" class="divide-y divide-gray-100 dark:divide-gray-800">' +
+            (comments.length > 0 ? commentsHtml : '<p class="text-sm text-gray-400 dark:text-gray-500 text-center py-4">No comments yet. Be the first to comment!</p>') +
+          '</div>' +
+        '</div>';
+
+      document.getElementById('detailContent').innerHTML = html;
+    }
+
+    function toggleLikeDetail(postId, btnEl) {
+      toggleLike(postId, btnEl);
+    }
+
+    // ─── Submit Comment ────────────────────────────────────────────────────────
+    function submitComment(postId) {
+      var input = document.getElementById('commentInput');
+      var content = input.value.trim();
+      if (!content) { showToast('Please write a comment.', 'error'); return; }
+
+      var token = getToken();
+      if (!token) { showToast('Please log in to comment.', 'error'); return; }
+
+      fetch(API_BASE + '/posts/announcements/' + postId + '/comments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ content: content })
+      })
+      .then(function(res) { return res.json().then(function(d) { return { ok: res.ok, data: d }; }); })
+      .then(function(result) {
+        if (!result.ok) { showToast(result.data.message || 'Failed to comment.', 'error'); return; }
+        input.value = '';
+        showToast('Comment added!');
+        // Re-open detail to refresh comments
+        openDetail(postId);
+        // Also update comment count in feed
+        for (var i = 0; i < allAnnouncements.length; i++) {
+          if (allAnnouncements[i].id === postId) {
+            allAnnouncements[i].comment_count = (allAnnouncements[i].comment_count || 0) + 1;
+            break;
+          }
+        }
+        renderAnnouncements();
+      })
+      .catch(function() { showToast('Failed to add comment.', 'error'); });
+    }
+
+    // ─── Composer Modal ────────────────────────────────────────────────────────
+    function openComposer() {
+      resetComposer();
+      document.getElementById('composerModal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeComposer() {
+      document.getElementById('composerModal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    function resetComposer() {
+      document.getElementById('composerTitle').value = '';
+      document.getElementById('composerContent').value = '';
+      document.getElementById('composerContentImage').value = '';
+      document.getElementById('composerContentLink').value = '';
+      document.getElementById('composerLinkUrl').value = '';
+      document.getElementById('composerTag').value = '';
+      document.getElementById('composerImage').value = '';
+      selectedFile = null;
+      document.getElementById('imagePreview').classList.add('hidden');
+      // Reset flair
+      document.querySelectorAll('.flair-btn').forEach(function(b) {
+        b.classList.remove('ring-2', 'ring-offset-1');
+        b.classList.add('opacity-60');
+      });
+      switchTab('post');
+    }
+
+    // ─── Tabs ──────────────────────────────────────────────────────────────────
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('tab-active'); });
+      document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.add('hidden'); });
+
+      if (tab === 'post') {
+        document.getElementById('tabPost').classList.add('tab-active');
+        document.getElementById('tabContentPost').classList.remove('hidden');
+      } else if (tab === 'image') {
+        document.getElementById('tabImage').classList.add('tab-active');
+        document.getElementById('tabContentImage').classList.remove('hidden');
+      } else if (tab === 'link') {
+        document.getElementById('tabLink').classList.add('tab-active');
+        document.getElementById('tabContentLink').classList.remove('hidden');
+      }
+    }
+
+    // ─── Flair Selector ────────────────────────────────────────────────────────
+    function selectFlair(flair) {
+      document.getElementById('composerTag').value = flair;
+      document.querySelectorAll('.flair-btn').forEach(function(b) {
+        if (b.getAttribute('data-flair') === flair) {
+          b.classList.add('ring-2', 'ring-offset-1');
+          b.classList.remove('opacity-60');
+        } else {
+          b.classList.remove('ring-2', 'ring-offset-1');
+          b.classList.add('opacity-60');
+        }
+      });
+    }
+
+    // ─── Image Handling ────────────────────────────────────────────────────────
+    function handleImageFile(file) {
+      var allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowed.includes(file.type)) { showToast('Only JPEG, PNG, GIF, WebP images allowed.', 'error'); return; }
+      if (file.size > 5 * 1024 * 1024) { showToast('Image must be under 5MB.', 'error'); return; }
+
+      selectedFile = file;
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('imagePreviewImg').src = e.target.result;
+        document.getElementById('imagePreview').classList.remove('hidden');
+        document.getElementById('imageDropZone').classList.add('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeImage() {
+      selectedFile = null;
+      document.getElementById('composerImage').value = '';
+      document.getElementById('imagePreview').classList.add('hidden');
+      document.getElementById('imageDropZone').classList.remove('hidden');
+    }
+
+    // ─── Submit Announcement ───────────────────────────────────────────────────
+    function submitAnnouncement() {
+      var title = document.getElementById('composerTitle').value.trim();
+      var tag = document.getElementById('composerTag').value;
+
+      if (!tag) { showToast('Please select a post flair.', 'error'); return; }
+      if (!title) { showToast('Please enter a title.', 'error'); return; }
+
+      // Determine content based on active tab
+      var content = '';
+      var linkUrl = '';
+      if (currentTab === 'post') {
+        content = document.getElementById('composerContent').value.trim();
+      } else if (currentTab === 'image') {
+        content = document.getElementById('composerContentImage').value.trim();
+      } else if (currentTab === 'link') {
+        content = document.getElementById('composerContentLink').value.trim();
+        linkUrl = document.getElementById('composerLinkUrl').value.trim();
+      }
+
+      if (!content) { showToast('Please enter content for your announcement.', 'error'); return; }
+
+      var token = getToken();
+      if (!token) { showToast('Please log in.', 'error'); return; }
+
+      // Build FormData
+      var formData = new FormData();
+      formData.append('title', title);
+      formData.append('content', content);
+      formData.append('tag', tag);
+      if (linkUrl) formData.append('link_url', linkUrl);
+      if (selectedFile) formData.append('image', selectedFile);
+
+      // Disable submit button
+      var submitBtn = document.getElementById('composerSubmitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Posting...';
+
+      fetch(API_BASE + '/posts/announcements', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token },
+        body: formData
+      })
+      .then(function(res) { return res.json().then(function(d) { return { ok: res.ok, data: d }; }); })
+      .then(function(result) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Post';
+        if (!result.ok) {
+          showToast(result.data.message || 'Failed to create announcement.', 'error');
+          return;
+        }
+        showToast('Announcement posted!');
+        closeComposer();
+        loadAnnouncements();
+      })
+      .catch(function() {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Post';
+        showToast('Unable to connect to server.', 'error');
+      });
+    }
+
+    // ─── Navigation ────────────────────────────────────────────────────────────
+    function goBack() {
+      window.location.href = 'hub.html';
+    }
+
+    function logout() {
+      localStorage.removeItem('gardnerHub_user');
+      localStorage.removeItem('gardnerHub_token');
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('userName');
+      window.location.href = '../../index.html';
+    }
+  </script>
+
+</body>
+</html>
