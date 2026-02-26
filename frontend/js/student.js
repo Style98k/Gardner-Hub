@@ -116,19 +116,33 @@ function getActionButton(inquiry) {
 }
 
 // ── Render Table ────────────────────────────────────────────
-function renderInquiriesTable(inquiries) {
+function renderInquiriesTable(inquiries, showStudentCol = false) {
   const tbody = document.getElementById('inquiriesTableBody');
   if (!tbody) return;
 
+  // Show/hide the student column header
+  const thStudent = document.getElementById('thStudent');
+  if (thStudent) {
+    thStudent.classList.toggle('hidden', !showStudentCol);
+  }
+
+  const colSpan = showStudentCol ? 6 : 5;
+
   if (!inquiries || inquiries.length === 0) {
+    const emptyMsg = showStudentCol
+      ? 'No student grade requests found.'
+      : 'No grade requests submitted yet.';
+    const emptyHint = showStudentCol
+      ? 'Student requests will appear here once they are submitted.'
+      : 'Use the button above to submit your first request.';
     tbody.innerHTML = `
       <tr>
-        <td colspan="5" class="px-6 py-12 text-center">
+        <td colspan="${colSpan}" class="px-6 py-12 text-center">
           <svg class="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/>
           </svg>
-          <p class="text-sm text-gray-500 dark:text-gray-400">No grade requests submitted yet.</p>
-          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Use the button above to submit your first request.</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">${emptyMsg}</p>
+          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">${emptyHint}</p>
         </td>
       </tr>`;
     return;
@@ -138,11 +152,18 @@ function renderInquiriesTable(inquiries) {
     const date = new Date(inq.created_at).toLocaleDateString('en-US', {
       year: 'numeric', month: 'short', day: 'numeric',
     });
+    const studentCell = showStudentCol
+      ? `<td class="px-6 py-4 whitespace-nowrap">
+          <div class="text-sm font-medium text-gray-900 dark:text-white">${inq.full_name || '—'}</div>
+          <div class="text-xs text-gray-500 dark:text-gray-400">${inq.school_id || ''}</div>
+        </td>`
+      : '';
     return `
       <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
         <td class="px-6 py-4 whitespace-nowrap">
           <div class="text-sm font-medium text-gray-900 dark:text-white">GR-${String(inq.id).padStart(4, '0')}</div>
         </td>
+        ${studentCell}
         <td class="px-6 py-4 whitespace-nowrap">
           <div class="text-sm text-gray-900 dark:text-white">${date}</div>
         </td>
@@ -175,8 +196,14 @@ function updateStats(inquiries) {
 
 // ── Load Inquiries from API ─────────────────────────────────
 async function loadInquiries() {
+  const user = getUser();
+  const isStudent = user?.role === 'student';
+  const endpoint = isStudent
+    ? `${API_BASE}/inquiries/my`
+    : `${API_BASE}/inquiries/all`;
+
   try {
-    const res = await fetch(`${API_BASE}/inquiries/my`, {
+    const res = await fetch(endpoint, {
       headers: authHeaders(),
     });
 
@@ -192,7 +219,7 @@ async function loadInquiries() {
       return;
     }
 
-    renderInquiriesTable(data.inquiries);
+    renderInquiriesTable(data.inquiries, !isStudent);
     updateStats(data.inquiries);
   } catch (err) {
     console.error('Load inquiries error:', err);
@@ -200,8 +227,28 @@ async function loadInquiries() {
   }
 }
 
+// ── Role-Based UI Init ──────────────────────────────────────
+function initRoleBasedUI() {
+  const user = getUser();
+  const isStudent = user?.role === 'student';
+
+  if (isStudent) return; // Nothing to change for students
+
+  const btnRequestGrade = document.getElementById('btnRequestGrade');
+  const pageTitle = document.getElementById('pageTitle');
+  const pageDescription = document.getElementById('pageDescription');
+
+  if (btnRequestGrade) btnRequestGrade.style.display = 'none';
+  if (pageTitle) pageTitle.textContent = 'Student Grade Requests';
+  if (pageDescription) pageDescription.textContent = 'Review and manage student academic record requests.';
+}
+
 // ── Modal Helpers ───────────────────────────────────────────
 function openInquiryModal() {
+  // Guard: only students can open the New Request modal
+  const user = getUser();
+  if (user?.role !== 'student') return;
+
   document.getElementById('inquiryModal').classList.remove('hidden');
   document.getElementById('inquiryModal').classList.add('flex');
 }
@@ -350,6 +397,10 @@ async function handleInquirySubmit(e) {
 document.addEventListener('DOMContentLoaded', () => {
   // Auth check & profile
   loadProfile();
+
+  // Apply role-based UI adjustments before loading data
+  initRoleBasedUI();
+
   loadInquiries();
 
   // Populate student ID in modal

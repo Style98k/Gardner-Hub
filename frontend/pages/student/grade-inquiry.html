@@ -105,11 +105,11 @@
     <!-- Page Header -->
     <div class="flex items-center justify-between mb-8">
       <div>
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">My Grade Requests</h2>
-        <p class="text-gray-600 dark:text-gray-400">Request your Cumulative Grade Report — from 1st semester to the current date</p>
+        <h2 id="pageTitle" class="text-3xl font-bold text-gray-900 dark:text-white mb-2">My Grade Requests</h2>
+        <p id="pageDescription" class="text-gray-600 dark:text-gray-400">Request your Cumulative Grade Report — from 1st semester to the current date</p>
       </div>
       
-      <button onclick="openInquiryModal()" class="flex items-center space-x-2 bg-brand-900 dark:bg-white text-white dark:text-black px-6 py-3 rounded-lg font-semibold hover:bg-brand-800 dark:hover:bg-gray-100 transition-colors duration-200 shadow-lg">
+      <button id="btnRequestGrade" onclick="openInquiryModal()" class="flex items-center space-x-2 bg-brand-900 dark:bg-white text-white dark:text-black px-6 py-3 rounded-lg font-semibold hover:bg-brand-800 dark:hover:bg-gray-100 transition-colors duration-200 shadow-lg">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
         </svg>
@@ -187,6 +187,7 @@
           <thead class="bg-gray-50 dark:bg-gray-800">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Request ID</th>
+              <th id="thStudent" class="hidden px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Student</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date Submitted</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
