@@ -13,6 +13,7 @@ const inquiryRoutes = require("./routes/inquiryRoutes");
 const forumRoutes = require("./routes/forumRoutes");
 const postRoutes = require("./routes/postRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const materialRoutes = require("./routes/materialRoutes");
 
 const app = express();
 
@@ -30,12 +31,16 @@ app.use("/uploads/profile_photos", express.static(path.join(__dirname, "uploads"
 // Serve announcement images
 app.use("/uploads/announcements", express.static(path.join(__dirname, "uploads", "announcements")));
 
+// Serve learning material files (PDFs & thumbnails)
+app.use("/uploads/materials", express.static(path.join(__dirname, "uploads", "materials")));
+
 // ─── Routes ──────────────────────────────────────────────────────────────────
 app.use("/api/auth", authRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/inquiries", inquiryRoutes);
 app.use("/api/forum", forumRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api/materials", materialRoutes);
 app.use("/api/admin", adminRoutes);
 
 // Health check

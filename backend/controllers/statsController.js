@@ -124,8 +124,8 @@ exports.getCategoryStats = async (req, res) => {
         latestActivity: latestAcademic.length > 0 ? { title: latestAcademic[0].title, created_at: latestAcademic[0].created_at } : null,
       },
       materials: {
-        topics: Number(materialsTopics[0].count),
-        posts: Number(materialsPosts[0].count),
+        materials: Number(materialsTopics[0].count),
+        comments: Number(materialsPosts[0].count),
         latestActivity: latestMaterials.length > 0 ? { title: latestMaterials[0].title, created_at: latestMaterials[0].created_at } : null,
       },
       gradeInquiries: {

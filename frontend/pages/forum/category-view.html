@@ -128,11 +128,20 @@
             </select>
           </div>
           
+          <!-- Regular New Post button (for non-materials categories) -->
           <button id="newPostBtn" class="hidden items-center space-x-2 bg-brand-900 dark:bg-white text-white dark:text-black px-4 py-2 rounded-lg font-medium hover:bg-brand-800 dark:hover:bg-gray-100 transition-colors duration-200" onclick="openNewPostModal()">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
             </svg>
             <span>New Post</span>
+          </button>
+
+          <!-- New Material button (materials category only, faculty/admin) -->
+          <button id="newMaterialBtn" class="hidden items-center space-x-2 bg-emerald-600 dark:bg-emerald-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-colors duration-200" onclick="openMaterialModal()">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+            <span>+ New Material</span>
           </button>
         </div>
 
@@ -145,7 +154,7 @@
     </div>
   </div>
 
-  <!-- New Post Modal -->
+  <!-- New Post Modal (for non-materials categories) -->
   <div id="newPostModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
     <div class="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg border border-gray-200 dark:border-gray-800 shadow-xl">
       <div class="p-6">
@@ -167,6 +176,232 @@
           <button onclick="closeNewPostModal()" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700">Cancel</button>
           <button onclick="submitNewPost()" class="px-4 py-2 text-sm font-medium text-white bg-brand-900 dark:bg-white dark:text-black rounded-lg hover:bg-brand-800 dark:hover:bg-gray-100">Post Topic</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Material Modal (materials category only, faculty/admin) -->
+  <div id="newMaterialModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg border border-gray-200 dark:border-gray-800 shadow-xl max-h-[90vh] overflow-y-auto">
+      <div class="p-6">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-5">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/>
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white">Post New Learning Material</h3>
+          </div>
+          <button onclick="closeMaterialModal()" class="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <form id="materialForm" onsubmit="submitMaterial(event)">
+          <!-- Title -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title <span class="text-red-500">*</span></label>
+            <input type="text" id="materialTitle" required class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. Chapter 3 — Data Structures Handout">
+          </div>
+
+          <!-- Material Type -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Material Type <span class="text-red-500">*</span></label>
+            <select id="materialType" required class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+              <option value="">Select type...</option>
+              <option value="Handout">📄 Handout</option>
+              <option value="Syllabus">📋 Syllabus</option>
+              <option value="Reference">📚 Reference</option>
+            </select>
+          </div>
+
+          <!-- Description -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description / Instructions <span class="text-red-500">*</span></label>
+            <textarea id="materialContent" rows="4" required class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 resize-y" placeholder="Write a summary, instructions, or notes about this material..."></textarea>
+          </div>
+
+          <!-- File Inputs Row -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <!-- File Upload -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">File <span class="text-red-500">*</span></label>
+              <div class="relative">
+                <input type="file" id="materialFile" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf" required class="hidden" onchange="updateFileLabel('materialFile', 'fileLabel')">
+                <button type="button" onclick="document.getElementById('materialFile').click()" class="w-full flex items-center justify-center space-x-2 px-3 py-3 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-emerald-400 dark:hover:border-emerald-500 bg-gray-50 dark:bg-gray-800/50 transition-colors duration-200">
+                  <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+                  </svg>
+                  <span id="fileLabel" class="text-xs text-gray-500 dark:text-gray-400 truncate">Choose file (PDF, Word, etc.)</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Thumbnail / Preview Image -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Thumbnail <span class="text-gray-400">(optional)</span></label>
+              <div class="relative">
+                <input type="file" id="materialThumbnail" accept="image/jpeg,image/png,image/gif,image/webp" class="hidden" onchange="updateFileLabel('materialThumbnail', 'thumbLabel')">
+                <button type="button" onclick="document.getElementById('materialThumbnail').click()" class="w-full flex items-center justify-center space-x-2 px-3 py-3 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 bg-gray-50 dark:bg-gray-800/50 transition-colors duration-200">
+                  <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/>
+                  </svg>
+                  <span id="thumbLabel" class="text-xs text-gray-500 dark:text-gray-400 truncate">Choose image</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Downloadable Toggle -->
+          <div class="mb-5 flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
+            <div>
+              <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Allow Download</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Students will only see a summary if disabled</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="materialDownloadable" checked class="sr-only peer">
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-300 dark:peer-focus:ring-emerald-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:after:border-gray-600 peer-checked:bg-emerald-500"></div>
+            </label>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex justify-end space-x-3">
+            <button type="button" onclick="closeMaterialModal()" class="px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">Cancel</button>
+            <button type="submit" id="materialSubmitBtn" class="px-5 py-2.5 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors duration-200 flex items-center space-x-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+              <span>Upload Material</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Document Previewer Modal -->
+  <div id="materialPreviewModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div id="previewModalInner" class="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-6xl border border-gray-200 dark:border-gray-800 shadow-2xl flex flex-col overflow-hidden transition-all duration-300" style="height: 85vh;">
+
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
+        <div class="flex items-center space-x-3 min-w-0">
+          <div id="previewTypeIcon" class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-emerald-100 dark:bg-emerald-900/30">
+            <span class="text-xl">📄</span>
+          </div>
+          <div class="min-w-0">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white truncate" id="previewTitle">Material Title</h3>
+            <div class="flex items-center space-x-2 mt-0.5">
+              <span id="previewTypeBadge" class="inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">Handout</span>
+              <span class="text-xs text-gray-400 dark:text-gray-500">&bull;</span>
+              <span id="previewAuthor" class="text-xs text-gray-500 dark:text-gray-400"></span>
+              <span class="text-xs text-gray-400 dark:text-gray-500">&bull;</span>
+              <span id="previewDate" class="text-xs text-gray-500 dark:text-gray-400"></span>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2 flex-shrink-0 ml-4">
+          <!-- Download button (role-based, hidden for students when download disabled) -->
+          <a id="previewDownloadBtn" href="#" class="hidden inline-flex items-center space-x-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-700 transition-colors duration-200" target="_blank">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+            <span>Download</span>
+          </a>
+          <!-- Fullscreen toggle button -->
+          <button id="previewFullscreenBtn" onclick="togglePreviewFullscreen()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200" title="Toggle fullscreen">
+            <svg id="fullscreenExpandIcon" class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"/></svg>
+            <svg id="fullscreenCollapseIcon" class="w-5 h-5 text-gray-500 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25"/></svg>
+          </button>
+          <!-- Close button -->
+          <button onclick="closePreviewModal()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Body: Split Pane -->
+      <div class="flex flex-1 overflow-hidden min-h-0">
+
+        <!-- Left Side: File Preview (fills 100% height) -->
+        <div class="flex-1 bg-gray-100 dark:bg-gray-950 relative flex flex-col">
+          <!-- Loading spinner -->
+          <div id="previewLoading" class="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-950 z-10">
+            <div class="text-center">
+              <svg class="w-10 h-10 text-emerald-500 animate-spin mx-auto mb-3" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Loading preview...</p>
+            </div>
+          </div>
+          <!-- PDF / Google Docs Viewer iframe (flex-1 fills all available height) -->
+          <iframe id="previewIframe" class="hidden w-full border-0 flex-1" src="about:blank" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
+          <!-- Image preview -->
+          <img id="previewImage" class="hidden max-w-full max-h-full object-contain m-auto p-4" src="" alt="Preview">
+          <!-- Unsupported file type placeholder -->
+          <div id="previewUnsupported" class="hidden text-center p-8 m-auto">
+            <div class="w-20 h-20 rounded-2xl bg-gray-200 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
+              <svg class="w-10 h-10 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+              </svg>
+            </div>
+            <p class="text-gray-600 dark:text-gray-400 font-medium mb-1">Preview not available</p>
+            <p id="previewUnsupportedExt" class="text-sm text-gray-400 dark:text-gray-500">This file type cannot be previewed in the browser.</p>
+            <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">Use the Download button to view this file.</p>
+          </div>
+        </div>
+
+        <!-- Right Side: Details Panel -->
+        <div id="previewDetailsPanel" class="w-80 flex-shrink-0 border-l border-gray-200 dark:border-gray-800 overflow-y-auto">
+          <div class="p-6 space-y-5">
+
+            <!-- Instructor Info -->
+            <div>
+              <h4 class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Uploaded By</h4>
+              <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-full bg-brand-900 dark:bg-white flex items-center justify-center flex-shrink-0">
+                  <span id="previewAuthorInitial" class="text-white dark:text-black font-semibold text-sm">U</span>
+                </div>
+                <div>
+                  <p id="previewAuthorName" class="text-sm font-medium text-gray-900 dark:text-white"></p>
+                  <p id="previewAuthorRole" class="text-xs text-gray-500 dark:text-gray-400"></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Material Details -->
+            <div>
+              <h4 class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Details</h4>
+              <div class="space-y-2">
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-500 dark:text-gray-400">Type</span>
+                  <span id="previewDetailType" class="font-medium text-gray-900 dark:text-white">Handout</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-500 dark:text-gray-400">Posted</span>
+                  <span id="previewDetailDate" class="font-medium text-gray-900 dark:text-white"></span>
+                </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-500 dark:text-gray-400">Download</span>
+                  <span id="previewDetailDownload" class="font-medium text-gray-900 dark:text-white">Enabled</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Thumbnail -->
+            <div id="previewThumbnailWrap" class="hidden">
+              <h4 class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Cover Image</h4>
+              <img id="previewThumbnail" src="" alt="Thumbnail" class="w-full rounded-lg border border-gray-200 dark:border-gray-700 object-cover max-h-40">
+            </div>
+
+            <!-- Description -->
+            <div>
+              <h4 class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Description / Instructions</h4>
+              <div id="previewContent" class="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap leading-relaxed"></div>
+            </div>
+
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -203,6 +438,13 @@
 
     var currentCategory = '';
 
+    // ─── Material type colors & icons ──────────────────────────────────────────
+    var materialTypeConfig = {
+      'Handout':    { color: 'emerald', icon: '📄', bg: 'bg-emerald-100 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-300' },
+      'Syllabus':   { color: 'blue',    icon: '📋', bg: 'bg-blue-100 dark:bg-blue-900/30',    text: 'text-blue-700 dark:text-blue-300' },
+      'Reference':  { color: 'indigo',  icon: '📚', bg: 'bg-indigo-100 dark:bg-indigo-900/30',  text: 'text-indigo-700 dark:text-indigo-300' }
+    };
+
     // Profile dropdown toggle
     document.addEventListener('DOMContentLoaded', function() {
       var user = getCurrentUser();
@@ -219,7 +461,7 @@
       var profileLink = document.getElementById('viewProfileLink');
       if (profileLink) profileLink.href = getProfileUrl(user.role);
 
-      // Hide separate View Profile link for admin — Command Center has everything
+      // Hide separate View Profile link for admin
       if (user.role === 'admin' && profileLink) profileLink.style.display = 'none';
 
       const profileMenuBtn = document.getElementById('profileMenuBtn');
@@ -278,6 +520,13 @@
       return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     }
 
+    function escapeHtml(text) {
+      var div = document.createElement('div');
+      div.appendChild(document.createTextNode(text));
+      return div.innerHTML;
+    }
+
+    // ─── Render a regular forum thread card ────────────────────────────────────
     function renderThread(thread) {
       var roleBadgeClass = getRoleBadgeClass(thread.author_role);
       var roleLabel = getRoleLabel(thread.author_role);
@@ -310,12 +559,83 @@
       '</div>';
     }
 
-    function escapeHtml(text) {
-      var div = document.createElement('div');
-      div.appendChild(document.createTextNode(text));
-      return div.innerHTML;
+    // ─── Render a material card (Google Classroom style) ───────────────────────
+    function renderMaterialCard(material, userRole) {
+      var typeConf = materialTypeConfig[material.material_type] || materialTypeConfig['Handout'];
+      var verifiedIcon = material.author_role === 'faculty' ? '<svg class="w-3.5 h-3.5 text-blue-500 inline ml-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>' : '';
+
+      // Thumbnail section
+      var thumbnailHtml = '';
+      if (material.thumbnail_path) {
+        thumbnailHtml = '<div class="hidden sm:block w-20 h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 flex-shrink-0 ml-4">' +
+          '<img src="' + API_BASE.replace('/api', '') + '/uploads/materials/' + material.thumbnail_path + '" alt="Preview" class="w-full h-full object-cover">' +
+        '</div>';
+      }
+
+      // Action button — role-based
+      var actionBtnHtml = '';
+
+      // View / Preview button — available to ALL roles
+      var viewBtn = '<button onclick="event.stopPropagation(); openPreviewModal(' + material.id + ')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">' +
+        '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>' +
+        '<span>View</span>' +
+      '</button>';
+
+      if (userRole === 'student') {
+        // Students: View button + Download only if is_downloadable
+        actionBtnHtml = '<div class="flex items-center space-x-2">' + viewBtn;
+        if (material.is_downloadable && material.stream_url) {
+          actionBtnHtml += '<a href="' + API_BASE.replace('/api', '') + material.stream_url + '?download=true" onclick="event.stopPropagation()" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-800/50 transition-colors duration-200">' +
+            '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>' +
+            '<span>Download</span>' +
+          '</a>';
+        }
+        actionBtnHtml += '</div>';
+      } else {
+        // Faculty/Admin: View + Download + Delete
+        var streamBase = material.stream_url ? (API_BASE.replace('/api', '') + material.stream_url) : '#';
+        actionBtnHtml = '<div class="flex items-center space-x-2">' + viewBtn +
+          '<a href="' + streamBase + '?download=true" onclick="event.stopPropagation()" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-800/50 transition-colors duration-200">' +
+            '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>' +
+            '<span>Download</span>' +
+          '</a>' +
+          '<button onclick="event.stopPropagation(); deleteMaterial(' + material.id + ')" class="inline-flex items-center p-1.5 rounded-lg text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200" title="Delete material">' +
+            '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>' +
+          '</button>' +
+        '</div>';
+      }
+
+      return '<div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 hover:shadow-lg hover:border-gray-300 dark:hover:border-gray-700 transition-all duration-200 cursor-pointer" onclick="openPreviewModal(' + material.id + ')">' +
+        '<div class="p-5 flex items-start">' +
+          '<!-- File Icon -->' +
+          '<div class="w-12 h-12 rounded-xl ' + typeConf.bg + ' flex items-center justify-center flex-shrink-0">' +
+            '<span class="text-xl">' + typeConf.icon + '</span>' +
+          '</div>' +
+          '<!-- Content -->' +
+          '<div class="ml-4 flex-1 min-w-0">' +
+            '<div class="flex items-center flex-wrap gap-2 mb-1">' +
+              '<h3 class="text-base font-semibold text-gray-900 dark:text-white truncate">' + escapeHtml(material.title) + '</h3>' +
+              '<span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold ' + typeConf.bg + ' ' + typeConf.text + '">' + escapeHtml(material.material_type) + '</span>' +
+            '</div>' +
+            '<p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-2">' + escapeHtml(material.content.substring(0, 150)) + '</p>' +
+            '<div class="flex items-center justify-between">' +
+              '<div class="flex items-center space-x-2 text-xs text-gray-400 dark:text-gray-500">' +
+                '<div class="w-5 h-5 rounded-full bg-brand-900 dark:bg-white flex items-center justify-center">' +
+                  '<span class="text-white dark:text-black font-semibold" style="font-size:9px">' + (material.author_name || 'U').charAt(0) + '</span>' +
+                '</div>' +
+                '<span>' + escapeHtml(material.author_name) + verifiedIcon + '</span>' +
+                '<span>&bull;</span>' +
+                '<span>' + formatDate(material.created_at) + '</span>' +
+              '</div>' +
+              actionBtnHtml +
+            '</div>' +
+          '</div>' +
+          thumbnailHtml +
+        '</div>' +
+      '</div>';
     }
 
+    // ─── Load Category ─────────────────────────────────────────────────────────
     function loadCategory(user) {
       currentCategory = getUrlParameter('category') || 'academic';
 
@@ -332,15 +652,33 @@
       document.getElementById('mainCategoryTitle').textContent = categoryInfo.title;
       document.getElementById('categoryDescription').textContent = categoryInfo.description;
 
-      // Show/hide New Post button based on role permissions
-      var allowed = categoryPermissions[currentCategory] || [];
       var newPostBtn = document.getElementById('newPostBtn');
-      if (newPostBtn && allowed.includes(user.role)) {
-        newPostBtn.classList.remove('hidden');
-        newPostBtn.classList.add('flex');
-      }
+      var newMaterialBtn = document.getElementById('newMaterialBtn');
 
-      // Fetch threads from API
+      if (currentCategory === 'materials') {
+        // Materials category: use dedicated materials logic
+        if (newPostBtn) { newPostBtn.classList.add('hidden'); newPostBtn.classList.remove('flex'); }
+        // Show + New Material button only for faculty/admin
+        if (newMaterialBtn && (user.role === 'admin' || user.role === 'faculty')) {
+          newMaterialBtn.classList.remove('hidden');
+          newMaterialBtn.classList.add('flex');
+        }
+        loadMaterials(user);
+      } else {
+        // Non-materials category: use regular forum logic
+        if (newMaterialBtn) { newMaterialBtn.classList.add('hidden'); newMaterialBtn.classList.remove('flex'); }
+        // Show/hide New Post button based on role permissions
+        var allowed = categoryPermissions[currentCategory] || [];
+        if (newPostBtn && allowed.includes(user.role)) {
+          newPostBtn.classList.remove('hidden');
+          newPostBtn.classList.add('flex');
+        }
+        loadForumThreads();
+      }
+    }
+
+    // ─── Load forum threads (non-materials categories) ─────────────────────────
+    function loadForumThreads() {
       fetch(API_BASE + '/forum/threads?category=' + currentCategory)
         .then(function(res) { return res.json(); })
         .then(function(data) {
@@ -357,11 +695,43 @@
         });
     }
 
+    // ─── Load materials (materials category) ───────────────────────────────────
+    var materialsCache = [];
+
+    function loadMaterials(user) {
+      var token = localStorage.getItem('gardnerHub_token');
+      var headers = {};
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+
+      fetch(API_BASE + '/materials', { headers: headers })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          var postsFeed = document.getElementById('postsFeed');
+          var materials = data.materials || [];
+          materialsCache = materials;
+
+          if (materials.length > 0) {
+            postsFeed.innerHTML = materials.map(function(m) { return renderMaterialCard(m, user.role); }).join('');
+          } else {
+            postsFeed.innerHTML = '<div class="text-center py-16">' +
+              '<div class="w-16 h-16 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mx-auto mb-4">' +
+                '<svg class="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>' +
+              '</div>' +
+              '<p class="text-gray-500 dark:text-gray-400 font-medium">No learning materials uploaded yet.</p>' +
+              '<p class="text-sm text-gray-400 dark:text-gray-500 mt-1">Faculty and admins can upload handouts, syllabi, and more.</p>' +
+            '</div>';
+          }
+        })
+        .catch(function() {
+          document.getElementById('postsFeed').innerHTML = '<div class="text-center py-12"><p class="text-gray-500 dark:text-gray-400">Unable to load materials. Server may be offline.</p></div>';
+        });
+    }
+
     function viewThread(threadId) {
       window.location.href = 'thread.html?id=' + threadId;
     }
 
-    // New Post Modal
+    // ─── Regular New Post Modal ────────────────────────────────────────────────
     function openNewPostModal() {
       document.getElementById('postTitle').value = '';
       document.getElementById('postContent').value = '';
@@ -398,6 +768,288 @@
         }
         alert('Topic created successfully!');
         closeNewPostModal();
+        loadCategory(getCurrentUser());
+      })
+      .catch(function() {
+        alert('Unable to connect to server.');
+      });
+    }
+
+    // ─── Material Modal (Faculty/Admin) ────────────────────────────────────────
+    function openMaterialModal() {
+      document.getElementById('materialForm').reset();
+      document.getElementById('fileLabel').textContent = 'Choose file (PDF, Word, etc.)';
+      document.getElementById('thumbLabel').textContent = 'Choose image';
+      document.getElementById('newMaterialModal').classList.remove('hidden');
+    }
+
+    function closeMaterialModal() {
+      document.getElementById('newMaterialModal').classList.add('hidden');
+    }
+
+    function updateFileLabel(inputId, labelId) {
+      var input = document.getElementById(inputId);
+      var label = document.getElementById(labelId);
+      if (input.files && input.files[0]) {
+        label.textContent = input.files[0].name;
+        label.classList.remove('text-gray-500', 'dark:text-gray-400');
+        label.classList.add('text-gray-900', 'dark:text-white');
+      }
+    }
+
+    function submitMaterial(e) {
+      e.preventDefault();
+      var token = localStorage.getItem('gardnerHub_token');
+      var submitBtn = document.getElementById('materialSubmitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg><span>Uploading...</span>';
+
+      var formData = new FormData();
+      formData.append('title', document.getElementById('materialTitle').value.trim());
+      formData.append('content', document.getElementById('materialContent').value.trim());
+      formData.append('material_type', document.getElementById('materialType').value);
+      formData.append('is_downloadable', document.getElementById('materialDownloadable').checked ? '1' : '0');
+
+      var fileInput = document.getElementById('materialFile');
+      if (fileInput.files[0]) formData.append('material_file', fileInput.files[0]);
+
+      var thumbInput = document.getElementById('materialThumbnail');
+      if (thumbInput.files[0]) formData.append('thumbnail', thumbInput.files[0]);
+
+      fetch(API_BASE + '/materials', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token },
+        body: formData
+      })
+      .then(function(res) { return res.json().then(function(d) { return { ok: res.ok, data: d }; }); })
+      .then(function(result) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg><span>Upload Material</span>';
+
+        if (!result.ok) {
+          alert(result.data.message || 'Failed to upload material.');
+          return;
+        }
+        alert('Learning material uploaded successfully!');
+        closeMaterialModal();
+        loadCategory(getCurrentUser());
+      })
+      .catch(function() {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg><span>Upload Material</span>';
+        alert('Unable to connect to server.');
+      });
+    }
+
+    // ─── Document Previewer Modal ─────────────────────────────────────────────
+    var isPreviewFullscreen = false;
+
+    function getFileExtension(filePath) {
+      if (!filePath) return '';
+      return filePath.split('.').pop().toLowerCase();
+    }
+
+    // Extensions that Google Docs Viewer can render
+    var googleViewerExts = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'rtf'];
+    var imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+
+    function buildPublicFileUrl(publicUrl) {
+      // Build full absolute URL from relative public_url for Google Docs Viewer
+      var origin = window.location.origin || (window.location.protocol + '//' + window.location.host);
+      // The backend runs on a different port in dev, so use the API_BASE origin
+      var backendOrigin = API_BASE.replace('/api', '');
+      return backendOrigin + publicUrl;
+    }
+
+    function openPreviewModal(materialId) {
+      var material = materialsCache.find(function(m) { return m.id === materialId; });
+      if (!material) return;
+
+      var user = getCurrentUser();
+      var userRole = user ? user.role : 'student';
+      var typeConf = materialTypeConfig[material.material_type] || materialTypeConfig['Handout'];
+      var token = localStorage.getItem('gardnerHub_token');
+      var streamBaseUrl = API_BASE.replace('/api', '') + '/api/materials/' + material.id + '/stream';
+
+      // ─ Populate header info
+      document.getElementById('previewTitle').textContent = material.title;
+      document.getElementById('previewTypeBadge').textContent = material.material_type;
+      document.getElementById('previewTypeBadge').className = 'inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold ' + typeConf.bg + ' ' + typeConf.text;
+
+      var iconWrap = document.getElementById('previewTypeIcon');
+      iconWrap.className = 'w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ' + typeConf.bg;
+      iconWrap.innerHTML = '<span class="text-xl">' + typeConf.icon + '</span>';
+
+      document.getElementById('previewAuthor').textContent = material.author_name;
+      document.getElementById('previewDate').textContent = formatDate(material.created_at);
+
+      // ─ Populate right panel details
+      document.getElementById('previewAuthorInitial').textContent = (material.author_name || 'U').charAt(0).toUpperCase();
+      document.getElementById('previewAuthorName').textContent = material.author_name;
+      document.getElementById('previewAuthorRole').textContent = getRoleLabel(material.author_role);
+      document.getElementById('previewDetailType').textContent = material.material_type;
+      document.getElementById('previewDetailDate').textContent = formatDate(material.created_at);
+      document.getElementById('previewDetailDownload').textContent = material.is_downloadable ? 'Enabled' : 'Disabled';
+      document.getElementById('previewContent').textContent = material.content;
+
+      // Thumbnail
+      var thumbWrap = document.getElementById('previewThumbnailWrap');
+      if (material.thumbnail_path) {
+        document.getElementById('previewThumbnail').src = API_BASE.replace('/api', '') + '/uploads/materials/' + material.thumbnail_path;
+        thumbWrap.classList.remove('hidden');
+      } else {
+        thumbWrap.classList.add('hidden');
+      }
+
+      // ─ Download button logic (header)
+      // Students: hide download when is_downloadable is OFF (but preview still works)
+      // Faculty/Admin: always show download
+      var dlBtn = document.getElementById('previewDownloadBtn');
+      if (userRole === 'student' && !material.is_downloadable) {
+        dlBtn.classList.add('hidden');
+        dlBtn.classList.remove('inline-flex');
+      } else {
+        dlBtn.href = streamBaseUrl + '?download=true';
+        dlBtn.classList.remove('hidden');
+        dlBtn.classList.add('inline-flex');
+      }
+
+      // ─ Smart Viewer Logic (left panel)
+      var iframe = document.getElementById('previewIframe');
+      var img = document.getElementById('previewImage');
+      var unsupported = document.getElementById('previewUnsupported');
+      var loading = document.getElementById('previewLoading');
+
+      // Reset all preview elements
+      iframe.classList.add('hidden');
+      iframe.src = 'about:blank';
+      iframe.onload = null;
+      img.classList.add('hidden');
+      img.src = '';
+      img.onload = null;
+      img.onerror = null;
+      unsupported.classList.add('hidden');
+      loading.classList.remove('hidden');
+
+      // Determine file extension from API-provided file_ext
+      var ext = material.file_ext || '';
+
+      // Full public URL for the file (used by Google Docs Viewer)
+      var publicFileUrl = material.public_url ? buildPublicFileUrl(material.public_url) : '';
+
+      // Auth stream URL (for PDF direct embed)
+      var authStreamUrl = streamBaseUrl + (token ? '?token=' + encodeURIComponent(token) : '');
+
+      if (ext === 'pdf') {
+        // ── PDF: embed directly via iframe using auth stream endpoint
+        iframe.onload = function() { loading.classList.add('hidden'); };
+        iframe.src = authStreamUrl;
+        iframe.classList.remove('hidden');
+
+      } else if (imageExts.indexOf(ext) !== -1) {
+        // ── Images: show directly in <img> tag
+        var imgUrl = publicFileUrl || authStreamUrl;
+        img.onload = function() { loading.classList.add('hidden'); };
+        img.onerror = function() {
+          loading.classList.add('hidden');
+          img.classList.add('hidden');
+          unsupported.classList.remove('hidden');
+        };
+        img.src = imgUrl;
+        img.classList.remove('hidden');
+
+      } else if (googleViewerExts.indexOf(ext) !== -1 && publicFileUrl) {
+        // ── Office files (DOCX, PPTX, XLSX, DOC, etc.): Google Docs Viewer
+        var googleViewerUrl = 'https://docs.google.com/viewer?url=' + encodeURIComponent(publicFileUrl) + '&embedded=true';
+        iframe.onload = function() { loading.classList.add('hidden'); };
+        iframe.src = googleViewerUrl;
+        iframe.classList.remove('hidden');
+
+      } else if (ext === 'txt') {
+        // ── TXT: load via stream and show in a styled pre block inside iframe
+        loading.classList.add('hidden');
+        fetch(authStreamUrl)
+          .then(function(r) { return r.text(); })
+          .then(function(text) {
+            var blob = new Blob(['\x3Chtml>\x3Cbody style="margin:16px;font-family:monospace;white-space:pre-wrap;font-size:14px;color:#333;">' + text.replace(/</g, '\x26lt;').replace(/>/g, '\x26gt;') + '\x3C/body>\x3C/html>'], { type: 'text/html' });
+            iframe.src = URL.createObjectURL(blob);
+            iframe.classList.remove('hidden');
+          })
+          .catch(function() {
+            document.getElementById('previewUnsupportedExt').textContent = '.TXT file could not be loaded.';
+            unsupported.classList.remove('hidden');
+          });
+
+      } else {
+        // ── Unsupported preview (unknown extensions)
+        loading.classList.add('hidden');
+        var extLabel = ext ? ('.' + ext.toUpperCase()) : 'Unknown';
+        document.getElementById('previewUnsupportedExt').textContent = extLabel + ' files cannot be previewed in the browser.';
+        unsupported.classList.remove('hidden');
+      }
+
+      // Reset fullscreen state
+      isPreviewFullscreen = false;
+      document.getElementById('fullscreenExpandIcon').classList.remove('hidden');
+      document.getElementById('fullscreenCollapseIcon').classList.add('hidden');
+
+      document.getElementById('materialPreviewModal').classList.remove('hidden');
+    }
+
+    function closePreviewModal() {
+      document.getElementById('materialPreviewModal').classList.add('hidden');
+      // Stop any loading iframe / image
+      document.getElementById('previewIframe').src = 'about:blank';
+      document.getElementById('previewImage').src = '';
+      // Reset fullscreen if active
+      if (isPreviewFullscreen) togglePreviewFullscreen();
+    }
+
+    function togglePreviewFullscreen() {
+      var inner = document.getElementById('previewModalInner');
+      var details = document.getElementById('previewDetailsPanel');
+      var expandIcon = document.getElementById('fullscreenExpandIcon');
+      var collapseIcon = document.getElementById('fullscreenCollapseIcon');
+
+      isPreviewFullscreen = !isPreviewFullscreen;
+
+      if (isPreviewFullscreen) {
+        // Expand to full viewport
+        inner.classList.remove('max-w-6xl', 'rounded-2xl');
+        inner.classList.add('max-w-none', 'rounded-none');
+        inner.style.height = '100vh';
+        inner.style.width = '100vw';
+        details.classList.add('hidden');
+        expandIcon.classList.add('hidden');
+        collapseIcon.classList.remove('hidden');
+      } else {
+        // Restore normal size
+        inner.classList.add('max-w-6xl', 'rounded-2xl');
+        inner.classList.remove('max-w-none', 'rounded-none');
+        inner.style.height = '85vh';
+        inner.style.width = '';
+        details.classList.remove('hidden');
+        collapseIcon.classList.add('hidden');
+        expandIcon.classList.remove('hidden');
+      }
+    }
+
+    // ─── Delete Material ───────────────────────────────────────────────────────
+    function deleteMaterial(materialId) {
+      if (!confirm('Are you sure you want to delete this material?')) return;
+
+      var token = localStorage.getItem('gardnerHub_token');
+      fetch(API_BASE + '/materials/' + materialId, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + token }
+      })
+      .then(function(res) { return res.json().then(function(d) { return { ok: res.ok, data: d }; }); })
+      .then(function(result) {
+        if (!result.ok) {
+          alert(result.data.message || 'Failed to delete material.');
+          return;
+        }
+        alert('Material deleted successfully.');
         loadCategory(getCurrentUser());
       })
       .catch(function() {

@@ -24,11 +24,11 @@ USE `gardner_hub`;
 DROP VIEW IF EXISTS `category_latest_activity`;
 -- Creating temporary table to overcome VIEW dependency errors
 CREATE TABLE `category_latest_activity` (
-	`category` VARCHAR(1) NULL COLLATE 'utf8mb4_0900_ai_ci',
-	`activity_type` VARCHAR(1) NULL COLLATE 'utf8mb4_0900_ai_ci',
-	`title` VARCHAR(1) NULL COLLATE 'utf8mb4_0900_ai_ci',
-	`author_name` VARCHAR(1) NULL COLLATE 'utf8mb4_0900_ai_ci',
-	`author_role` VARCHAR(1) NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`category` VARCHAR(1) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`activity_type` VARCHAR(1) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`title` VARCHAR(1) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`author_name` VARCHAR(1) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`author_role` VARCHAR(1) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
 	`created_at` TIMESTAMP NULL,
 	`rn` BIGINT UNSIGNED NOT NULL
 ) ENGINE=MyISAM;
@@ -59,6 +59,10 @@ CREATE TABLE IF NOT EXISTS `forum_threads` (
   `title` varchar(255) NOT NULL,
   `content` text NOT NULL,
   `tag` enum('Enrollment','Class Schedule','Class Suspension','Events') DEFAULT NULL,
+  `material_type` enum('Handout','Syllabus','Reference') DEFAULT NULL,
+  `file_path` varchar(500) DEFAULT NULL,
+  `thumbnail_path` varchar(500) DEFAULT NULL,
+  `is_downloadable` tinyint(1) NOT NULL DEFAULT '1',
   `image_url` varchar(255) DEFAULT NULL,
   `link_url` varchar(500) DEFAULT NULL,
   `like_count` int DEFAULT '0',
@@ -71,11 +75,12 @@ CREATE TABLE IF NOT EXISTS `forum_threads` (
   KEY `idx_recent_activities_category` (`category`,`created_at` DESC),
   KEY `idx_category_created` (`category`,`created_at` DESC),
   CONSTRAINT `forum_threads_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Dumping data for table gardner_hub.forum_threads: ~0 rows (approximately)
-INSERT INTO `forum_threads` (`id`, `category`, `title`, `content`, `tag`, `image_url`, `link_url`, `like_count`, `author_id`, `created_at`, `updated_at`) VALUES
-	(1, 'announcements', 'Announcements!', 'No Class March 05, 2026', 'Class Suspension', '1772024250731-166021592.png', NULL, 1, 2, '2026-02-25 12:57:30', '2026-02-25 12:58:36');
+-- Dumping data for table gardner_hub.forum_threads: ~1 rows (approximately)
+INSERT INTO `forum_threads` (`id`, `category`, `title`, `content`, `tag`, `material_type`, `file_path`, `thumbnail_path`, `is_downloadable`, `image_url`, `link_url`, `like_count`, `author_id`, `created_at`, `updated_at`) VALUES
+	(1, 'announcements', 'Announcements!', 'No Class March 05, 2026', 'Class Suspension', NULL, NULL, NULL, 1, '1772024250731-166021592.png', NULL, 1, 2, '2026-02-25 12:57:30', '2026-02-25 12:58:36'),
+	(2, 'materials', 'NEW LESSON', 'sdsdsdsd', NULL, 'Handout', '1772284667034-650837520.docx', NULL, 0, NULL, NULL, 0, 2, '2026-02-28 13:17:47', '2026-02-28 13:17:47');
 
 -- Dumping structure for table gardner_hub.grade_inquiries
 DROP TABLE IF EXISTS `grade_inquiries`;
@@ -94,7 +99,7 @@ CREATE TABLE IF NOT EXISTS `grade_inquiries` (
   KEY `idx_student_updated` (`student_id`,`updated_at` DESC),
   KEY `idx_grade_inquiries_status` (`status`,`created_at` DESC),
   CONSTRAINT `grade_inquiries_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table gardner_hub.grade_inquiries: ~0 rows (approximately)
 
@@ -140,14 +145,14 @@ INSERT INTO `post_likes` (`id`, `post_id`, `user_id`) VALUES
 DROP VIEW IF EXISTS `recent_activities_view`;
 -- Creating temporary table to overcome VIEW dependency errors
 CREATE TABLE `recent_activities_view` (
-	`activity_type` VARCHAR(1) NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`activity_type` VARCHAR(1) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
 	`item_id` INT NOT NULL,
-	`category` VARCHAR(1) NULL COLLATE 'utf8mb4_0900_ai_ci',
-	`title` VARCHAR(1) NULL COLLATE 'utf8mb4_0900_ai_ci',
-	`content` MEDIUMTEXT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`category` VARCHAR(1) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`title` VARCHAR(1) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`content` MEDIUMTEXT NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
 	`author_id` INT NOT NULL,
-	`author_name` VARCHAR(1) NULL COLLATE 'utf8mb4_0900_ai_ci',
-	`author_role` VARCHAR(1) NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`author_name` VARCHAR(1) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`author_role` VARCHAR(1) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
 	`created_at` TIMESTAMP NULL,
 	`updated_at` TIMESTAMP NULL
 ) ENGINE=MyISAM;
@@ -172,7 +177,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   KEY `idx_users_created_at` (`created_at` DESC)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table gardner_hub.users: ~1 rows (approximately)
+-- Dumping data for table gardner_hub.users: ~2 rows (approximately)
 INSERT INTO `users` (`id`, `full_name`, `school_id`, `role`, `department_course`, `email`, `password`, `status`, `created_at`, `profile_photo`, `show_school_id`) VALUES
 	(1, 'Blady', 'GCD 2023 T111434', 'student', 'BSCS', 'blady@gmail.com', '$2b$10$UA2l5fGpW3BU5Sd30rLUVuCSfmOqSl/BjIFCovj2yfs2NVDUSxoxe', 'approved', '2026-02-24 10:13:40', NULL, 1),
 	(2, 'Charles', 'GCD 2022 T1136543', 'faculty', 'ADM', 'charles@gmail.com', '$2b$10$fBmhBh6oTI4DDshv5ZgJteEQbbyI0J2vcp9tOTNmWcc32.DDh9RpC', 'approved', '2026-02-25 04:22:02', NULL, 1),

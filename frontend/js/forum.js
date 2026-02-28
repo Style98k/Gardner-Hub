@@ -335,8 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const card = e.target.closest('.category-card');
     if (card) {
       const catId = card.getAttribute('data-category');
-      console.log('Navigate to category:', catId);
-      // In a real app: window.location.href = `/forum/category/${catId}`;
+      window.location.href = 'pages/forum/category-view.html?category=' + catId;
     }
   });
 
