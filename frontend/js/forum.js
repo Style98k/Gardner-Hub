@@ -144,7 +144,7 @@ function renderCategories(data) {
             <!-- Stats (mobile) -->
             <div class="flex items-center gap-4 mt-3 lg:hidden text-xs text-gray-400 dark:text-gray-500">
               <span>${cat.topics} topics</span>
-              <span>${cat.posts} posts</span>
+              <span>${cat.posts} comments</span>
             </div>
           </div>
         </div>
@@ -158,7 +158,7 @@ function renderCategories(data) {
           </div>
           <div class="flex flex-col items-center gap-0.5 text-center min-w-[60px]">
             <span class="text-lg font-bold text-gray-800 dark:text-gray-200">${cat.posts}</span>
-            <span class="text-[11px] text-gray-400 dark:text-gray-500 uppercase tracking-wide">Posts</span>
+            <span class="text-[11px] text-gray-400 dark:text-gray-500 uppercase tracking-wide">Comments</span>
           </div>
           <!-- Separator -->
           <div class="w-px h-10 bg-gray-200 dark:bg-gray-800"></div>

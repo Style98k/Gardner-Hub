@@ -34,6 +34,9 @@ app.use("/uploads/announcements", express.static(path.join(__dirname, "uploads",
 // Serve learning material files (PDFs & thumbnails)
 app.use("/uploads/materials", express.static(path.join(__dirname, "uploads", "materials")));
 
+// Serve academic discussion images/videos
+app.use("/uploads/academic", express.static(path.join(__dirname, "uploads", "academic")));
+
 // ─── Routes ──────────────────────────────────────────────────────────────────
 app.use("/api/auth", authRoutes);
 app.use("/api/stats", statsRoutes);

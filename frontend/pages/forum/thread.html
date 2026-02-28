@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thread — The Gardner Hub</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="../../js/tailwind-config.js"></script>
+
+  <style>
+    /* Reddit-style thread lines */
+    .comment-thread-line {
+      position: absolute;
+      left: 16px;
+      top: 40px;
+      bottom: 0;
+      width: 2px;
+      background: transparent;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .comment-thread-line:hover {
+      background-color: rgb(99 102 241 / 0.5) !important;
+    }
+    .comment-thread-line::before {
+      content: '';
+      position: absolute;
+      left: -4px;
+      right: -4px;
+      top: 0;
+      bottom: 0;
+    }
+    .dark .comment-thread-line {
+      background-color: rgb(55 65 81);
+    }
+    .comment-thread-line {
+      background-color: rgb(229 231 235);
+    }
+  </style>
+</head>
+
+<body class="font-sans text-gray-800 dark:text-gray-200 min-h-screen bg-gray-50 dark:bg-black transition-colors duration-300">
+
+  <!-- Header -->
+  <header class="bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50 transition-colors duration-300">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center space-x-4">
+          <button onclick="goBack()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+            <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <div class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-brand-900 dark:bg-white shadow-md">
+            <span class="text-white dark:text-black font-bold text-lg">G</span>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white">The Gardner Hub</h1>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Thread View</p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <button id="themeToggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200" title="Toggle theme">
+            <svg class="w-5 h-5 text-yellow-500 hidden dark:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            <svg class="w-5 h-5 text-gray-600 block dark:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+          </button>
+          <div class="relative">
+            <button id="profileMenuBtn" class="flex items-center space-x-2 hover:opacity-80 transition-opacity duration-200">
+              <div class="w-8 h-8 rounded-full bg-brand-900 dark:bg-white flex items-center justify-center">
+                <span class="text-white dark:text-black font-semibold text-sm" id="userInitial">U</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- Loading Spinner -->
+    <div id="threadLoading" class="text-center py-16">
+      <svg class="w-10 h-10 text-indigo-500 animate-spin mx-auto mb-3" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+      </svg>
+      <p class="text-sm text-gray-500 dark:text-gray-400">Loading thread...</p>
+    </div>
+
+    <!-- Thread Content (populated by JS) -->
+    <div id="threadContent" class="hidden">
+
+      <!-- Post Card -->
+      <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm mb-6">
+        <div class="p-6">
+          <!-- Author & Flair -->
+          <div class="flex items-center flex-wrap gap-2 mb-3">
+            <div class="flex items-center space-x-2">
+              <div class="w-8 h-8 rounded-full bg-brand-900 dark:bg-white flex items-center justify-center">
+                <span id="threadAuthorInitial" class="text-white dark:text-black font-semibold text-sm">U</span>
+              </div>
+              <div>
+                <span id="threadAuthorName" class="text-sm font-semibold text-gray-900 dark:text-white"></span>
+                <span id="threadAuthorBadge" class="ml-1 px-2 py-0.5 rounded-full text-[10px] font-semibold"></span>
+              </div>
+            </div>
+            <span class="text-xs text-gray-400 dark:text-gray-500">&bull;</span>
+            <span id="threadDate" class="text-xs text-gray-400 dark:text-gray-500"></span>
+            <span id="threadFlair" class="hidden ml-auto inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold"></span>
+          </div>
+
+          <!-- Title -->
+          <h1 id="threadTitle" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-3"></h1>
+
+          <!-- Content -->
+          <div id="threadBody" class="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap"></div>
+
+          <!-- Image -->
+          <div id="threadImageWrap" class="hidden mt-4">
+            <img id="threadImage" class="w-full rounded-lg border border-gray-200 dark:border-gray-700 max-h-96 object-cover" src="" alt="Thread image">
+          </div>
+
+          <!-- Actions Bar -->
+          <div class="flex items-center space-x-6 mt-5 pt-4 border-t border-gray-100 dark:border-gray-800">
+            <!-- Heart -->
+            <button id="threadHeartBtn" onclick="togglePostHeart()" class="flex items-center space-x-1.5 group transition-colors duration-200 text-gray-400 dark:text-gray-500 hover:text-red-400">
+              <svg id="threadHeartIcon" class="w-5 h-5 transition-transform duration-200 group-hover:scale-110" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg>
+              <span id="threadLikeCount" class="text-sm font-medium">0</span>
+            </button>
+            <!-- Comments count -->
+            <div class="flex items-center space-x-1.5 text-gray-400 dark:text-gray-500">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+              <span id="threadCommentCount" class="text-sm font-medium">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Comment Box -->
+      <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 mb-6">
+        <div class="flex items-start space-x-3">
+          <div class="w-8 h-8 rounded-full bg-brand-900 dark:bg-white flex items-center justify-center flex-shrink-0 mt-1">
+            <span id="commentUserInitial" class="text-white dark:text-black font-semibold text-xs">U</span>
+          </div>
+          <div class="flex-1">
+            <textarea id="commentInput" rows="3" class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none" placeholder="What are your thoughts?"></textarea>
+            <div class="flex justify-end mt-2">
+              <button onclick="submitComment()" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors duration-200">Comment</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comments Section -->
+      <div class="mb-4">
+        <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Comments</h3>
+      </div>
+      <div id="commentsContainer" class="space-y-1">
+        <!-- Comments rendered by JS -->
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Theme -->
+  <script src="../../js/theme.js"></script>
+
+  <script>
+    var API_BASE = 'http://localhost:5000/api';
+    var currentThreadId = null;
+    var currentThread = null;
+
+    var flairConfig = {
+      'Lessons':    { bg: 'bg-indigo-100 dark:bg-indigo-900/30', text: 'text-indigo-700 dark:text-indigo-300', icon: '📘' },
+      'Q&A':        { bg: 'bg-amber-100 dark:bg-amber-900/30',  text: 'text-amber-700 dark:text-amber-300',  icon: '❓' },
+      'School Org': { bg: 'bg-emerald-100 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-300', icon: '🏫' }
+    };
+
+    function getCurrentUser() {
+      try { return JSON.parse(localStorage.getItem('gardnerHub_user')); } catch(e) { return null; }
+    }
+
+    function getToken() {
+      return localStorage.getItem('gardnerHub_token');
+    }
+
+    function escapeHtml(text) {
+      var div = document.createElement('div');
+      div.appendChild(document.createTextNode(text));
+      return div.innerHTML;
+    }
+
+    function formatDate(dateStr) {
+      var d = new Date(dateStr);
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function timeAgo(dateStr) {
+      var now = new Date();
+      var d = new Date(dateStr);
+      var seconds = Math.floor((now - d) / 1000);
+      if (seconds < 60) return 'just now';
+      var minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return minutes + 'm ago';
+      var hours = Math.floor(minutes / 60);
+      if (hours < 24) return hours + 'h ago';
+      var days = Math.floor(hours / 24);
+      if (days < 30) return days + 'd ago';
+      return formatDate(dateStr);
+    }
+
+    function getRoleBadgeClass(role) {
+      switch(role) {
+        case 'faculty': return 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300';
+        case 'admin': return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300';
+        default: return 'bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300';
+      }
+    }
+
+    function getRoleLabel(role) {
+      switch(role) {
+        case 'admin': return 'Admin';
+        case 'faculty': return 'Faculty';
+        default: return 'Student';
+      }
+    }
+
+    // ─── Init ──────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+      var user = getCurrentUser();
+      if (!user) { window.location.href = '../../index.html'; return; }
+
+      var initial = (user.full_name || 'U').charAt(0).toUpperCase();
+      document.getElementById('userInitial').textContent = initial;
+      document.getElementById('commentUserInitial').textContent = initial;
+
+      var params = new URLSearchParams(window.location.search);
+      currentThreadId = params.get('id');
+      if (!currentThreadId) { window.location.href = 'hub.html'; return; }
+
+      loadThread();
+    });
+
+    // ─── Load Thread ───────────────────────────────────────────────────────────
+    function loadThread() {
+      var token = getToken();
+      var headers = {};
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+
+      fetch(API_BASE + '/forum/threads/' + currentThreadId, { headers: headers })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          document.getElementById('threadLoading').classList.add('hidden');
+          document.getElementById('threadContent').classList.remove('hidden');
+
+          currentThread = data.thread;
+          var t = data.thread;
+
+          // Author
+          document.getElementById('threadAuthorInitial').textContent = (t.author_name || 'U').charAt(0).toUpperCase();
+          document.getElementById('threadAuthorName').textContent = t.author_name;
+          var badge = document.getElementById('threadAuthorBadge');
+          badge.textContent = getRoleLabel(t.author_role);
+          badge.className = 'ml-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ' + getRoleBadgeClass(t.author_role);
+
+          document.getElementById('threadDate').textContent = timeAgo(t.created_at);
+          document.getElementById('threadTitle').textContent = t.title;
+          document.getElementById('threadBody').textContent = t.content;
+
+          // Flair
+          if (t.tag && flairConfig[t.tag]) {
+            var fc = flairConfig[t.tag];
+            var flairEl = document.getElementById('threadFlair');
+            flairEl.innerHTML = fc.icon + ' ' + escapeHtml(t.tag);
+            flairEl.className = 'ml-auto inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold ' + fc.bg + ' ' + fc.text;
+            flairEl.classList.remove('hidden');
+          }
+
+          // Image
+          if (t.image_url && t.category === 'academic') {
+            document.getElementById('threadImage').src = API_BASE.replace('/api', '') + '/uploads/academic/' + t.image_url;
+            document.getElementById('threadImageWrap').classList.remove('hidden');
+          }
+
+          // Hearts
+          document.getElementById('threadLikeCount').textContent = t.like_count || 0;
+          document.getElementById('threadCommentCount').textContent = t.comment_count || 0;
+          updateHeartUI(t.liked && t.liked > 0);
+
+          // Comments (nested tree)
+          renderComments(data.comments || []);
+        })
+        .catch(function() {
+          document.getElementById('threadLoading').innerHTML = '<p class="text-gray-500 dark:text-gray-400">Unable to load thread. Server may be offline.</p>';
+        });
+    }
+
+    // ─── Heart UI ──────────────────────────────────────────────────────────────
+    function updateHeartUI(liked) {
+      var btn = document.getElementById('threadHeartBtn');
+      var icon = document.getElementById('threadHeartIcon');
+      if (liked) {
+        btn.classList.remove('text-gray-400', 'dark:text-gray-500', 'hover:text-red-400');
+        btn.classList.add('text-red-500');
+        icon.setAttribute('fill', 'currentColor');
+      } else {
+        btn.classList.add('text-gray-400', 'dark:text-gray-500', 'hover:text-red-400');
+        btn.classList.remove('text-red-500');
+        icon.setAttribute('fill', 'none');
+      }
+    }
+
+    function togglePostHeart() {
+      var token = getToken();
+      if (!token) { alert('Please log in to like posts.'); return; }
+
+      fetch(API_BASE + '/forum/threads/' + currentThreadId + '/like', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token }
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        document.getElementById('threadLikeCount').textContent = data.like_count;
+        updateHeartUI(data.liked);
+      })
+      .catch(function() { alert('Unable to update reaction.'); });
+    }
+
+    // ─── Submit Comment ────────────────────────────────────────────────────────
+    function submitComment(parentId) {
+      var token = getToken();
+      if (!token) { alert('Please log in to comment.'); return; }
+
+      var inputEl;
+      if (parentId) {
+        inputEl = document.getElementById('reply-input-' + parentId);
+      } else {
+        inputEl = document.getElementById('commentInput');
+      }
+
+      var content = inputEl.value.trim();
+      if (!content) { alert('Please write a comment.'); return; }
+
+      var body = { content: content };
+      if (parentId) body.parent_id = parentId;
+
+      fetch(API_BASE + '/forum/threads/' + currentThreadId + '/comments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify(body)
+      })
+      .then(function(res) { return res.json().then(function(d) { return { ok: res.ok, data: d }; }); })
+      .then(function(result) {
+        if (!result.ok) {
+          alert(result.data.message || 'Failed to add comment.');
+          return;
+        }
+        inputEl.value = '';
+
+        // If replying to a parent, hide the reply input
+        if (parentId) {
+          var replyWrap = document.getElementById('reply-wrap-' + parentId);
+          if (replyWrap) replyWrap.classList.add('hidden');
+        }
+
+        // Reload to get updated nested tree
+        loadThread();
+      })
+      .catch(function() { alert('Unable to connect to server.'); });
+    }
+
+    // ─── Toggle Comment Heart ──────────────────────────────────────────────────
+    function toggleCommentHeart(commentId, btn) {
+      var token = getToken();
+      if (!token) { alert('Please log in to like comments.'); return; }
+
+      fetch(API_BASE + '/forum/comments/' + commentId + '/like', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token }
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        var svg = btn.querySelector('svg');
+        var countEl = btn.querySelector('.comment-like-count');
+        if (data.liked) {
+          btn.classList.remove('text-gray-400', 'dark:text-gray-500', 'hover:text-red-400');
+          btn.classList.add('text-red-500');
+          svg.setAttribute('fill', 'currentColor');
+        } else {
+          btn.classList.add('text-gray-400', 'dark:text-gray-500', 'hover:text-red-400');
+          btn.classList.remove('text-red-500');
+          svg.setAttribute('fill', 'none');
+        }
+        countEl.textContent = data.like_count;
+      })
+      .catch(function() { alert('Unable to update reaction.'); });
+    }
+
+    // ─── Show/Hide Reply Input ─────────────────────────────────────────────────
+    function toggleReplyInput(commentId) {
+      var wrap = document.getElementById('reply-wrap-' + commentId);
+      if (wrap.classList.contains('hidden')) {
+        wrap.classList.remove('hidden');
+        document.getElementById('reply-input-' + commentId).focus();
+      } else {
+        wrap.classList.add('hidden');
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // RENDER THREADED COMMENTS (Reddit-style with indentation)
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    function renderComments(comments) {
+      var container = document.getElementById('commentsContainer');
+      if (!comments || comments.length === 0) {
+        container.innerHTML = '<div class="text-center py-8"><p class="text-gray-400 dark:text-gray-500 text-sm">No comments yet. Be the first to share your thoughts!</p></div>';
+        return;
+      }
+      container.innerHTML = comments.map(function(c) { return renderCommentNode(c, 0); }).join('');
+    }
+
+    function renderCommentNode(comment, depth) {
+      var maxIndent = 6;
+      var effectiveDepth = Math.min(depth, maxIndent);
+      var marginLeft = effectiveDepth * 24; // 24px per level
+
+      var roleBadge = getRoleBadgeClass(comment.author_role);
+      var roleLabel = getRoleLabel(comment.author_role);
+
+      var liked = comment.liked && comment.liked > 0;
+      var heartFill = liked ? 'fill="currentColor"' : 'fill="none"';
+      var heartColor = liked ? 'text-red-500' : 'text-gray-400 dark:text-gray-500 hover:text-red-400';
+
+      var hasReplies = comment.replies && comment.replies.length > 0;
+
+      var html = '<div class="relative" style="margin-left:' + marginLeft + 'px">';
+
+      // Thread line for nesting
+      if (depth > 0) {
+        html += '<div class="absolute -left-3 top-0 w-3 h-5 border-l-2 border-b-2 border-gray-200 dark:border-gray-700 rounded-bl-lg"></div>';
+      }
+
+      html += '<div class="bg-white dark:bg-gray-900 rounded-lg p-4 ' + (depth === 0 ? 'border border-gray-200 dark:border-gray-800' : 'border-l-2 border-gray-100 dark:border-gray-800 pl-4') + ' mb-2">';
+
+      // Author row
+      html += '<div class="flex items-center space-x-2 mb-2">' +
+        '<div class="w-6 h-6 rounded-full bg-brand-900 dark:bg-white flex items-center justify-center flex-shrink-0">' +
+          '<span class="text-white dark:text-black font-semibold" style="font-size:10px">' + (comment.author_name || 'U').charAt(0).toUpperCase() + '</span>' +
+        '</div>' +
+        '<span class="text-xs font-semibold text-gray-900 dark:text-white">' + escapeHtml(comment.author_name) + '</span>' +
+        '<span class="px-1.5 py-0.5 rounded text-[9px] font-semibold ' + roleBadge + '">' + roleLabel + '</span>' +
+        '<span class="text-[11px] text-gray-400 dark:text-gray-500">&bull; ' + timeAgo(comment.created_at) + '</span>' +
+      '</div>';
+
+      // Content
+      html += '<p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-2 whitespace-pre-wrap">' + escapeHtml(comment.content) + '</p>';
+
+      // Actions: Heart + Reply
+      html += '<div class="flex items-center space-x-4">' +
+        '<button onclick="event.stopPropagation(); toggleCommentHeart(' + comment.id + ', this)" class="flex items-center space-x-1 transition-colors duration-200 ' + heartColor + '">' +
+          '<svg class="w-3.5 h-3.5" ' + heartFill + ' stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg>' +
+          '<span class="text-[11px] font-medium comment-like-count">' + (comment.like_count || 0) + '</span>' +
+        '</button>' +
+        '<button onclick="toggleReplyInput(' + comment.id + ')" class="flex items-center space-x-1 text-gray-400 dark:text-gray-500 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors duration-200">' +
+          '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>' +
+          '<span class="text-[11px] font-medium">Reply</span>' +
+        '</button>' +
+      '</div>';
+
+      // Nested reply input (hidden by default)
+      html += '<div id="reply-wrap-' + comment.id + '" class="hidden mt-3">' +
+        '<div class="flex items-start space-x-2">' +
+          '<textarea id="reply-input-' + comment.id + '" rows="2" class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none" placeholder="Write a reply..."></textarea>' +
+          '<button onclick="submitComment(' + comment.id + ')" class="px-3 py-2 text-xs font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors duration-200 flex-shrink-0">Reply</button>' +
+        '</div>' +
+      '</div>';
+
+      html += '</div>'; // close comment card
+
+      // Render child replies recursively
+      if (hasReplies) {
+        comment.replies.forEach(function(reply) {
+          html += renderCommentNode(reply, depth + 1);
+        });
+      }
+
+      html += '</div>'; // close relative wrapper
+
+      return html;
+    }
+
+    function goBack() {
+      if (document.referrer && document.referrer.indexOf('category-view') !== -1) {
+        window.history.back();
+      } else {
+        // Try to go back to the category view
+        var cat = currentThread ? currentThread.category : 'academic';
+        window.location.href = 'category-view.html?category=' + cat;
+      }
+    }
+  </script>
+</body>
+</html>
