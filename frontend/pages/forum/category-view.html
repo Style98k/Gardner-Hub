@@ -12,6 +12,44 @@
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- JSZip (required by docx-preview) -->
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+
+  <!-- docx-preview – renders Word documents with full formatting -->
+  <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.3.2/dist/docx-preview.min.js"></script>
+
+  <!-- docx-preview styling -->
+  <style>
+    .docx-preview-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+    }
+    .docx-preview-container .docx-wrapper {
+      background: transparent !important;
+      padding: 0 !important;
+    }
+    .docx-preview-container .docx-wrapper > section.docx {
+      background: white !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+      margin-bottom: 20px !important;
+      border-radius: 4px;
+      max-width: 100% !important;
+      overflow-x: auto !important;
+      transform-origin: top center;
+    }
+    /* Scale down the document pages to fit the preview area */
+    #previewDocx {
+      overflow: auto !important;
+    }
+    #previewDocxContent {
+      width: 100% !important;
+      max-width: 100% !important;
+      overflow: hidden !important;
+    }
+  </style>
   
   <!-- Tailwind Configuration -->
   <script src="../../js/tailwind-config.js"></script>
@@ -419,7 +457,7 @@
       <div class="flex flex-1 overflow-hidden min-h-0">
 
         <!-- Left Side: File Preview (fills 100% height) -->
-        <div class="flex-1 bg-gray-100 dark:bg-gray-950 relative flex flex-col">
+        <div class="flex-1 bg-gray-100 dark:bg-gray-950 relative flex flex-col min-w-0 overflow-hidden">
           <!-- Loading spinner -->
           <div id="previewLoading" class="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-950 z-10">
             <div class="text-center">
@@ -434,6 +472,11 @@
           <iframe id="previewIframe" class="hidden w-full border-0 flex-1" src="about:blank" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
           <!-- Image preview -->
           <img id="previewImage" class="hidden max-w-full max-h-full object-contain m-auto p-4" src="" alt="Preview">
+          <!-- DOCX rendered document preview -->
+          <div id="previewDocx" class="hidden w-full h-full overflow-y-auto bg-gray-200 dark:bg-gray-800">
+            <div id="previewDocxContent" class="docx-preview-container" style="min-height:100%;">
+            </div>
+          </div>
           <!-- Unsupported file type placeholder -->
           <div id="previewUnsupported" class="hidden text-center p-8 m-auto">
             <div class="w-20 h-20 rounded-2xl bg-gray-200 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
@@ -1006,8 +1049,8 @@
       return filePath.split('.').pop().toLowerCase();
     }
 
-    // Extensions that Google Docs Viewer can render
-    var googleViewerExts = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'rtf'];
+    // Extensions that Google Docs Viewer can render (docx handled separately by mammoth.js)
+    var googleViewerExts = ['doc', 'xls', 'xlsx', 'ppt', 'pptx', 'rtf'];
     var imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
 
     function buildPublicFileUrl(publicUrl) {
@@ -1074,6 +1117,8 @@
       // ─ Smart Viewer Logic (left panel)
       var iframe = document.getElementById('previewIframe');
       var img = document.getElementById('previewImage');
+      var docxWrap = document.getElementById('previewDocx');
+      var docxContent = document.getElementById('previewDocxContent');
       var unsupported = document.getElementById('previewUnsupported');
       var loading = document.getElementById('previewLoading');
 
@@ -1085,6 +1130,8 @@
       img.src = '';
       img.onload = null;
       img.onerror = null;
+      docxWrap.classList.add('hidden');
+      docxContent.innerHTML = '';
       unsupported.classList.add('hidden');
       loading.classList.remove('hidden');
 
@@ -1115,8 +1162,47 @@
         img.src = imgUrl;
         img.classList.remove('hidden');
 
+      } else if (ext === 'docx') {
+        // ── DOCX: use docx-preview to render with full formatting (works offline / localhost)
+        fetch(authStreamUrl)
+          .then(function(r) {
+            if (!r.ok) throw new Error('Failed to fetch file: ' + r.status);
+            return r.blob();
+          })
+          .then(function(blob) {
+            // Check if docx-preview library is loaded
+            if (typeof docx === 'undefined' || !docx.renderAsync) {
+              throw new Error('docx-preview library not loaded');
+            }
+            loading.classList.add('hidden');
+            docxContent.innerHTML = '';
+            docxWrap.classList.remove('hidden');
+            return docx.renderAsync(blob, docxContent, null, {
+              className: 'docx-rendered',
+              inWrapper: true,
+              ignoreWidth: true,
+              ignoreHeight: true,
+              ignoreFonts: false,
+              breakPages: true,
+              ignoreLastRenderedPageBreak: false,
+              experimental: false,
+              trimXmlDeclaration: true,
+              useBase64URL: true,
+              renderHeaders: true,
+              renderFooters: true,
+              renderFootnotes: true,
+              renderEndnotes: true
+            });
+          })
+          .catch(function(err) {
+            console.error('DOCX preview error:', err);
+            loading.classList.add('hidden');
+            document.getElementById('previewUnsupportedExt').textContent = '.DOCX preview failed. Try downloading the file.';
+            unsupported.classList.remove('hidden');
+          });
+
       } else if (googleViewerExts.indexOf(ext) !== -1 && publicFileUrl) {
-        // ── Office files (DOCX, PPTX, XLSX, DOC, etc.): Google Docs Viewer
+        // ── Office files (DOC, PPTX, XLSX, etc.): Google Docs Viewer
         var googleViewerUrl = 'https://docs.google.com/viewer?url=' + encodeURIComponent(publicFileUrl) + '&embedded=true';
         iframe.onload = function() { loading.classList.add('hidden'); };
         iframe.src = googleViewerUrl;
@@ -1158,6 +1244,8 @@
       // Stop any loading iframe / image
       document.getElementById('previewIframe').src = 'about:blank';
       document.getElementById('previewImage').src = '';
+      document.getElementById('previewDocx').classList.add('hidden');
+      document.getElementById('previewDocxContent').innerHTML = '';
       // Reset fullscreen if active
       if (isPreviewFullscreen) togglePreviewFullscreen();
     }
