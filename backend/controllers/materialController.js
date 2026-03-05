@@ -6,7 +6,7 @@ const mime = require("mime-types");
 // ─── Create Learning Material (Faculty/Admin Only) ──────────────────────────
 exports.createMaterial = async (req, res) => {
   try {
-    const { title, content, material_type, is_downloadable, academic_level, course_strand, year_grade, semester } = req.body;
+    const { title, content, material_type, is_downloadable, academic_level, course_strand, year_grade, semester, subject_name } = req.body;
     const authorId = req.user.id;
     const userRole = req.user.role;
 
@@ -23,8 +23,8 @@ exports.createMaterial = async (req, res) => {
     }
 
     // Validate classification fields
-    if (!academic_level || !course_strand || !year_grade || !semester) {
-      return res.status(400).json({ message: "Academic level, course/strand, year/grade, and semester are required." });
+    if (!academic_level || !course_strand || !year_grade || !semester || !subject_name) {
+      return res.status(400).json({ message: "Academic level, course/strand, year/grade, semester, and subject are required." });
     }
 
     // Validate material_type
@@ -57,9 +57,9 @@ exports.createMaterial = async (req, res) => {
 
     const [result] = await pool.query(
       `INSERT INTO forum_threads 
-        (category, title, content, material_type, file_path, thumbnail_path, is_downloadable, author_id, academic_level, course_strand, year_grade, semester) 
-       VALUES ('materials', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [title, content, material_type, filePath, thumbnailPath, downloadable, authorId, academic_level, course_strand, year_grade, semester]
+        (category, title, content, material_type, file_path, thumbnail_path, is_downloadable, author_id, academic_level, course_strand, year_grade, semester, subject_name) 
+       VALUES ('materials', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [title, content, material_type, filePath, thumbnailPath, downloadable, authorId, academic_level, course_strand, year_grade, semester, subject_name]
     );
 
     res.status(201).json({
@@ -77,6 +77,7 @@ exports.createMaterial = async (req, res) => {
         course_strand,
         year_grade,
         semester,
+        subject_name,
       },
     });
   } catch (error) {
@@ -110,11 +111,15 @@ exports.getMaterials = async (req, res) => {
       whereClauses.push('t.semester = ?');
       queryParams.push(req.query.semester);
     }
+    if (req.query.subject_name) {
+      whereClauses.push('t.subject_name = ?');
+      queryParams.push(req.query.subject_name);
+    }
 
     const [rows] = await pool.query(
       `SELECT t.id, t.title, t.content, t.material_type, t.file_path, t.thumbnail_path, 
               t.is_downloadable, t.created_at, t.updated_at,
-              t.academic_level, t.course_strand, t.year_grade, t.semester,
+              t.academic_level, t.course_strand, t.year_grade, t.semester, t.subject_name,
               u.full_name AS author_name, u.role AS author_role, u.profile_photo AS author_photo
        FROM forum_threads t
        JOIN users u ON t.author_id = u.id
@@ -155,7 +160,7 @@ exports.getMaterialDetail = async (req, res) => {
     const [rows] = await pool.query(
       `SELECT t.id, t.title, t.content, t.material_type, t.file_path, t.thumbnail_path,
               t.is_downloadable, t.created_at, t.updated_at,
-              t.academic_level, t.course_strand, t.year_grade, t.semester,
+              t.academic_level, t.course_strand, t.year_grade, t.semester, t.subject_name,
               u.full_name AS author_name, u.role AS author_role, u.profile_photo AS author_photo
        FROM forum_threads t
        JOIN users u ON t.author_id = u.id

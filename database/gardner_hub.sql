@@ -84,19 +84,25 @@ CREATE TABLE IF NOT EXISTS `forum_threads` (
   `author_id` int NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `academic_level` varchar(50) DEFAULT NULL,
+  `course_strand` varchar(100) DEFAULT NULL,
+  `year_grade` varchar(50) DEFAULT NULL,
+  `semester` varchar(50) DEFAULT NULL,
+  `subject_name` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `author_id` (`author_id`),
   KEY `idx_recent_activities_created_at` (`created_at` DESC),
   KEY `idx_recent_activities_category` (`category`,`created_at` DESC),
   KEY `idx_category_created` (`category`,`created_at` DESC),
   CONSTRAINT `forum_threads_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Dumping data for table gardner_hub.forum_threads: ~1 rows (approximately)
-INSERT INTO `forum_threads` (`id`, `category`, `title`, `content`, `tag`, `material_type`, `file_path`, `thumbnail_path`, `is_downloadable`, `image_url`, `link_url`, `like_count`, `author_id`, `created_at`, `updated_at`) VALUES
-	(1, 'announcements', 'Announcements!', 'No Class March 05, 2026', 'Class Suspension', NULL, NULL, NULL, 1, '1772024250731-166021592.png', NULL, 1, 2, '2026-02-25 12:57:30', '2026-02-25 12:58:36'),
-	(2, 'materials', 'NEW LESSON', 'sdsdsdsd', NULL, 'Handout', '1772284667034-650837520.docx', NULL, 0, NULL, NULL, 0, 2, '2026-02-28 13:17:47', '2026-02-28 13:17:47'),
-	(3, 'academic', 'Class', 'May Class ba Tom?', 'Q&A', NULL, NULL, NULL, 1, NULL, NULL, 1, 1, '2026-02-28 14:31:12', '2026-02-28 14:32:33');
+-- Dumping data for table gardner_hub.forum_threads: ~3 rows (approximately)
+INSERT INTO `forum_threads` (`id`, `category`, `title`, `content`, `tag`, `material_type`, `file_path`, `thumbnail_path`, `is_downloadable`, `image_url`, `link_url`, `like_count`, `author_id`, `created_at`, `updated_at`, `academic_level`, `course_strand`, `year_grade`, `semester`, `subject_name`) VALUES
+	(3, 'academic', 'Class', 'May Class ba Tom?', 'Q&A', NULL, NULL, NULL, 1, NULL, NULL, 1, 1, '2026-02-28 14:31:12', '2026-02-28 14:32:33', NULL, NULL, NULL, NULL, NULL),
+	(5, 'announcements', '📢 𝐆𝐀𝐑𝐃𝐍𝐄𝐑 𝐁𝐀𝐋𝐈𝐓𝐀 𝐖𝐀𝐋𝐀𝐍𝐆 𝐏𝐀𝐒𝐎𝐊 | 𝐀𝐋𝐋 𝐋𝐄𝐕𝐄𝐋𝐒 | 𝐒𝐄𝐏𝐓𝐄𝐌𝐁𝐄𝐑 𝟐𝟐, 𝟐𝟎𝟐𝟓 (𝐌𝐎𝐍𝐃𝐀𝐘)', 'Based on Memorandum Circular No. 97, s. 2025 from Malacañang, all classes in Metro Manila are suspended tomorrow, September 22, 2025 (Monday), due to the expected bad weather caused by Bagyong Nando.', 'Class Suspension', NULL, NULL, NULL, 1, '1772718976474-864103673.jpg', NULL, 0, 2, '2026-03-05 13:56:16', '2026-03-05 13:56:16', NULL, NULL, NULL, NULL, NULL),
+	(6, 'announcements', 'ANNOUNCEMENT!', 'This is the class schedule for 1st Year BSIT 1C Term 2', 'Class Schedule', NULL, NULL, NULL, 1, '1772719247100-19177664.jpg', NULL, 0, 2, '2026-03-05 14:00:47', '2026-03-05 14:00:47', NULL, NULL, NULL, NULL, NULL),
+	(7, 'materials', 'Lesson 1', 'Sample', NULL, 'Reference', '1772721781166-121915552.docx', NULL, 1, NULL, NULL, 0, 2, '2026-03-05 14:43:01', '2026-03-05 14:43:01', 'College', 'BS Information Technology', '1st Year', '2nd Semester', NULL);
 
 -- Dumping structure for table gardner_hub.grade_inquiries
 DROP TABLE IF EXISTS `grade_inquiries`;
@@ -140,9 +146,8 @@ CREATE TABLE IF NOT EXISTS `post_comments` (
   CONSTRAINT `post_comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Dumping data for table gardner_hub.post_comments: ~0 rows (approximately)
+-- Dumping data for table gardner_hub.post_comments: ~3 rows (approximately)
 INSERT INTO `post_comments` (`id`, `post_id`, `parent_id`, `user_id`, `content`, `like_count`, `created_at`) VALUES
-	(1, 1, NULL, 1, 'Nice!', 0, '2026-02-25 12:58:32'),
 	(2, 3, NULL, 2, 'Yes', 0, '2026-02-28 14:31:58'),
 	(3, 3, 2, 1, 'thanks po', 0, '2026-02-28 14:32:23');
 
@@ -159,9 +164,8 @@ CREATE TABLE IF NOT EXISTS `post_likes` (
   CONSTRAINT `post_likes_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Dumping data for table gardner_hub.post_likes: ~0 rows (approximately)
+-- Dumping data for table gardner_hub.post_likes: ~1 rows (approximately)
 INSERT INTO `post_likes` (`id`, `post_id`, `user_id`) VALUES
-	(1, 1, 1),
 	(3, 3, 1);
 
 -- Dumping structure for view gardner_hub.recent_activities_view

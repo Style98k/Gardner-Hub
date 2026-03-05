@@ -72,6 +72,7 @@
     .mat-card-stagger:nth-child(5) { animation-delay: 240ms; }
     .mat-card-stagger:nth-child(6) { animation-delay: 300ms; }
     .mat-card-stagger:nth-child(7) { animation-delay: 360ms; }
+    .mat-card-stagger:nth-child(8) { animation-delay: 420ms; }
 
     /* ── Glassmorphism Card ── */
     .glass-card {
@@ -468,6 +469,10 @@
                 <option value="3rd Semester">3rd Semester</option>
               </select>
             </div>
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-semibold text-emerald-700 dark:text-emerald-400 mb-1">Subject <span class="text-red-500">*</span></label>
+              <input type="text" id="matSubjectName" required class="w-full px-2.5 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="e.g. IT122-3: Computer Programming 2 C/C++ (Intermediate)">
+            </div>
           </div>
 
           <!-- Material Type -->
@@ -708,7 +713,7 @@
     var currentCategory = '';
 
     // ─── Hierarchical Navigation State & Data ─────────────────────────────────
-    var materialNav = { step: 1, level: null, course: null, year: null, semester: null };
+    var materialNav = { step: 1, level: null, course: null, year: null, semester: null, subject: null };
 
     var collegePrograms = [
       'BS Computer Science', 'BS Information Technology', 'BS Information System',
@@ -722,18 +727,47 @@
     var shsGrades = ['Grade 11', 'Grade 12'];
     var semesterOptions = ['1st Semester', '2nd Semester', '3rd Semester'];
 
+    // ─── Subject data per course/year/semester ─────────────────────────────────
+    var subjectData = {
+      'BS Information Technology': {
+        '1st Year': {
+          '2nd Semester': [
+            { code: 'IT122-3', name: 'Computer Programming 2 C/C++ (Intermediate)', icon: '💻' },
+            { code: 'IT124-3', name: 'Web Application PHP', icon: '🌐' },
+            { code: 'IT123-3', name: 'Information Management (DBMS)', icon: '🗄️' },
+            { code: 'IT121-3', name: 'Program Design', icon: '📐' },
+            { code: 'IT131-3', name: 'Computer Architecture and Organization', icon: '🖥️' },
+            { code: 'IT214-3', name: 'PC Troubleshooting', icon: '🔧' },
+            { code: 'IT213-3', name: 'Multimedia Technologies', icon: '🎨' },
+            { code: 'PE2-3', name: 'Rhythmic Activity', icon: '🏃' }
+          ]
+        }
+      }
+    };
+
+    function getSubjectsForNav() {
+      if (!materialNav.course || !materialNav.year || !materialNav.semester) return null;
+      var courseData = subjectData[materialNav.course];
+      if (!courseData) return null;
+      var yearData = courseData[materialNav.year];
+      if (!yearData) return null;
+      return yearData[materialNav.semester] || null;
+    }
+
     var navStepIcons = {
       1: '🏫',
       2: '📚',
       3: '📅',
-      4: '📆'
+      4: '📆',
+      5: '📖'
     };
 
     var navStepLabels = {
       1: 'Select Academic Level',
       2: 'Select Course / Strand',
       3: 'Select Year / Grade Level',
-      4: 'Select Semester'
+      4: 'Select Semester',
+      5: 'Select Subject'
     };
 
     // ─── Material type colors & icons ──────────────────────────────────────────
@@ -981,7 +1015,8 @@
       if (materialNav.step >= 2 && materialNav.level) crumbs.push({ label: materialNav.level, step: 1, icon: materialNav.level === 'College' ? '🎓' : '🏫' });
       if (materialNav.step >= 3 && materialNav.course) crumbs.push({ label: materialNav.course, step: 2, icon: '📘' });
       if (materialNav.step >= 4 && materialNav.year) crumbs.push({ label: materialNav.year, step: 3, icon: '📅' });
-      if (materialNav.semester) crumbs.push({ label: materialNav.semester, step: 4, icon: '📆' });
+      if (materialNav.step >= 5 && materialNav.semester) crumbs.push({ label: materialNav.semester, step: 4, icon: '📆' });
+      if (materialNav.subject) crumbs.push({ label: materialNav.subject, step: 5, icon: '📖' });
 
       var html = '<nav class="flex items-center flex-wrap gap-1.5 mb-6 mat-animate-fade">';
       html += '<div class="flex items-center flex-wrap gap-1.5 px-4 py-2.5 rounded-xl bg-white/60 dark:bg-gray-800/50 backdrop-blur border border-gray-200/60 dark:border-gray-700/40 shadow-sm">';
@@ -1000,26 +1035,32 @@
 
     function navJumpToStep(step) {
       if (step === 0) {
-        materialNav = { step: 1, level: null, course: null, year: null, semester: null };
+        materialNav = { step: 1, level: null, course: null, year: null, semester: null, subject: null };
       } else if (step === 1) {
         materialNav.step = 2;
         materialNav.course = null;
         materialNav.year = null;
         materialNav.semester = null;
+        materialNav.subject = null;
       } else if (step === 2) {
         materialNav.step = 3;
         materialNav.year = null;
         materialNav.semester = null;
+        materialNav.subject = null;
       } else if (step === 3) {
         materialNav.step = 4;
         materialNav.semester = null;
+        materialNav.subject = null;
+      } else if (step === 4) {
+        materialNav.step = 5;
+        materialNav.subject = null;
       }
       renderNavigationStep();
     }
 
     // Quick nav from sidebar — jump straight to a level's step 2
     function quickNavLevel(level) {
-      materialNav = { step: 2, level: level, course: null, year: null, semester: null };
+      materialNav = { step: 2, level: level, course: null, year: null, semester: null, subject: null };
       renderNavigationStep();
     }
 
@@ -1029,7 +1070,7 @@
         var searchInput = document.getElementById('matSidebarSearch');
         if (searchInput) {
           searchInput.addEventListener('input', function() {
-            if (materialNav.step < 5 || !materialsCache.length) return;
+            if (materialNav.step < 6 || !materialsCache.length) return;
             var q = this.value.toLowerCase().trim();
             var feed = document.getElementById('postsFeed');
             if (!feed) return;
@@ -1073,10 +1114,11 @@
         return;
       }
       materialNav.step--;
-      if (materialNav.step === 1) { materialNav.level = null; materialNav.course = null; materialNav.year = null; materialNav.semester = null; }
-      if (materialNav.step === 2) { materialNav.course = null; materialNav.year = null; materialNav.semester = null; }
-      if (materialNav.step === 3) { materialNav.year = null; materialNav.semester = null; }
-      if (materialNav.step === 4) { materialNav.semester = null; }
+      if (materialNav.step === 1) { materialNav.level = null; materialNav.course = null; materialNav.year = null; materialNav.semester = null; materialNav.subject = null; }
+      if (materialNav.step === 2) { materialNav.course = null; materialNav.year = null; materialNav.semester = null; materialNav.subject = null; }
+      if (materialNav.step === 3) { materialNav.year = null; materialNav.semester = null; materialNav.subject = null; }
+      if (materialNav.step === 4) { materialNav.semester = null; materialNav.subject = null; }
+      if (materialNav.step === 5) { materialNav.subject = null; }
       renderNavigationStep();
     }
 
@@ -1168,6 +1210,19 @@
           var escapedOpt = opt.replace(/'/g, "\\'");
           cards.push(buildNavCard(opt, "selectNavSemester('" + escapedOpt + "')", '📆'));
         });
+      } else if (step === 5) {
+        // Step 5: Subject (data-driven)
+        var subjects = getSubjectsForNav();
+        if (subjects && subjects.length > 0) {
+          subjects.forEach(function(subj) {
+            var escapedName = (subj.code + ': ' + subj.name).replace(/'/g, "\\'");
+            cards.push(buildNavCard(subj.code + ': ' + subj.name, "selectNavSubject('" + escapedName + "')", subj.icon, subj.code));
+          });
+        } else {
+          // Fallback: no subjects defined for this combination — skip directly to materials
+          loadFilteredMaterials();
+          return;
+        }
       }
 
       var html = '<div class="mat-animate-fade">';
@@ -1180,12 +1235,12 @@
         '<svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>' +
       '</button>';
       html += '<div>';
-      html += '<p class="text-xs text-emerald-600 dark:text-emerald-400 uppercase tracking-wider font-bold">Step ' + step + ' of 4</p>';
+      html += '<p class="text-xs text-emerald-600 dark:text-emerald-400 uppercase tracking-wider font-bold">Step ' + step + ' of 5</p>';
       html += '<h3 class="text-xl font-bold text-gray-900 dark:text-white">' + navStepLabels[step] + '</h3>';
       html += '</div></div>';
       // Step progress dots
       html += '<div class="flex items-center gap-2">';
-      for (var d = 1; d <= 4; d++) {
+      for (var d = 1; d <= 5; d++) {
         if (d < step) html += '<div class="w-8 h-1.5 rounded-full bg-emerald-500"></div>';
         else if (d === step) html += '<div class="w-8 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>';
         else html += '<div class="w-8 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700"></div>';
@@ -1229,6 +1284,13 @@
 
     function selectNavSemester(semester) {
       materialNav.semester = semester;
+      materialNav.step = 5;
+      materialNav.subject = null;
+      renderNavigationStep();
+    }
+
+    function selectNavSubject(subject) {
+      materialNav.subject = subject;
       loadFilteredMaterials();
     }
 
@@ -1244,6 +1306,9 @@
       params.append('course_strand', materialNav.course);
       params.append('year_grade', materialNav.year);
       params.append('semester', materialNav.semester);
+      if (materialNav.subject) {
+        params.append('subject_name', materialNav.subject);
+      }
 
       var postsFeed = document.getElementById('postsFeed');
 
@@ -1258,12 +1323,21 @@
         '</button>';
         h += '<div>';
         h += '<p class="text-xs text-emerald-600 dark:text-emerald-400 uppercase tracking-wider font-bold">Viewing Materials</p>';
-        h += '<h3 class="text-xl font-bold text-gray-900 dark:text-white">' + escapeHtml(materialNav.course) + ' — ' + escapeHtml(materialNav.year) + ', ' + escapeHtml(materialNav.semester) + '</h3>';
+        var subtitle = escapeHtml(materialNav.course) + ' — ' + escapeHtml(materialNav.year) + ', ' + escapeHtml(materialNav.semester);
+        if (materialNav.subject) subtitle = escapeHtml(materialNav.subject);
+        h += '<h3 class="text-xl font-bold text-gray-900 dark:text-white">' + subtitle + '</h3>';
         h += '</div></div>';
-        // Show completed progress dots
+        // Show completed progress dots + New Material button (faculty/admin only)
+        h += '<div class="flex items-center gap-4">';
+        if (user && (user.role === 'admin' || user.role === 'faculty')) {
+          h += '<button onclick="openMaterialModal()" class="inline-flex items-center space-x-2 bg-emerald-600 dark:bg-emerald-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-colors duration-200 text-sm">' +
+            '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>' +
+            '<span>+ New Material</span>' +
+          '</button>';
+        }
         h += '<div class="flex items-center gap-2">';
-        for (var d = 1; d <= 4; d++) h += '<div class="w-8 h-1.5 rounded-full bg-emerald-500"></div>';
-        h += '</div></div>';
+        for (var d = 1; d <= 5; d++) h += '<div class="w-8 h-1.5 rounded-full bg-emerald-500"></div>';
+        h += '</div></div></div>';
         return h;
       }
 
@@ -1329,13 +1403,13 @@
         if (sidebar) sidebar.classList.remove('hidden');
         if (sortFilterBar) sortFilterBar.classList.add('hidden');
         if (newPostBtn) { newPostBtn.classList.add('hidden'); newPostBtn.classList.remove('flex'); }
-        // Show + New Material button only for faculty/admin
-        if (newMaterialBtn && (user.role === 'admin' || user.role === 'faculty')) {
-          newMaterialBtn.classList.remove('hidden');
-          newMaterialBtn.classList.add('flex');
+        // Show + New Material button only for faculty/admin (hidden during nav, shown inside subject view)
+        if (newMaterialBtn) {
+          newMaterialBtn.classList.add('hidden');
+          newMaterialBtn.classList.remove('flex');
         }
         // Reset navigation state and render step 1
-        materialNav = { step: 1, level: null, course: null, year: null, semester: null };
+        materialNav = { step: 1, level: null, course: null, year: null, semester: null, subject: null };
         renderNavigationStep();
         renderRecentlyViewed();
       } else if (currentCategory === 'academic') {
@@ -1476,9 +1550,32 @@
       document.getElementById('materialForm').reset();
       document.getElementById('fileLabel').textContent = 'Choose file (PDF, Word, etc.)';
       document.getElementById('thumbLabel').textContent = 'Choose image';
-      // Reset dependent dropdowns to placeholder state
-      document.getElementById('matCourseStrand').innerHTML = '<option value="">Select level first...</option>';
-      document.getElementById('matYearGrade').innerHTML = '<option value="">Select level first...</option>';
+
+      // If opened from inside a subject view, auto-fill and lock classification fields
+      if (materialNav.level && materialNav.course && materialNav.year && materialNav.semester) {
+        // Set academic level
+        var levelSel = document.getElementById('matAcademicLevel');
+        levelSel.value = materialNav.level;
+        onMatLevelChange(); // populate dependent dropdowns
+        // Set course/strand
+        document.getElementById('matCourseStrand').value = materialNav.course;
+        // Set year/grade
+        document.getElementById('matYearGrade').value = materialNav.year;
+        // Set semester
+        document.getElementById('matSemester').value = materialNav.semester;
+
+        // Set subject if present
+        var subjectInput = document.getElementById('matSubjectName');
+        if (subjectInput && materialNav.subject) {
+          subjectInput.value = materialNav.subject;
+        }
+      } else {
+        // Reset dependent dropdowns to placeholder state
+        document.getElementById('matCourseStrand').innerHTML = '<option value="">Select level first...</option>';
+        document.getElementById('matYearGrade').innerHTML = '<option value="">Select level first...</option>';
+        var subjectInput = document.getElementById('matSubjectName');
+        if (subjectInput) subjectInput.value = '';
+      }
       document.getElementById('newMaterialModal').classList.remove('hidden');
     }
 
@@ -1533,9 +1630,10 @@
       var courseStrand = document.getElementById('matCourseStrand').value;
       var yearGrade = document.getElementById('matYearGrade').value;
       var semester = document.getElementById('matSemester').value;
+      var subjectName = document.getElementById('matSubjectName').value.trim();
 
-      if (!academicLevel || !courseStrand || !yearGrade || !semester) {
-        alert('Please fill in all classification fields (Academic Level, Course/Strand, Year/Grade, Semester).');
+      if (!academicLevel || !courseStrand || !yearGrade || !semester || !subjectName) {
+        alert('Please fill in all classification fields (Academic Level, Course/Strand, Year/Grade, Semester, Subject).');
         return;
       }
 
@@ -1551,6 +1649,7 @@
       formData.append('course_strand', courseStrand);
       formData.append('year_grade', yearGrade);
       formData.append('semester', semester);
+      formData.append('subject_name', subjectName);
 
       var fileInput = document.getElementById('materialFile');
       if (fileInput.files[0]) formData.append('material_file', fileInput.files[0]);
@@ -1574,7 +1673,12 @@
         }
         alert('Learning material uploaded successfully!');
         closeMaterialModal();
-        loadCategory(getCurrentUser());
+        // Reload materials within the current subject view if available
+        if (materialNav.subject) {
+          loadFilteredMaterials();
+        } else {
+          loadCategory(getCurrentUser());
+        }
       })
       .catch(function() {
         submitBtn.disabled = false;
