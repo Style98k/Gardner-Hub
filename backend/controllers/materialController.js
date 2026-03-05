@@ -6,7 +6,7 @@ const mime = require("mime-types");
 // ─── Create Learning Material (Faculty/Admin Only) ──────────────────────────
 exports.createMaterial = async (req, res) => {
   try {
-    const { title, content, material_type, is_downloadable } = req.body;
+    const { title, content, material_type, is_downloadable, academic_level, course_strand, year_grade, semester } = req.body;
     const authorId = req.user.id;
     const userRole = req.user.role;
 
@@ -20,6 +20,11 @@ exports.createMaterial = async (req, res) => {
     // Validate required fields
     if (!title || !content) {
       return res.status(400).json({ message: "Title and description are required." });
+    }
+
+    // Validate classification fields
+    if (!academic_level || !course_strand || !year_grade || !semester) {
+      return res.status(400).json({ message: "Academic level, course/strand, year/grade, and semester are required." });
     }
 
     // Validate material_type
@@ -52,9 +57,9 @@ exports.createMaterial = async (req, res) => {
 
     const [result] = await pool.query(
       `INSERT INTO forum_threads 
-        (category, title, content, material_type, file_path, thumbnail_path, is_downloadable, author_id) 
-       VALUES ('materials', ?, ?, ?, ?, ?, ?, ?)`,
-      [title, content, material_type, filePath, thumbnailPath, downloadable, authorId]
+        (category, title, content, material_type, file_path, thumbnail_path, is_downloadable, author_id, academic_level, course_strand, year_grade, semester) 
+       VALUES ('materials', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [title, content, material_type, filePath, thumbnailPath, downloadable, authorId, academic_level, course_strand, year_grade, semester]
     );
 
     res.status(201).json({
@@ -68,6 +73,10 @@ exports.createMaterial = async (req, res) => {
         thumbnail_path: thumbnailPath,
         is_downloadable: downloadable,
         author_id: authorId,
+        academic_level,
+        course_strand,
+        year_grade,
+        semester,
       },
     });
   } catch (error) {
@@ -81,14 +90,37 @@ exports.getMaterials = async (req, res) => {
   try {
     const userRole = req.user ? req.user.role : null;
 
+    // Build dynamic WHERE clause for hierarchical filtering
+    let whereClauses = ["t.category = 'materials'"];
+    let queryParams = [];
+
+    if (req.query.academic_level) {
+      whereClauses.push('t.academic_level = ?');
+      queryParams.push(req.query.academic_level);
+    }
+    if (req.query.course_strand) {
+      whereClauses.push('t.course_strand = ?');
+      queryParams.push(req.query.course_strand);
+    }
+    if (req.query.year_grade) {
+      whereClauses.push('t.year_grade = ?');
+      queryParams.push(req.query.year_grade);
+    }
+    if (req.query.semester) {
+      whereClauses.push('t.semester = ?');
+      queryParams.push(req.query.semester);
+    }
+
     const [rows] = await pool.query(
       `SELECT t.id, t.title, t.content, t.material_type, t.file_path, t.thumbnail_path, 
               t.is_downloadable, t.created_at, t.updated_at,
+              t.academic_level, t.course_strand, t.year_grade, t.semester,
               u.full_name AS author_name, u.role AS author_role, u.profile_photo AS author_photo
        FROM forum_threads t
        JOIN users u ON t.author_id = u.id
-       WHERE t.category = 'materials'
-       ORDER BY t.created_at DESC`
+       WHERE ${whereClauses.join(' AND ')}
+       ORDER BY t.created_at DESC`,
+      queryParams
     );
 
     // Return materials with stream URL + public URL; strip raw file_path for students
@@ -123,6 +155,7 @@ exports.getMaterialDetail = async (req, res) => {
     const [rows] = await pool.query(
       `SELECT t.id, t.title, t.content, t.material_type, t.file_path, t.thumbnail_path,
               t.is_downloadable, t.created_at, t.updated_at,
+              t.academic_level, t.course_strand, t.year_grade, t.semester,
               u.full_name AS author_name, u.role AS author_role, u.profile_photo AS author_photo
        FROM forum_threads t
        JOIN users u ON t.author_id = u.id

@@ -341,6 +341,39 @@
             <input type="text" id="materialTitle" required class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. Chapter 3 — Data Structures Handout">
           </div>
 
+          <!-- Classification Dropdowns (4 fields) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-800/40">
+            <div>
+              <label class="block text-xs font-semibold text-emerald-700 dark:text-emerald-400 mb-1">Academic Level <span class="text-red-500">*</span></label>
+              <select id="matAcademicLevel" required onchange="onMatLevelChange()" class="w-full px-2.5 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="">Select level...</option>
+                <option value="Senior High School">Senior High School</option>
+                <option value="College">College</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-emerald-700 dark:text-emerald-400 mb-1">Course / Strand <span class="text-red-500">*</span></label>
+              <select id="matCourseStrand" required class="w-full px-2.5 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="">Select level first...</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-emerald-700 dark:text-emerald-400 mb-1">Year / Grade <span class="text-red-500">*</span></label>
+              <select id="matYearGrade" required class="w-full px-2.5 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="">Select level first...</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-emerald-700 dark:text-emerald-400 mb-1">Semester <span class="text-red-500">*</span></label>
+              <select id="matSemester" required class="w-full px-2.5 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="">Select semester...</option>
+                <option value="1st Semester">1st Semester</option>
+                <option value="2nd Semester">2nd Semester</option>
+                <option value="3rd Semester">3rd Semester</option>
+              </select>
+            </div>
+          </div>
+
           <!-- Material Type -->
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Material Type <span class="text-red-500">*</span></label>
@@ -577,6 +610,35 @@
     };
 
     var currentCategory = '';
+
+    // ─── Hierarchical Navigation State & Data ─────────────────────────────────
+    var materialNav = { step: 1, level: null, course: null, year: null, semester: null };
+
+    var collegePrograms = [
+      'BS Computer Science', 'BS Information Technology', 'BS Information System',
+      'BS Business Administration', 'BS Computer Engineering', 'BS Real Estate Management'
+    ];
+    var shsStrands = [
+      'ABM', 'GAS', 'HUMSS', 'STEM', 'Arts and Design',
+      'TVL - Animation (NC II)', 'TVL - Computer Programming (NC IV)'
+    ];
+    var collegeYears = ['1st Year', '2nd Year', '3rd Year'];
+    var shsGrades = ['Grade 11', 'Grade 12'];
+    var semesterOptions = ['1st Semester', '2nd Semester', '3rd Semester'];
+
+    var navStepIcons = {
+      1: '🏫',
+      2: '📚',
+      3: '📅',
+      4: '📆'
+    };
+
+    var navStepLabels = {
+      1: 'Select Academic Level',
+      2: 'Select Course / Strand',
+      3: 'Select Year / Grade Level',
+      4: 'Select Semester'
+    };
 
     // ─── Material type colors & icons ──────────────────────────────────────────
     var materialTypeConfig = {
@@ -817,6 +879,212 @@
       '</div>';
     }
 
+    // ─── Breadcrumb Renderer ──────────────────────────────────────────────────
+    function renderBreadcrumb() {
+      var crumbs = [{ label: 'Materials', step: 0 }];
+      if (materialNav.step >= 2 && materialNav.level) crumbs.push({ label: materialNav.level, step: 1 });
+      if (materialNav.step >= 3 && materialNav.course) crumbs.push({ label: materialNav.course, step: 2 });
+      if (materialNav.step >= 4 && materialNav.year) crumbs.push({ label: materialNav.year, step: 3 });
+      if (materialNav.semester) crumbs.push({ label: materialNav.semester, step: 4 });
+
+      var html = '<nav class="flex items-center flex-wrap gap-1 mb-6 text-sm">';
+      crumbs.forEach(function(c, i) {
+        if (i > 0) html += '<svg class="w-4 h-4 text-gray-400 dark:text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>';
+        var isLast = i === crumbs.length - 1;
+        if (isLast) {
+          html += '<span class="font-semibold text-emerald-700 dark:text-emerald-400">' + escapeHtml(c.label) + '</span>';
+        } else {
+          html += '<button onclick="navJumpToStep(' + c.step + ')" class="text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline transition-colors duration-200">' + escapeHtml(c.label) + '</button>';
+        }
+      });
+      html += '</nav>';
+      return html;
+    }
+
+    function navJumpToStep(step) {
+      if (step === 0) {
+        materialNav = { step: 1, level: null, course: null, year: null, semester: null };
+      } else if (step === 1) {
+        materialNav.step = 2;
+        materialNav.course = null;
+        materialNav.year = null;
+        materialNav.semester = null;
+      } else if (step === 2) {
+        materialNav.step = 3;
+        materialNav.year = null;
+        materialNav.semester = null;
+      } else if (step === 3) {
+        materialNav.step = 4;
+        materialNav.semester = null;
+      }
+      renderNavigationStep();
+    }
+
+    function navGoBack() {
+      if (materialNav.step <= 1) {
+        goBack();
+        return;
+      }
+      materialNav.step--;
+      if (materialNav.step === 1) { materialNav.level = null; materialNav.course = null; materialNav.year = null; materialNav.semester = null; }
+      if (materialNav.step === 2) { materialNav.course = null; materialNav.year = null; materialNav.semester = null; }
+      if (materialNav.step === 3) { materialNav.year = null; materialNav.semester = null; }
+      if (materialNav.step === 4) { materialNav.semester = null; }
+      renderNavigationStep();
+    }
+
+    // ─── Build a selection card HTML ─────────────────────────────────────────
+    function buildNavCard(label, onClick, iconEmoji) {
+      return '<button onclick="' + onClick + '" class="group flex flex-col items-center justify-center p-6 bg-white dark:bg-gray-900 rounded-xl border-2 border-gray-200 dark:border-gray-800 hover:border-emerald-400 dark:hover:border-emerald-500 hover:shadow-lg transition-all duration-200 cursor-pointer">' +
+        '<div class="w-14 h-14 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200">' +
+          '<span class="text-2xl">' + iconEmoji + '</span>' +
+        '</div>' +
+        '<span class="text-sm font-semibold text-gray-800 dark:text-gray-200 text-center">' + escapeHtml(label) + '</span>' +
+      '</button>';
+    }
+
+    // ─── Hierarchical Navigation Renderer ────────────────────────────────────
+    function renderNavigationStep() {
+      var postsFeed = document.getElementById('postsFeed');
+      var step = materialNav.step;
+      var cards = [];
+      var icon = navStepIcons[step] || '📁';
+
+      if (step === 1) {
+        // Step 1: Academic Level
+        cards.push(buildNavCard('Senior High School', "selectNavLevel('Senior High School')", '🏫'));
+        cards.push(buildNavCard('College', "selectNavLevel('College')", '🎓'));
+      } else if (step === 2) {
+        // Step 2: Course / Strand
+        var options = materialNav.level === 'College' ? collegePrograms : shsStrands;
+        options.forEach(function(opt) {
+          var escapedOpt = opt.replace(/'/g, "\\'");
+          cards.push(buildNavCard(opt, "selectNavCourse('" + escapedOpt + "')", materialNav.level === 'College' ? '🎓' : '📖'));
+        });
+      } else if (step === 3) {
+        // Step 3: Year / Grade
+        var yearOptions = materialNav.level === 'College' ? collegeYears : shsGrades;
+        yearOptions.forEach(function(opt) {
+          var escapedOpt = opt.replace(/'/g, "\\'");
+          cards.push(buildNavCard(opt, "selectNavYear('" + escapedOpt + "')", '📅'));
+        });
+      } else if (step === 4) {
+        // Step 4: Semester
+        semesterOptions.forEach(function(opt) {
+          var escapedOpt = opt.replace(/'/g, "\\'");
+          cards.push(buildNavCard(opt, "selectNavSemester('" + escapedOpt + "')", '📆'));
+        });
+      }
+
+      var html = renderBreadcrumb();
+
+      // Back button + step title
+      html += '<div class="flex items-center space-x-3 mb-6">';
+      html += '<button onclick="navGoBack()" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">' +
+        '<svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>' +
+      '</button>';
+      html += '<div>';
+      html += '<p class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider font-semibold">Step ' + step + ' of 4</p>';
+      html += '<h3 class="text-lg font-bold text-gray-900 dark:text-white">' + navStepLabels[step] + '</h3>';
+      html += '</div></div>';
+
+      // Cards grid
+      html += '<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">';
+      html += cards.join('');
+      html += '</div>';
+
+      postsFeed.innerHTML = html;
+    }
+
+    // ─── Navigation selection handlers ───────────────────────────────────────
+    function selectNavLevel(level) {
+      materialNav.level = level;
+      materialNav.step = 2;
+      renderNavigationStep();
+    }
+
+    function selectNavCourse(course) {
+      materialNav.course = course;
+      materialNav.step = 3;
+      renderNavigationStep();
+    }
+
+    function selectNavYear(year) {
+      materialNav.year = year;
+      materialNav.step = 4;
+      renderNavigationStep();
+    }
+
+    function selectNavSemester(semester) {
+      materialNav.semester = semester;
+      loadFilteredMaterials();
+    }
+
+    // ─── Load filtered materials (after all 4 steps chosen) ─────────────────
+    function loadFilteredMaterials() {
+      var user = getCurrentUser();
+      var token = localStorage.getItem('gardnerHub_token');
+      var headers = {};
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+
+      var params = new URLSearchParams();
+      params.append('academic_level', materialNav.level);
+      params.append('course_strand', materialNav.course);
+      params.append('year_grade', materialNav.year);
+      params.append('semester', materialNav.semester);
+
+      var postsFeed = document.getElementById('postsFeed');
+
+      // Show breadcrumb + loading
+      var html = renderBreadcrumb();
+      html += '<div class="flex items-center space-x-3 mb-6">';
+      html += '<button onclick="navGoBack()" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">' +
+        '<svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>' +
+      '</button>';
+      html += '<div>';
+      html += '<p class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider font-semibold">Viewing Materials</p>';
+      html += '<h3 class="text-lg font-bold text-gray-900 dark:text-white">' + escapeHtml(materialNav.course) + ' — ' + escapeHtml(materialNav.year) + ', ' + escapeHtml(materialNav.semester) + '</h3>';
+      html += '</div></div>';
+      html += '<div class="text-center py-8"><svg class="w-8 h-8 text-emerald-500 animate-spin mx-auto" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg></div>';
+      postsFeed.innerHTML = html;
+
+      fetch(API_BASE + '/materials?' + params.toString(), { headers: headers })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          var materials = data.materials || [];
+          materialsCache = materials;
+
+          var resultHtml = renderBreadcrumb();
+          resultHtml += '<div class="flex items-center space-x-3 mb-6">';
+          resultHtml += '<button onclick="navGoBack()" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">' +
+            '<svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>' +
+          '</button>';
+          resultHtml += '<div>';
+          resultHtml += '<p class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider font-semibold">Viewing Materials</p>';
+          resultHtml += '<h3 class="text-lg font-bold text-gray-900 dark:text-white">' + escapeHtml(materialNav.course) + ' — ' + escapeHtml(materialNav.year) + ', ' + escapeHtml(materialNav.semester) + '</h3>';
+          resultHtml += '</div></div>';
+
+          if (materials.length > 0) {
+            resultHtml += '<div class="space-y-4">';
+            resultHtml += materials.map(function(m) { return renderMaterialCard(m, user ? user.role : 'student'); }).join('');
+            resultHtml += '</div>';
+          } else {
+            resultHtml += '<div class="text-center py-16">' +
+              '<div class="w-16 h-16 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mx-auto mb-4">' +
+                '<svg class="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>' +
+              '</div>' +
+              '<p class="text-gray-500 dark:text-gray-400 font-medium">No learning materials found for this selection.</p>' +
+              '<p class="text-sm text-gray-400 dark:text-gray-500 mt-1">Faculty and admins can upload handouts, syllabi, and more.</p>' +
+            '</div>';
+          }
+
+          postsFeed.innerHTML = resultHtml;
+        })
+        .catch(function() {
+          postsFeed.innerHTML = renderBreadcrumb() + '<div class="text-center py-12"><p class="text-gray-500 dark:text-gray-400">Unable to load materials. Server may be offline.</p></div>';
+        });
+    }
+
     // ─── Load Category ─────────────────────────────────────────────────────────
     function loadCategory(user) {
       currentCategory = getUrlParameter('category') || 'academic';
@@ -838,14 +1106,16 @@
       var newMaterialBtn = document.getElementById('newMaterialBtn');
 
       if (currentCategory === 'materials') {
-        // Materials category: use dedicated materials logic
+        // Materials category: use hierarchical navigation
         if (newPostBtn) { newPostBtn.classList.add('hidden'); newPostBtn.classList.remove('flex'); }
         // Show + New Material button only for faculty/admin
         if (newMaterialBtn && (user.role === 'admin' || user.role === 'faculty')) {
           newMaterialBtn.classList.remove('hidden');
           newMaterialBtn.classList.add('flex');
         }
-        loadMaterials(user);
+        // Reset navigation state and render step 1
+        materialNav = { step: 1, level: null, course: null, year: null, semester: null };
+        renderNavigationStep();
       } else if (currentCategory === 'academic') {
         // Academic category: use Reddit-style composer
         if (newPostBtn) { newPostBtn.classList.add('hidden'); newPostBtn.classList.remove('flex'); }
@@ -980,6 +1250,9 @@
       document.getElementById('materialForm').reset();
       document.getElementById('fileLabel').textContent = 'Choose file (PDF, Word, etc.)';
       document.getElementById('thumbLabel').textContent = 'Choose image';
+      // Reset dependent dropdowns to placeholder state
+      document.getElementById('matCourseStrand').innerHTML = '<option value="">Select level first...</option>';
+      document.getElementById('matYearGrade').innerHTML = '<option value="">Select level first...</option>';
       document.getElementById('newMaterialModal').classList.remove('hidden');
     }
 
@@ -997,10 +1270,49 @@
       }
     }
 
+    // ─── Modal dropdown cascade logic ──────────────────────────────────────
+    function onMatLevelChange() {
+      var level = document.getElementById('matAcademicLevel').value;
+      var courseSelect = document.getElementById('matCourseStrand');
+      var yearSelect = document.getElementById('matYearGrade');
+
+      // Reset dependent dropdowns
+      courseSelect.innerHTML = '<option value="">Select course/strand...</option>';
+      yearSelect.innerHTML = '<option value="">Select year/grade...</option>';
+
+      if (level === 'College') {
+        collegePrograms.forEach(function(p) {
+          courseSelect.innerHTML += '<option value="' + escapeHtml(p) + '">' + escapeHtml(p) + '</option>';
+        });
+        collegeYears.forEach(function(y) {
+          yearSelect.innerHTML += '<option value="' + escapeHtml(y) + '">' + escapeHtml(y) + '</option>';
+        });
+      } else if (level === 'Senior High School') {
+        shsStrands.forEach(function(s) {
+          courseSelect.innerHTML += '<option value="' + escapeHtml(s) + '">' + escapeHtml(s) + '</option>';
+        });
+        shsGrades.forEach(function(g) {
+          yearSelect.innerHTML += '<option value="' + escapeHtml(g) + '">' + escapeHtml(g) + '</option>';
+        });
+      }
+    }
+
     function submitMaterial(e) {
       e.preventDefault();
       var token = localStorage.getItem('gardnerHub_token');
       var submitBtn = document.getElementById('materialSubmitBtn');
+
+      // Validate classification fields
+      var academicLevel = document.getElementById('matAcademicLevel').value;
+      var courseStrand = document.getElementById('matCourseStrand').value;
+      var yearGrade = document.getElementById('matYearGrade').value;
+      var semester = document.getElementById('matSemester').value;
+
+      if (!academicLevel || !courseStrand || !yearGrade || !semester) {
+        alert('Please fill in all classification fields (Academic Level, Course/Strand, Year/Grade, Semester).');
+        return;
+      }
+
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg><span>Uploading...</span>';
 
@@ -1009,6 +1321,10 @@
       formData.append('content', document.getElementById('materialContent').value.trim());
       formData.append('material_type', document.getElementById('materialType').value);
       formData.append('is_downloadable', document.getElementById('materialDownloadable').checked ? '1' : '0');
+      formData.append('academic_level', academicLevel);
+      formData.append('course_strand', courseStrand);
+      formData.append('year_grade', yearGrade);
+      formData.append('semester', semester);
 
       var fileInput = document.getElementById('materialFile');
       if (fileInput.files[0]) formData.append('material_file', fileInput.files[0]);
