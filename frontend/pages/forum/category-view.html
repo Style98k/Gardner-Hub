@@ -49,6 +49,59 @@
       max-width: 100% !important;
       overflow: hidden !important;
     }
+
+    /* ── Materials Dashboard Animations ── */
+    @keyframes matFadeSlideUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes matFadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    .mat-animate-in {
+      animation: matFadeSlideUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .mat-animate-fade {
+      animation: matFadeIn 0.35s ease both;
+    }
+    .mat-card-stagger:nth-child(1) { animation-delay: 0ms; }
+    .mat-card-stagger:nth-child(2) { animation-delay: 60ms; }
+    .mat-card-stagger:nth-child(3) { animation-delay: 120ms; }
+    .mat-card-stagger:nth-child(4) { animation-delay: 180ms; }
+    .mat-card-stagger:nth-child(5) { animation-delay: 240ms; }
+    .mat-card-stagger:nth-child(6) { animation-delay: 300ms; }
+    .mat-card-stagger:nth-child(7) { animation-delay: 360ms; }
+
+    /* ── Glassmorphism Card ── */
+    .glass-card {
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.18);
+    }
+    .dark .glass-card {
+      background: rgba(17,24,39,0.65);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .glass-card:hover {
+      box-shadow: 0 8px 32px rgba(16,185,129,0.15);
+    }
+    .dark .glass-card:hover {
+      box-shadow: 0 8px 32px rgba(16,185,129,0.10);
+    }
+
+    /* ── Sidebar Glass ── */
+    .glass-sidebar {
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .dark .glass-sidebar {
+      background: rgba(17,24,39,0.55);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
   </style>
   
   <!-- Tailwind Configuration -->
@@ -143,11 +196,54 @@
   </header>
 
   <!-- Main Layout -->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+  <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
     <div class="flex gap-6">
 
-      <!-- Main Content Area -->
-      <div class="flex-1">
+      <!-- ════ Materials Sidebar (shown only for materials category) ════ -->
+      <aside id="materialsSidebar" class="hidden w-72 flex-shrink-0">
+        <div class="sticky top-20 space-y-4">
+
+          <!-- Search Materials -->
+          <div class="glass-sidebar rounded-2xl p-4">
+            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Search Materials</label>
+            <div class="relative">
+              <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <input type="text" id="matSidebarSearch" placeholder="Search handouts..." class="w-full pl-10 pr-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-800/70 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors" />
+            </div>
+          </div>
+
+          <!-- Quick Navigation -->
+          <div class="glass-sidebar rounded-2xl p-4">
+            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Quick Navigation</label>
+            <nav class="space-y-1" id="sidebarQuickNav">
+              <button onclick="navJumpToStep(0)" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0h4"/></svg>
+                Home
+              </button>
+              <button onclick="quickNavLevel('Senior High School')" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:text-amber-700 dark:hover:text-amber-400 transition-colors">
+                <span class="text-base">🏫</span>
+                All SHS
+              </button>
+              <button onclick="quickNavLevel('College')" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors">
+                <span class="text-base">🎓</span>
+                All College
+              </button>
+            </nav>
+          </div>
+
+          <!-- Recently Viewed -->
+          <div class="glass-sidebar rounded-2xl p-4">
+            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Recently Viewed</label>
+            <div id="sidebarRecentlyViewed" class="space-y-2">
+              <p class="text-xs text-gray-400 dark:text-gray-500 italic">No materials viewed yet.</p>
+            </div>
+          </div>
+
+        </div>
+      </aside>
+
+      <!-- ════ Main Content Area ════ -->
+      <div class="flex-1 min-w-0">
         
         <!-- Category Header -->
         <div class="mb-6">
@@ -156,7 +252,7 @@
         </div>
 
         <!-- Sort & Filter -->
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center justify-between mb-6" id="sortFilterBar">
           <div class="flex items-center space-x-4">
             <select class="text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
               <option>Latest Posts</option>
@@ -849,7 +945,7 @@
         '</div>';
       }
 
-      return '<div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 hover:shadow-lg hover:border-gray-300 dark:hover:border-gray-700 transition-all duration-200 cursor-pointer" onclick="openPreviewModal(' + material.id + ')">' +
+      return '<div data-material-title="' + escapeHtml(material.title) + '" class="glass-card mat-animate-in rounded-xl hover:shadow-lg hover:scale-[1.01] transition-all duration-200 cursor-pointer" onclick="openPreviewModal(' + material.id + ')">' +
         '<div class="p-5 flex items-start">' +
           '<!-- File Icon -->' +
           '<div class="w-12 h-12 rounded-xl ' + typeConf.bg + ' flex items-center justify-center flex-shrink-0">' +
@@ -881,23 +977,24 @@
 
     // ─── Breadcrumb Renderer ──────────────────────────────────────────────────
     function renderBreadcrumb() {
-      var crumbs = [{ label: 'Materials', step: 0 }];
-      if (materialNav.step >= 2 && materialNav.level) crumbs.push({ label: materialNav.level, step: 1 });
-      if (materialNav.step >= 3 && materialNav.course) crumbs.push({ label: materialNav.course, step: 2 });
-      if (materialNav.step >= 4 && materialNav.year) crumbs.push({ label: materialNav.year, step: 3 });
-      if (materialNav.semester) crumbs.push({ label: materialNav.semester, step: 4 });
+      var crumbs = [{ label: 'Materials', step: 0, icon: '📦' }];
+      if (materialNav.step >= 2 && materialNav.level) crumbs.push({ label: materialNav.level, step: 1, icon: materialNav.level === 'College' ? '🎓' : '🏫' });
+      if (materialNav.step >= 3 && materialNav.course) crumbs.push({ label: materialNav.course, step: 2, icon: '📘' });
+      if (materialNav.step >= 4 && materialNav.year) crumbs.push({ label: materialNav.year, step: 3, icon: '📅' });
+      if (materialNav.semester) crumbs.push({ label: materialNav.semester, step: 4, icon: '📆' });
 
-      var html = '<nav class="flex items-center flex-wrap gap-1 mb-6 text-sm">';
+      var html = '<nav class="flex items-center flex-wrap gap-1.5 mb-6 mat-animate-fade">';
+      html += '<div class="flex items-center flex-wrap gap-1.5 px-4 py-2.5 rounded-xl bg-white/60 dark:bg-gray-800/50 backdrop-blur border border-gray-200/60 dark:border-gray-700/40 shadow-sm">';
       crumbs.forEach(function(c, i) {
-        if (i > 0) html += '<svg class="w-4 h-4 text-gray-400 dark:text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>';
+        if (i > 0) html += '<svg class="w-3.5 h-3.5 text-gray-300 dark:text-gray-600 flex-shrink-0 mx-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>';
         var isLast = i === crumbs.length - 1;
         if (isLast) {
-          html += '<span class="font-semibold text-emerald-700 dark:text-emerald-400">' + escapeHtml(c.label) + '</span>';
+          html += '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-sm font-semibold">' + c.icon + ' ' + escapeHtml(c.label) + '</span>';
         } else {
-          html += '<button onclick="navJumpToStep(' + c.step + ')" class="text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline transition-colors duration-200">' + escapeHtml(c.label) + '</button>';
+          html += '<button onclick="navJumpToStep(' + c.step + ')" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all duration-200">' + c.icon + ' ' + escapeHtml(c.label) + '</button>';
         }
       });
-      html += '</nav>';
+      html += '</div></nav>';
       return html;
     }
 
@@ -920,6 +1017,56 @@
       renderNavigationStep();
     }
 
+    // Quick nav from sidebar — jump straight to a level's step 2
+    function quickNavLevel(level) {
+      materialNav = { step: 2, level: level, course: null, year: null, semester: null };
+      renderNavigationStep();
+    }
+
+    // Sidebar search filter
+    (function() {
+      document.addEventListener('DOMContentLoaded', function() {
+        var searchInput = document.getElementById('matSidebarSearch');
+        if (searchInput) {
+          searchInput.addEventListener('input', function() {
+            if (materialNav.step < 5 || !materialsCache.length) return;
+            var q = this.value.toLowerCase().trim();
+            var feed = document.getElementById('postsFeed');
+            if (!feed) return;
+            var cards = feed.querySelectorAll('[data-material-title]');
+            cards.forEach(function(card) {
+              var title = (card.getAttribute('data-material-title') || '').toLowerCase();
+              card.style.display = (!q || title.includes(q)) ? '' : 'none';
+            });
+          });
+        }
+      });
+    })();
+
+    // Recently-viewed tracking
+    var recentlyViewed = JSON.parse(localStorage.getItem('matRecentlyViewed') || '[]');
+    function addToRecentlyViewed(id, title) {
+      recentlyViewed = recentlyViewed.filter(function(r) { return r.id !== id; });
+      recentlyViewed.unshift({ id: id, title: title });
+      if (recentlyViewed.length > 5) recentlyViewed = recentlyViewed.slice(0, 5);
+      localStorage.setItem('matRecentlyViewed', JSON.stringify(recentlyViewed));
+      renderRecentlyViewed();
+    }
+    function renderRecentlyViewed() {
+      var el = document.getElementById('sidebarRecentlyViewed');
+      if (!el) return;
+      if (!recentlyViewed.length) {
+        el.innerHTML = '<p class="text-xs text-gray-400 dark:text-gray-500 italic">No materials viewed yet.</p>';
+        return;
+      }
+      el.innerHTML = recentlyViewed.map(function(r) {
+        return '<button onclick="openPreviewModal(' + r.id + ')" class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors truncate text-left">' +
+          '<svg class="w-3.5 h-3.5 flex-shrink-0 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>' +
+          '<span class="truncate">' + escapeHtml(r.title) + '</span>' +
+        '</button>';
+      }).join('');
+    }
+
     function navGoBack() {
       if (materialNav.step <= 1) {
         goBack();
@@ -933,13 +1080,22 @@
       renderNavigationStep();
     }
 
-    // ─── Build a selection card HTML ─────────────────────────────────────────
-    function buildNavCard(label, onClick, iconEmoji) {
-      return '<button onclick="' + onClick + '" class="group flex flex-col items-center justify-center p-6 bg-white dark:bg-gray-900 rounded-xl border-2 border-gray-200 dark:border-gray-800 hover:border-emerald-400 dark:hover:border-emerald-500 hover:shadow-lg transition-all duration-200 cursor-pointer">' +
-        '<div class="w-14 h-14 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200">' +
-          '<span class="text-2xl">' + iconEmoji + '</span>' +
+    // ─── Build a selection card HTML (Glassmorphism) ──────────────────────────
+    function buildNavCard(label, onClick, iconEmoji, subtitle) {
+      var sub = subtitle ? '<p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5 text-center leading-relaxed">' + escapeHtml(subtitle) + '</p>' : '';
+      return '<button onclick="' + onClick + '" class="mat-card-stagger mat-animate-in group relative flex flex-col items-center justify-center p-10 rounded-2xl glass-card hover:scale-[1.03] transition-all duration-300 cursor-pointer overflow-hidden min-h-[200px]">' +
+        '<div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-teal-500/5 dark:from-emerald-400/5 dark:to-teal-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>' +
+        '<div class="relative z-10 flex flex-col items-center">' +
+          '<div class="w-18 h-18 w-[72px] h-[72px] rounded-2xl bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/40 dark:to-teal-900/30 flex items-center justify-center mb-5 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-emerald-200/30 dark:shadow-emerald-900/20">' +
+            '<span class="text-4xl">' + iconEmoji + '</span>' +
+          '</div>' +
+          '<span class="text-base font-bold text-gray-800 dark:text-gray-100 text-center">' + escapeHtml(label) + '</span>' +
+          sub +
+          '<div class="mt-4 flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-xs font-semibold opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-300">' +
+            '<span>Select</span>' +
+            '<svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform duration-300" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>' +
+          '</div>' +
         '</div>' +
-        '<span class="text-sm font-semibold text-gray-800 dark:text-gray-200 text-center">' + escapeHtml(label) + '</span>' +
       '</button>';
     }
 
@@ -950,16 +1106,54 @@
       var cards = [];
       var icon = navStepIcons[step] || '📁';
 
+      var courseIcons = {
+        'BS Computer Science': '💻', 'BS Information Technology': '🖥️', 'BS Information System': '📊',
+        'BS Business Administration': '📈', 'BS Computer Engineering': '⚙️', 'BS Real Estate Management': '🏢',
+        'ABM': '💼', 'GAS': '📚', 'HUMSS': '🗣️', 'STEM': '🔬', 'Arts and Design': '🎨',
+        'TVL - Animation (NC II)': '🎬', 'TVL - Computer Programming (NC IV)': '👨‍💻'
+      };
+
       if (step === 1) {
-        // Step 1: Academic Level
-        cards.push(buildNavCard('Senior High School', "selectNavLevel('Senior High School')", '🏫'));
-        cards.push(buildNavCard('College', "selectNavLevel('College')", '🎓'));
+        // Step 1: Academic Level — large featured cards with glassmorphism
+        cards.push(
+          '<button onclick="selectNavLevel(\'Senior High School\')" class="mat-card-stagger mat-animate-in group relative flex flex-col items-center justify-center py-20 px-8 rounded-2xl glass-card hover:scale-[1.02] transition-all duration-300 cursor-pointer overflow-hidden min-h-[320px]">' +
+            '<div class="absolute inset-0 bg-gradient-to-br from-amber-500/[0.08] to-orange-500/5 dark:from-amber-400/[0.08] dark:to-orange-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>' +
+            '<div class="relative z-10 flex flex-col items-center">' +
+              '<div class="w-28 h-28 rounded-3xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-all duration-300 shadow-xl shadow-amber-200/40 dark:shadow-amber-900/20">' +
+                '<span class="text-6xl">🏫</span>' +
+              '</div>' +
+              '<span class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Senior High School</span>' +
+              '<p class="text-sm text-gray-400 dark:text-gray-500 text-center mb-5 max-w-xs">Grades 11–12 • ABM, STEM, HUMSS, GAS & more</p>' +
+              '<div class="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-sm font-semibold opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">' +
+                '<span>Browse Strands</span>' +
+                '<svg class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>' +
+              '</div>' +
+            '</div>' +
+          '</button>'
+        );
+        cards.push(
+          '<button onclick="selectNavLevel(\'College\')" class="mat-card-stagger mat-animate-in group relative flex flex-col items-center justify-center py-20 px-8 rounded-2xl glass-card hover:scale-[1.02] transition-all duration-300 cursor-pointer overflow-hidden min-h-[320px]">' +
+            '<div class="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.08] to-teal-500/5 dark:from-emerald-400/[0.08] dark:to-teal-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>' +
+            '<div class="relative z-10 flex flex-col items-center">' +
+              '<div class="w-28 h-28 rounded-3xl bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/40 dark:to-teal-900/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-all duration-300 shadow-xl shadow-emerald-200/40 dark:shadow-emerald-900/20">' +
+                '<span class="text-6xl">🎓</span>' +
+              '</div>' +
+              '<span class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">College</span>' +
+              '<p class="text-sm text-gray-400 dark:text-gray-500 text-center mb-5 max-w-xs">1st–3rd Year • BS CS, IT, IS, BA & more</p>' +
+              '<div class="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 text-sm font-semibold opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">' +
+                '<span>Browse Programs</span>' +
+                '<svg class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>' +
+              '</div>' +
+            '</div>' +
+          '</button>'
+        );
       } else if (step === 2) {
         // Step 2: Course / Strand
         var options = materialNav.level === 'College' ? collegePrograms : shsStrands;
         options.forEach(function(opt) {
           var escapedOpt = opt.replace(/'/g, "\\'");
-          cards.push(buildNavCard(opt, "selectNavCourse('" + escapedOpt + "')", materialNav.level === 'College' ? '🎓' : '📖'));
+          var ic = courseIcons[opt] || (materialNav.level === 'College' ? '🎓' : '📖');
+          cards.push(buildNavCard(opt, "selectNavCourse('" + escapedOpt + "')", ic));
         });
       } else if (step === 3) {
         // Step 3: Year / Grade
@@ -976,22 +1170,40 @@
         });
       }
 
-      var html = renderBreadcrumb();
+      var html = '<div class="mat-animate-fade">';
+      html += renderBreadcrumb();
 
       // Back button + step title
-      html += '<div class="flex items-center space-x-3 mb-6">';
-      html += '<button onclick="navGoBack()" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">' +
+      html += '<div class="flex items-center justify-between mb-8">';
+      html += '<div class="flex items-center space-x-3">';
+      html += '<button onclick="navGoBack()" class="p-2.5 rounded-xl glass-card hover:scale-105 transition-all duration-200" title="Go back">' +
         '<svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>' +
       '</button>';
       html += '<div>';
-      html += '<p class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider font-semibold">Step ' + step + ' of 4</p>';
-      html += '<h3 class="text-lg font-bold text-gray-900 dark:text-white">' + navStepLabels[step] + '</h3>';
+      html += '<p class="text-xs text-emerald-600 dark:text-emerald-400 uppercase tracking-wider font-bold">Step ' + step + ' of 4</p>';
+      html += '<h3 class="text-xl font-bold text-gray-900 dark:text-white">' + navStepLabels[step] + '</h3>';
+      html += '</div></div>';
+      // Step progress dots
+      html += '<div class="flex items-center gap-2">';
+      for (var d = 1; d <= 4; d++) {
+        if (d < step) html += '<div class="w-8 h-1.5 rounded-full bg-emerald-500"></div>';
+        else if (d === step) html += '<div class="w-8 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>';
+        else html += '<div class="w-8 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700"></div>';
+      }
       html += '</div></div>';
 
-      // Cards grid
-      html += '<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">';
+      // Cards grid — adaptive layout
+      var gridClass = 'grid gap-5 ';
+      if (cards.length <= 2) {
+        gridClass += 'grid-cols-1 md:grid-cols-2';
+      } else if (cards.length <= 3) {
+        gridClass += 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
+      } else {
+        gridClass += 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4';
+      }
+      html += '<div class="' + gridClass + '">';
       html += cards.join('');
-      html += '</div>';
+      html += '</div></div>';
 
       postsFeed.innerHTML = html;
     }
@@ -1035,18 +1247,28 @@
 
       var postsFeed = document.getElementById('postsFeed');
 
-      // Show breadcrumb + loading
-      var html = renderBreadcrumb();
-      html += '<div class="flex items-center space-x-3 mb-6">';
-      html += '<button onclick="navGoBack()" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">' +
-        '<svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>' +
-      '</button>';
-      html += '<div>';
-      html += '<p class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider font-semibold">Viewing Materials</p>';
-      html += '<h3 class="text-lg font-bold text-gray-900 dark:text-white">' + escapeHtml(materialNav.course) + ' — ' + escapeHtml(materialNav.year) + ', ' + escapeHtml(materialNav.semester) + '</h3>';
-      html += '</div></div>';
-      html += '<div class="text-center py-8"><svg class="w-8 h-8 text-emerald-500 animate-spin mx-auto" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg></div>';
-      postsFeed.innerHTML = html;
+      // Build header section (shared between loading & results)
+      function buildHeader() {
+        var h = '<div class="mat-animate-fade">';
+        h += renderBreadcrumb();
+        h += '<div class="flex items-center justify-between mb-8">';
+        h += '<div class="flex items-center space-x-3">';
+        h += '<button onclick="navGoBack()" class="p-2.5 rounded-xl glass-card hover:scale-105 transition-all duration-200" title="Go back">' +
+          '<svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>' +
+        '</button>';
+        h += '<div>';
+        h += '<p class="text-xs text-emerald-600 dark:text-emerald-400 uppercase tracking-wider font-bold">Viewing Materials</p>';
+        h += '<h3 class="text-xl font-bold text-gray-900 dark:text-white">' + escapeHtml(materialNav.course) + ' — ' + escapeHtml(materialNav.year) + ', ' + escapeHtml(materialNav.semester) + '</h3>';
+        h += '</div></div>';
+        // Show completed progress dots
+        h += '<div class="flex items-center gap-2">';
+        for (var d = 1; d <= 4; d++) h += '<div class="w-8 h-1.5 rounded-full bg-emerald-500"></div>';
+        h += '</div></div>';
+        return h;
+      }
+
+      // Show loading
+      postsFeed.innerHTML = buildHeader() + '<div class="text-center py-8"><svg class="w-8 h-8 text-emerald-500 animate-spin mx-auto" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg></div></div>';
 
       fetch(API_BASE + '/materials?' + params.toString(), { headers: headers })
         .then(function(res) { return res.json(); })
@@ -1054,22 +1276,14 @@
           var materials = data.materials || [];
           materialsCache = materials;
 
-          var resultHtml = renderBreadcrumb();
-          resultHtml += '<div class="flex items-center space-x-3 mb-6">';
-          resultHtml += '<button onclick="navGoBack()" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">' +
-            '<svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>' +
-          '</button>';
-          resultHtml += '<div>';
-          resultHtml += '<p class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider font-semibold">Viewing Materials</p>';
-          resultHtml += '<h3 class="text-lg font-bold text-gray-900 dark:text-white">' + escapeHtml(materialNav.course) + ' — ' + escapeHtml(materialNav.year) + ', ' + escapeHtml(materialNav.semester) + '</h3>';
-          resultHtml += '</div></div>';
+          var resultHtml = buildHeader();
 
           if (materials.length > 0) {
-            resultHtml += '<div class="space-y-4">';
+            resultHtml += '<div class="space-y-3">';
             resultHtml += materials.map(function(m) { return renderMaterialCard(m, user ? user.role : 'student'); }).join('');
             resultHtml += '</div>';
           } else {
-            resultHtml += '<div class="text-center py-16">' +
+            resultHtml += '<div class="text-center py-16 mat-animate-in">' +
               '<div class="w-16 h-16 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mx-auto mb-4">' +
                 '<svg class="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>' +
               '</div>' +
@@ -1078,10 +1292,11 @@
             '</div>';
           }
 
+          resultHtml += '</div>';
           postsFeed.innerHTML = resultHtml;
         })
         .catch(function() {
-          postsFeed.innerHTML = renderBreadcrumb() + '<div class="text-center py-12"><p class="text-gray-500 dark:text-gray-400">Unable to load materials. Server may be offline.</p></div>';
+          postsFeed.innerHTML = buildHeader() + '<div class="text-center py-12 mat-animate-in"><p class="text-gray-500 dark:text-gray-400">Unable to load materials. Server may be offline.</p></div></div>';
         });
     }
 
@@ -1105,8 +1320,14 @@
       var newPostBtn = document.getElementById('newPostBtn');
       var newMaterialBtn = document.getElementById('newMaterialBtn');
 
+      // Toggle sidebar and sort/filter bar visibility
+      var sidebar = document.getElementById('materialsSidebar');
+      var sortFilterBar = document.getElementById('sortFilterBar');
+
       if (currentCategory === 'materials') {
-        // Materials category: use hierarchical navigation
+        // Materials category: use hierarchical navigation + show sidebar
+        if (sidebar) sidebar.classList.remove('hidden');
+        if (sortFilterBar) sortFilterBar.classList.add('hidden');
         if (newPostBtn) { newPostBtn.classList.add('hidden'); newPostBtn.classList.remove('flex'); }
         // Show + New Material button only for faculty/admin
         if (newMaterialBtn && (user.role === 'admin' || user.role === 'faculty')) {
@@ -1116,8 +1337,11 @@
         // Reset navigation state and render step 1
         materialNav = { step: 1, level: null, course: null, year: null, semester: null };
         renderNavigationStep();
+        renderRecentlyViewed();
       } else if (currentCategory === 'academic') {
         // Academic category: use Reddit-style composer
+        if (sidebar) sidebar.classList.add('hidden');
+        if (sortFilterBar) sortFilterBar.classList.remove('hidden');
         if (newPostBtn) { newPostBtn.classList.add('hidden'); newPostBtn.classList.remove('flex'); }
         if (newMaterialBtn) { newMaterialBtn.classList.add('hidden'); newMaterialBtn.classList.remove('flex'); }
         // Show New Discussion button for all roles (student, faculty, admin)
@@ -1132,6 +1356,8 @@
         loadForumThreads();
       } else {
         // Non-materials category: use regular forum logic
+        if (sidebar) sidebar.classList.add('hidden');
+        if (sortFilterBar) sortFilterBar.classList.remove('hidden');
         if (newMaterialBtn) { newMaterialBtn.classList.add('hidden'); newMaterialBtn.classList.remove('flex'); }
         // Show/hide New Post button based on role permissions
         var allowed = categoryPermissions[currentCategory] || [];
@@ -1380,6 +1606,9 @@
     function openPreviewModal(materialId) {
       var material = materialsCache.find(function(m) { return m.id === materialId; });
       if (!material) return;
+
+      // Track in recently viewed
+      addToRecentlyViewed(materialId, material.title);
 
       var user = getCurrentUser();
       var userRole = user ? user.role : 'student';
