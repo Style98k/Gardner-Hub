@@ -59,6 +59,17 @@ exports.getAuditLogs = async (req, res) => {
         FROM document_requests dr
         JOIN users u ON dr.student_id = u.id
       )
+      UNION ALL
+      (
+        SELECT
+          id,
+          'password_reset'                                AS type,
+          label         COLLATE utf8mb4_general_ci        AS label,
+          meta          COLLATE utf8mb4_general_ci        AS meta,
+          created_at
+        FROM audit_logs
+        WHERE type = 'password_reset'
+      )
       ORDER BY created_at DESC
       LIMIT 10
     `;

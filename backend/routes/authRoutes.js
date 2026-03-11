@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const path = require("path");
-const { register, login, getProfile, updateProfile, uploadPhoto, listUsers } = require("../controllers/authController");
+const { register, login, getProfile, updateProfile, uploadPhoto, listUsers, verifyIdentity, resetPassword } = require("../controllers/authController");
 const { verifyToken, requireRole } = require("../middleware/authMiddleware");
 
 // Multer config for profile photos
@@ -35,6 +35,12 @@ router.post("/register", register);
 
 // POST /api/auth/login
 router.post("/login", login);
+
+// POST /api/auth/verify-identity — self-service password reset step 1
+router.post("/verify-identity", verifyIdentity);
+
+// POST /api/auth/reset-password — self-service password reset step 2
+router.post("/reset-password", resetPassword);
 
 // GET /api/auth/profile — get own profile
 router.get("/profile", verifyToken, getProfile);

@@ -193,6 +193,73 @@ exports.uploadPhoto = async (req, res) => {
   }
 };
 
+// ─── Verify Identity (self-service password reset — step 1) ──────────────────
+exports.verifyIdentity = async (req, res) => {
+  try {
+    const { school_id, email } = req.body;
+
+    if (!school_id || !email) {
+      return res.status(400).json({ message: "School/Employee ID and email are required" });
+    }
+
+    const [rows] = await pool.query(
+      "SELECT id, full_name FROM users WHERE school_id = ? AND email = ?",
+      [school_id, email]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "No account matches that ID and email combination" });
+    }
+
+    res.json({ verified: true, message: "Identity verified" });
+  } catch (error) {
+    console.error("Verify identity error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// ─── Reset Password (self-service — step 2) ─────────────────────────────────
+exports.resetPassword = async (req, res) => {
+  try {
+    const { school_id, email, new_password } = req.body;
+
+    if (!school_id || !email || !new_password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    if (new_password.length < 8) {
+      return res.status(400).json({ message: "Password must be at least 8 characters" });
+    }
+
+    const [rows] = await pool.query(
+      "SELECT id, full_name FROM users WHERE school_id = ? AND email = ?",
+      [school_id, email]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "No account matches that ID and email combination" });
+    }
+
+    const user = rows[0];
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(new_password, salt);
+
+    await pool.query("UPDATE users SET password = ? WHERE id = ?", [hashedPassword, user.id]);
+
+    // Audit log entry
+    await pool.query(
+      "INSERT INTO audit_logs (type, label, meta) VALUES (?, ?, ?)",
+      ["password_reset", `${user.full_name} successfully reset their password`, user.full_name]
+    );
+
+    res.json({ message: "Password successfully updated. You can now login with your new credentials." });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 // ─── List All Users (admin only) ─────────────────────────────────────────────
 exports.listUsers = async (req, res) => {
   try {

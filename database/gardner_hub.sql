@@ -20,6 +20,20 @@ DROP DATABASE IF EXISTS `gardner_hub`;
 CREATE DATABASE IF NOT EXISTS `gardner_hub` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
 USE `gardner_hub`;
 
+-- Dumping structure for table gardner_hub.audit_logs
+DROP TABLE IF EXISTS `audit_logs`;
+CREATE TABLE IF NOT EXISTS `audit_logs` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `type` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `label` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `meta` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_audit_logs_created_at` (`created_at` DESC)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Dumping data for table gardner_hub.audit_logs: ~0 rows (approximately)
+
 -- Dumping structure for view gardner_hub.category_latest_activity
 DROP VIEW IF EXISTS `category_latest_activity`;
 -- Creating temporary table to overcome VIEW dependency errors
