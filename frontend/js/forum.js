@@ -381,9 +381,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Logout functionality
   document.getElementById('logoutBtn').addEventListener('click', () => {
-    // Clear any stored session data
-    localStorage.removeItem('userSession');
-    localStorage.removeItem('currentUser');
+    // Clear all stored session data
+    localStorage.clear();
     sessionStorage.clear();
     
     // Show confirmation message and redirect

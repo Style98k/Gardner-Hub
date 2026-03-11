@@ -25,6 +25,9 @@ app.use(express.urlencoded({ extended: true }));
 // Serve uploaded ID proofs as static files (grade files are served via secure download)
 app.use("/uploads/id_proofs", express.static(path.join(__dirname, "uploads", "id_proofs")));
 
+// Serve issued official documents
+app.use("/uploads/issued_docs", express.static(path.join(__dirname, "uploads", "issued_docs")));
+
 // Serve profile photos
 app.use("/uploads/profile_photos", express.static(path.join(__dirname, "uploads", "profile_photos")));
 

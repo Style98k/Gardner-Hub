@@ -56,10 +56,7 @@ function timeAgo(dateStr) {
 // ── Logout ───────────────────────────────────────────────────────────────────
 
 function logout() {
-  localStorage.removeItem('gardnerHub_user');
-  localStorage.removeItem('gardnerHub_token');
-  localStorage.removeItem('userRole');
-  localStorage.removeItem('userName');
+  localStorage.clear();
   window.location.href = '../../index.html';
 }
 

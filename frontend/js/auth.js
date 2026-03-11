@@ -190,11 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ── LOGOUT HELPER ───────────────────────────────────────────
 function logout() {
-  localStorage.removeItem('gardnerHub_user');
-  localStorage.removeItem('gardnerHub_token');
-  // Legacy keys cleanup
-  localStorage.removeItem('userRole');
-  localStorage.removeItem('userName');
+  localStorage.clear();
   window.location.href = '../index.html';
 }
 

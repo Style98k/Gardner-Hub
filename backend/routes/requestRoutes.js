@@ -61,6 +61,35 @@ const uploadGradeFileMulter = multer({
   limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
 });
 
+// ─── Multer Configuration: Issued Official Documents ────────────────────────
+const issuedDocDir = path.join(__dirname, "..", "uploads", "issued_docs");
+if (!fs.existsSync(issuedDocDir)) {
+  fs.mkdirSync(issuedDocDir, { recursive: true });
+}
+
+const issuedDocStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, issuedDocDir),
+  filename: (req, file, cb) => {
+    const uniqueName = `${Date.now()}-${file.originalname}`;
+    cb(null, uniqueName);
+  },
+});
+
+const uploadIssuedDocMulter = multer({
+  storage: issuedDocStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /pdf/;
+    const ext = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mime = file.mimetype === "application/pdf";
+    if (ext && mime) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only PDF files are allowed for official documents."));
+    }
+  },
+});
+
 // ─── Student Routes ─────────────────────────────────────────────────────────
 // POST /api/inquiries          — Submit a new document request (with ID proof upload)
 router.post("/", verifyToken, requireRole("student"), uploadIdProof.single("idProof"), submitRequest);
@@ -80,5 +109,8 @@ router.patch("/:id/status", verifyToken, requireRole("faculty", "admin"), update
 
 // POST /api/inquiries/:id/upload-grade — Upload document file for a request
 router.post("/:id/upload-grade", verifyToken, requireRole("faculty", "admin"), uploadGradeFileMulter.single("gradeFile"), uploadDocumentFile);
+
+// POST /api/inquiries/:id/upload-issued — Upload official issued document (Registrar only)
+router.post("/:id/upload-issued", verifyToken, requireRole("faculty", "admin"), uploadIssuedDocMulter.single("issuedDoc"), uploadDocumentFile);
 
 module.exports = router;

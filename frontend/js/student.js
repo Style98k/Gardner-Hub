@@ -6,6 +6,7 @@
  */
 
 const API_BASE = 'http://localhost:5000/api';
+let _loadedInquiries = [];
 
 // ── Helpers ─────────────────────────────────────────────────
 function getToken() {
@@ -39,7 +40,6 @@ function showToast(message, type = 'success') {
 function loadProfile() {
   const user = getUser();
   if (!user) {
-    // Not logged in — redirect
     window.location.href = '../../index.html';
     return;
   }
@@ -47,15 +47,22 @@ function loadProfile() {
   const nameEl = document.getElementById('profileName');
   const idEl = document.getElementById('profileId');
   const initialEl = document.getElementById('profileInitial');
+  const profileLink = document.getElementById('profileLink');
 
   if (nameEl) nameEl.textContent = user.full_name || 'Student';
   if (idEl) idEl.textContent = `ID: ${user.school_id || user.id}`;
   if (initialEl) initialEl.textContent = (user.full_name || 'S').charAt(0).toUpperCase();
+
+  // Set profile link based on role
+  if (profileLink) {
+    profileLink.href = user.role === 'faculty'
+      ? '../faculty/profile.html'
+      : 'profile.html';
+  }
 }
 
 function logout() {
-  localStorage.removeItem('gardnerHub_token');
-  localStorage.removeItem('gardnerHub_user');
+  localStorage.clear();
   window.location.href = '../../index.html';
 }
 
@@ -80,6 +87,12 @@ function getStatusBadge(status) {
       label: 'Pending',
       icon: '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>',
     },
+    rejected: {
+      bg: 'bg-red-100 dark:bg-red-900/50',
+      text: 'text-red-800 dark:text-red-300',
+      label: 'Rejected',
+      icon: '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>',
+    },
   };
 
   const s = map[status] || map.pending;
@@ -91,6 +104,20 @@ function getStatusBadge(status) {
 
 // ── Action Buttons ──────────────────────────────────────────
 function getActionButton(inquiry) {
+  const user = getUser();
+  const isRegistrar = (user?.role === 'faculty' && user?.department_course === 'Registrar Office') || user?.role === 'admin';
+
+  // Registrar/Admin: always show "Review Request" button
+  if (isRegistrar) {
+    return `<button onclick="openReviewModal(${inquiry.id})" class="flex items-center space-x-1 bg-indigo-600 dark:bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors duration-200">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+      </svg>
+      <span>Review Request</span>
+    </button>`;
+  }
+
+  // Student views
   if (inquiry.status === 'resolved' && inquiry.grade_file_path) {
     return `<button onclick="downloadRecord(${inquiry.id})" class="flex items-center space-x-1 bg-brand-900 dark:bg-white text-white dark:text-black px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-800 dark:hover:bg-gray-100 transition-colors duration-200">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -121,7 +148,7 @@ function renderInquiriesTable(inquiries, showStudentCol = false) {
   if (!tbody) return;
 
   // Show/hide the student column header
-  const thStudent = document.getElementById('thStudent');
+  const thStudent = document.getElementById('thStudentName');
   if (thStudent) {
     thStudent.classList.toggle('hidden', !showStudentCol);
   }
@@ -158,8 +185,9 @@ function renderInquiriesTable(inquiries, showStudentCol = false) {
           <div class="text-xs text-gray-500 dark:text-gray-400">${inq.school_id || ''}</div>
         </td>`
       : '';
+    const resolvedClass = inq.status === 'resolved' ? 'bg-green-50 dark:bg-green-900/10' : '';
     return `
-      <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
+      <tr class="${resolvedClass} hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
         <td class="px-6 py-4 whitespace-nowrap">
           <div class="text-sm font-medium text-gray-900 dark:text-white">GR-${String(inq.id).padStart(4, '0')}</div>
         </td>
@@ -168,7 +196,7 @@ function renderInquiriesTable(inquiries, showStudentCol = false) {
           <div class="text-sm text-gray-900 dark:text-white">${date}</div>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-          <div class="text-sm text-gray-900 dark:text-white">Cumulative Grade Report</div>
+          <div class="text-sm text-gray-900 dark:text-white">${inq.document_type || 'N/A'}</div>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
           ${getStatusBadge(inq.status)}
@@ -198,6 +226,9 @@ function updateStats(inquiries) {
 async function loadInquiries() {
   const user = getUser();
   const isStudent = user?.role === 'student';
+  const isRegistrar = user?.role === 'faculty' && user?.department_course === 'Registrar Office';
+  const isOtherFaculty = user?.role === 'faculty' && user?.department_course !== 'Registrar Office';
+
   const endpoint = isStudent
     ? `${API_BASE}/inquiries/my`
     : `${API_BASE}/inquiries/all`;
@@ -219,6 +250,18 @@ async function loadInquiries() {
       return;
     }
 
+    // PATH C: Other faculty — use server-provided counts, no table data
+    if (isOtherFaculty && data.counts) {
+      const el = (id) => document.getElementById(id);
+      if (el('statTotal')) el('statTotal').textContent = data.counts.total;
+      if (el('statPending')) el('statPending').textContent = data.counts.pending;
+      if (el('statUnderReview')) el('statUnderReview').textContent = data.counts.under_review;
+      if (el('statResolved')) el('statResolved').textContent = data.counts.resolved;
+      return;
+    }
+
+    // PATH A (student) or PATH B (Registrar): render full table
+    _loadedInquiries = data.inquiries || [];
     renderInquiriesTable(data.inquiries, !isStudent);
     updateStats(data.inquiries);
   } catch (err) {
@@ -227,23 +270,45 @@ async function loadInquiries() {
   }
 }
 
-// ── Role-Based UI Init ──────────────────────────────────────
+// ── Role-Based UI Init (Three-Tier Access Control) ──────────
 function initRoleBasedUI() {
   const user = getUser();
   const isStudent = user?.role === 'student';
+  const isRegistrar = user?.role === 'faculty' && user?.department_course === 'Registrar Office';
+  const isOtherFaculty = user?.role === 'faculty' && !isRegistrar;
 
   const btnRequestGrade = document.getElementById('btnRequestGrade');
   const pageTitle = document.getElementById('pageTitle');
   const pageDescription = document.getElementById('pageDescription');
   const privacyNotice = document.getElementById('privacyNotice');
+  const requestsTableSection = document.getElementById('requestsTableSection');
+  const restrictedBanner = document.getElementById('restrictedBanner');
 
+  // PATH A: Student — private vault
   if (isStudent) {
-    // Show data privacy notice for students
     if (privacyNotice) privacyNotice.classList.remove('hidden');
     return;
   }
 
-  // Faculty/Admin: hide request button, update labels
+  // PATH B: Registrar Office — management hub
+  if (isRegistrar) {
+    if (btnRequestGrade) btnRequestGrade.style.display = 'none';
+    if (pageTitle) pageTitle.textContent = 'Student Document Requests';
+    if (pageDescription) pageDescription.textContent = 'Review and manage all student academic document requests.';
+    return;
+  }
+
+  // PATH C: Other Faculty — statistical overview only
+  if (isOtherFaculty) {
+    if (btnRequestGrade) btnRequestGrade.style.display = 'none';
+    if (pageTitle) pageTitle.textContent = 'Document Request Overview';
+    if (pageDescription) pageDescription.textContent = 'System-wide statistics for academic document requests.';
+    if (requestsTableSection) requestsTableSection.style.display = 'none';
+    if (restrictedBanner) restrictedBanner.classList.remove('hidden');
+    return;
+  }
+
+  // Admin fallback — full access like Registrar
   if (btnRequestGrade) btnRequestGrade.style.display = 'none';
   if (pageTitle) pageTitle.textContent = 'Student Document Requests';
   if (pageDescription) pageDescription.textContent = 'Review and manage all student academic document requests.';
@@ -263,6 +328,110 @@ function closeInquiryModal() {
   document.getElementById('inquiryModal').classList.add('hidden');
   document.getElementById('inquiryModal').classList.remove('flex');
   document.getElementById('gradeInquiryForm').reset();
+}
+
+// ── Registrar Review Modal ──────────────────────────────────
+let _reviewInquiryId = null;
+
+function openReviewModal(inquiryId) {
+  const inq = _loadedInquiries.find(i => i.id === inquiryId);
+  if (!inq) return;
+
+  _reviewInquiryId = inquiryId;
+
+  // Populate details
+  document.getElementById('reviewStudentName').textContent = inq.full_name || '—';
+  document.getElementById('reviewStudentId').textContent = inq.school_id || '—';
+  document.getElementById('reviewDocType').textContent = inq.document_type || '—';
+  document.getElementById('reviewRequestId').textContent = `GR-${String(inq.id).padStart(4, '0')}`;
+  document.getElementById('reviewStatus').value = inq.status || 'pending';
+
+  // Show ID photo
+  const photo = document.getElementById('reviewIdPhoto');
+  const placeholder = document.getElementById('reviewIdPlaceholder');
+  if (inq.id_proof_path) {
+    const photoUrl = `${API_BASE.replace('/api', '')}/${inq.id_proof_path}`;
+    photo.src = photoUrl;
+    photo.classList.remove('hidden');
+    placeholder.classList.add('hidden');
+  } else {
+    photo.classList.add('hidden');
+    placeholder.classList.remove('hidden');
+  }
+
+  // Reset file input
+  document.getElementById('reviewFileUpload').value = '';
+
+  // Open modal
+  document.getElementById('registrarReviewModal').classList.remove('hidden');
+  document.getElementById('registrarReviewModal').classList.add('flex');
+}
+
+function closeReviewModal() {
+  _reviewInquiryId = null;
+  document.getElementById('registrarReviewModal').classList.add('hidden');
+  document.getElementById('registrarReviewModal').classList.remove('flex');
+}
+
+async function saveReviewChanges() {
+  if (!_reviewInquiryId) return;
+
+  const btn = document.getElementById('reviewSaveBtn');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  try {
+    const newStatus = document.getElementById('reviewStatus').value;
+    const file = document.getElementById('reviewFileUpload').files[0];
+
+    // 1. Update status
+    const statusRes = await fetch(`${API_BASE}/inquiries/${_reviewInquiryId}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders(),
+      },
+      body: JSON.stringify({ status: newStatus }),
+    });
+
+    if (!statusRes.ok) {
+      const data = await statusRes.json();
+      showToast(data.message || 'Failed to update status.', 'error');
+      return;
+    }
+
+    // 2. Upload file if provided
+    if (file) {
+      const formData = new FormData();
+      formData.append('issuedDoc', file);
+
+      const uploadRes = await fetch(`${API_BASE}/inquiries/${_reviewInquiryId}/upload-issued`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: formData,
+      });
+
+      if (!uploadRes.ok) {
+        const data = await uploadRes.json();
+        showToast(data.message || 'Failed to upload document.', 'error');
+        return;
+      }
+
+      showToast('Document uploaded successfully!', 'success');
+    } else {
+      showToast('Status updated successfully!', 'success');
+    }
+
+    closeReviewModal();
+    await loadInquiries();
+  } catch (err) {
+    console.error('Save review error:', err);
+    showToast('Unable to connect to the server.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
 }
 
 // ── Secure Download Flow ────────────────────────────────────
@@ -441,6 +610,14 @@ document.addEventListener('DOMContentLoaded', () => {
   if (passwordModal) {
     passwordModal.addEventListener('click', (e) => {
       if (e.target === passwordModal) closePasswordModal();
+    });
+  }
+
+  // Registrar review modal backdrop click
+  const reviewModal = document.getElementById('registrarReviewModal');
+  if (reviewModal) {
+    reviewModal.addEventListener('click', (e) => {
+      if (e.target === reviewModal) closeReviewModal();
     });
   }
 

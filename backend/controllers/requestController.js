@@ -61,17 +61,43 @@ exports.getMyRequests = async (req, res) => {
   }
 };
 
-// ─── Get All Requests (Admin/Faculty — Master List) ──────────────────────────
+// ─── Get All Requests (Admin/Faculty — Three-Tier Access) ─────────────────────
 exports.getAllRequests = async (req, res) => {
   try {
-    const [rows] = await pool.query(
-      `SELECT dr.*, u.full_name, u.school_id, u.email, u.department_course
-       FROM document_requests dr
-       JOIN users u ON dr.student_id = u.id
-       ORDER BY dr.created_at DESC`
+    const userRole = req.user.role;
+    const userDept = req.user.department_course || "";
+
+    // PATH B: Registrar Office faculty/admin — full access to all records
+    if (userRole === "admin" || userDept === "Registrar Office") {
+      const [rows] = await pool.query(
+        `SELECT dr.*, u.full_name, u.school_id, u.email, u.department_course
+         FROM document_requests dr
+         JOIN users u ON dr.student_id = u.id
+         ORDER BY dr.created_at DESC`
+      );
+      return res.json({ inquiries: rows });
+    }
+
+    // PATH C: Other faculty — return counts only, no individual records
+    const [countRows] = await pool.query(
+      `SELECT
+         COUNT(*) AS total,
+         SUM(status = 'pending') AS pending,
+         SUM(status = 'under_review') AS under_review,
+         SUM(status = 'resolved') AS resolved
+       FROM document_requests`
     );
 
-    res.json({ inquiries: rows });
+    const counts = countRows[0];
+    return res.json({
+      inquiries: [],
+      counts: {
+        total: counts.total || 0,
+        pending: counts.pending || 0,
+        under_review: counts.under_review || 0,
+        resolved: counts.resolved || 0,
+      },
+    });
   } catch (error) {
     console.error("Get all requests error:", error);
     res.status(500).json({ message: "Server error." });
@@ -134,9 +160,15 @@ exports.updateRequestStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const validStatuses = ["pending", "under_review", "resolved"];
+    const validStatuses = ["pending", "under_review", "resolved", "rejected"];
     if (!validStatuses.includes(status)) {
-      return res.status(400).json({ message: "Invalid status. Must be: pending, under_review, or resolved." });
+      return res.status(400).json({ message: "Invalid status. Must be: pending, under_review, resolved, or rejected." });
+    }
+
+    // Only Registrar Office personnel can update request status
+    const dept = req.user.department_course || "";
+    if (req.user.role !== "admin" && dept !== "Registrar Office") {
+      return res.status(403).json({ message: "Forbidden. Only Registrar Office staff can update request status." });
     }
 
     const [result] = await pool.query(
@@ -161,6 +193,12 @@ exports.updateRequestStatus = async (req, res) => {
 exports.uploadDocumentFile = async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Only Registrar Office personnel can upload documents
+    const dept = req.user.department_course || "";
+    if (req.user.role !== "admin" && dept !== "Registrar Office") {
+      return res.status(403).json({ message: "Forbidden. Only Registrar Office staff can upload documents." });
+    }
 
     if (!req.file) {
       return res.status(400).json({ message: "Document file is required." });
