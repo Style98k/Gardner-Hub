@@ -23,14 +23,7 @@ USE `gardner_hub`;
 -- Dumping structure for view gardner_hub.category_latest_activity
 DROP VIEW IF EXISTS `category_latest_activity`;
 -- Creating temporary table to overcome VIEW dependency errors
-CREATE TABLE `category_latest_activity` (
-	`category` VARCHAR(1) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
-	`activity_type` VARCHAR(1) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
-	`title` VARCHAR(1) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
-	`author_name` VARCHAR(1) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
-	`author_role` VARCHAR(1) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
-	`created_at` TIMESTAMP NULL,
-	`rn` BIGINT UNSIGNED NOT NULL
+CREATE TABLE `category_latest_activity` 
 ) ENGINE=MyISAM;
 
 -- Dumping structure for table gardner_hub.comment_likes
@@ -47,6 +40,28 @@ CREATE TABLE IF NOT EXISTS `comment_likes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Dumping data for table gardner_hub.comment_likes: ~0 rows (approximately)
+
+-- Dumping structure for table gardner_hub.document_requests
+DROP TABLE IF EXISTS `document_requests`;
+CREATE TABLE IF NOT EXISTS `document_requests` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `student_id` int NOT NULL,
+  `document_type` varchar(100) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Cumulative Grade Report',
+  `id_proof_path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `status` enum('pending','under_review','resolved') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'pending',
+  `grade_file_path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `student_id` (`student_id`),
+  KEY `idx_grade_inquiries_created_at` (`created_at` DESC),
+  KEY `idx_grade_inquiries_updated_at` (`updated_at` DESC),
+  KEY `idx_student_updated` (`student_id`,`updated_at` DESC),
+  KEY `idx_grade_inquiries_status` (`status`,`created_at` DESC),
+  CONSTRAINT `document_requests_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Dumping data for table gardner_hub.document_requests: ~0 rows (approximately)
 
 -- Dumping structure for table gardner_hub.forum_posts
 DROP TABLE IF EXISTS `forum_posts`;
@@ -104,27 +119,6 @@ INSERT INTO `forum_threads` (`id`, `category`, `title`, `content`, `tag`, `mater
 	(6, 'announcements', 'ANNOUNCEMENT!', 'This is the class schedule for 1st Year BSIT 1C Term 2', 'Class Schedule', NULL, NULL, NULL, 1, '1772719247100-19177664.jpg', NULL, 0, 2, '2026-03-05 14:00:47', '2026-03-05 14:00:47', NULL, NULL, NULL, NULL, NULL),
 	(7, 'materials', 'Lesson 1', 'Sample', NULL, 'Reference', '1772721781166-121915552.docx', NULL, 1, NULL, NULL, 0, 2, '2026-03-05 14:43:01', '2026-03-05 14:43:01', 'College', 'BS Information Technology', '1st Year', '2nd Semester', NULL);
 
--- Dumping structure for table gardner_hub.grade_inquiries
-DROP TABLE IF EXISTS `grade_inquiries`;
-CREATE TABLE IF NOT EXISTS `grade_inquiries` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `student_id` int NOT NULL,
-  `id_proof_path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `status` enum('pending','under_review','resolved') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'pending',
-  `grade_file_path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `student_id` (`student_id`),
-  KEY `idx_grade_inquiries_created_at` (`created_at` DESC),
-  KEY `idx_grade_inquiries_updated_at` (`updated_at` DESC),
-  KEY `idx_student_updated` (`student_id`,`updated_at` DESC),
-  KEY `idx_grade_inquiries_status` (`status`,`created_at` DESC),
-  CONSTRAINT `grade_inquiries_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- Dumping data for table gardner_hub.grade_inquiries: ~0 rows (approximately)
-
 -- Dumping structure for table gardner_hub.post_comments
 DROP TABLE IF EXISTS `post_comments`;
 CREATE TABLE IF NOT EXISTS `post_comments` (
@@ -171,17 +165,7 @@ INSERT INTO `post_likes` (`id`, `post_id`, `user_id`) VALUES
 -- Dumping structure for view gardner_hub.recent_activities_view
 DROP VIEW IF EXISTS `recent_activities_view`;
 -- Creating temporary table to overcome VIEW dependency errors
-CREATE TABLE `recent_activities_view` (
-	`activity_type` VARCHAR(1) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
-	`item_id` INT NOT NULL,
-	`category` VARCHAR(1) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
-	`title` VARCHAR(1) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
-	`content` MEDIUMTEXT NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
-	`author_id` INT NOT NULL,
-	`author_name` VARCHAR(1) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
-	`author_role` VARCHAR(1) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
-	`created_at` TIMESTAMP NULL,
-	`updated_at` TIMESTAMP NULL
+CREATE TABLE `recent_activities_view` 
 ) ENGINE=MyISAM;
 
 -- Dumping structure for table gardner_hub.users

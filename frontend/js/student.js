@@ -1,7 +1,7 @@
 /**
  * ============================================================
- * STUDENT.JS — Grade Inquiry System (API-Connected)
- * Handles: form submission, inquiry list, secure download
+ * STUDENT.JS — Academic Document Request System (API-Connected)
+ * Handles: form submission, request list, secure download
  * ============================================================
  */
 
@@ -232,15 +232,21 @@ function initRoleBasedUI() {
   const user = getUser();
   const isStudent = user?.role === 'student';
 
-  if (isStudent) return; // Nothing to change for students
-
   const btnRequestGrade = document.getElementById('btnRequestGrade');
   const pageTitle = document.getElementById('pageTitle');
   const pageDescription = document.getElementById('pageDescription');
+  const privacyNotice = document.getElementById('privacyNotice');
 
+  if (isStudent) {
+    // Show data privacy notice for students
+    if (privacyNotice) privacyNotice.classList.remove('hidden');
+    return;
+  }
+
+  // Faculty/Admin: hide request button, update labels
   if (btnRequestGrade) btnRequestGrade.style.display = 'none';
-  if (pageTitle) pageTitle.textContent = 'Student Grade Requests';
-  if (pageDescription) pageDescription.textContent = 'Review and manage student academic record requests.';
+  if (pageTitle) pageTitle.textContent = 'Student Document Requests';
+  if (pageDescription) pageDescription.textContent = 'Review and manage all student academic document requests.';
 }
 
 // ── Modal Helpers ───────────────────────────────────────────
@@ -347,11 +353,17 @@ async function confirmSecureDownload() {
   }
 }
 
-// ── Form Submit (New Inquiry) ───────────────────────────────
+// ── Form Submit (New Document Request) ──────────────────────
 async function handleInquirySubmit(e) {
   e.preventDefault();
 
+  const documentType = document.getElementById('documentType').value;
   const idProofFile = document.getElementById('idProof').files[0];
+
+  if (!documentType) {
+    showToast('Please select a document type.', 'error');
+    return;
+  }
 
   if (!idProofFile) {
     showToast('Please upload your ID proof photo.', 'error');
@@ -359,6 +371,7 @@ async function handleInquirySubmit(e) {
   }
 
   const formData = new FormData();
+  formData.append('documentType', documentType);
   formData.append('idProof', idProofFile);
 
   // Disable submit button
@@ -370,22 +383,22 @@ async function handleInquirySubmit(e) {
   try {
     const res = await fetch(`${API_BASE}/inquiries`, {
       method: 'POST',
-      headers: authHeaders(), // No Content-Type — browser sets multipart boundary
+      headers: authHeaders(),
       body: formData,
     });
 
     const data = await res.json();
 
     if (!res.ok) {
-      showToast(data.message || 'Failed to submit inquiry.', 'error');
+      showToast(data.message || 'Failed to submit request.', 'error');
       return;
     }
 
     closeInquiryModal();
-    showToast('Grade report request submitted successfully!', 'success');
+    showToast('Document request submitted successfully!', 'success');
     await loadInquiries();
   } catch (err) {
-    console.error('Submit inquiry error:', err);
+    console.error('Submit request error:', err);
     showToast('Unable to connect to the server.', 'error');
   } finally {
     submitBtn.disabled = false;

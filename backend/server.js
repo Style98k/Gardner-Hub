@@ -9,7 +9,7 @@ require("./config/db");
 // Import routes
 const authRoutes = require("./routes/authRoutes");
 const statsRoutes = require("./routes/statsRoutes");
-const inquiryRoutes = require("./routes/inquiryRoutes");
+const requestRoutes = require("./routes/requestRoutes");
 const forumRoutes = require("./routes/forumRoutes");
 const postRoutes = require("./routes/postRoutes");
 const adminRoutes = require("./routes/adminRoutes");
@@ -40,7 +40,7 @@ app.use("/uploads/academic", express.static(path.join(__dirname, "uploads", "aca
 // ─── Routes ──────────────────────────────────────────────────────────────────
 app.use("/api/auth", authRoutes);
 app.use("/api/stats", statsRoutes);
-app.use("/api/inquiries", inquiryRoutes);
+app.use("/api/inquiries", requestRoutes);
 app.use("/api/forum", forumRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/materials", materialRoutes);

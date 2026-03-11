@@ -240,7 +240,7 @@
         </div>
       </div>
 
-      <!-- Student Grade Inquiry (Private) -->
+      <!-- Academic Document Request (Private) -->
       <div class="category-card bg-white dark:bg-black rounded-xl p-6 border border-gray-200 dark:border-gray-900 cursor-pointer hover:shadow-lg hover:dark:border-gray-800 transition-all duration-200 relative" onclick="navigateToGradeInquiry()">
         <div class="flex items-start gap-4">
           <!-- Icon -->
@@ -259,15 +259,15 @@
           <!-- Content -->
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 mb-2">
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white">Student Grade Inquiry</h3>
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white">Academic Document Request</h3>
               <span class="text-xs px-2 py-1 rounded-full font-medium bg-gradient-to-r from-yellow-200 to-yellow-300 text-yellow-800">🔒 Secure</span>
             </div>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">A secure and encrypted channel to inquire about official grades, address discrepancies, and request academic records from the Registrar.</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">A secure and encrypted portal to request official academic documents such as transcripts, certifications, and grade reports from the Registrar.</p>
             
             <!-- Tags -->
             <div class="flex flex-wrap gap-2">
-              <span class="px-2 py-1 text-xs font-medium bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded">Grade Reports</span>
-              <span class="px-2 py-1 text-xs font-medium bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 rounded">Discrepancies</span>
+              <span class="px-2 py-1 text-xs font-medium bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded">Transcripts</span>
+              <span class="px-2 py-1 text-xs font-medium bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 rounded">Certificates</span>
               <span class="px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded">Registrar</span>
             </div>
           </div>
@@ -276,7 +276,7 @@
           <div class="flex flex-col items-end gap-4 flex-shrink-0">
             <div class="text-right">
               <div class="text-2xl font-bold text-gray-900 dark:text-white" id="statGradeInquiriesCount">0</div>
-              <div class="text-xs text-gray-500 dark:text-gray-400 uppercase">INQUIRIES</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400 uppercase">REQUESTS</div>
             </div>
             <div class="text-right">
               <div class="text-2xl font-bold text-gray-900 dark:text-white" id="statGradeReplies">0</div>
@@ -319,7 +319,7 @@
           </div>
           <div>
             <p class="text-2xl font-bold text-gray-900 dark:text-white" id="statGradeInquiries">0</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Grade Inquiries</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Document Requests</p>
           </div>
           <div>
             <p class="text-2xl font-bold text-gray-900 dark:text-white" id="statAnnouncements">0</p>
@@ -620,7 +620,7 @@
       'announcements': 'Official Announcements',
       'academic': 'Academic Discussion',
       'materials': 'Learning Materials',
-      'grades': 'Student Grade Inquiry'
+      'grades': 'Academic Document Request'
     };
 
     function openNewTopicModal(category) {
@@ -682,7 +682,7 @@
     }
 
     function navigateToGradeInquiry() {
-      window.location.href = '../student/grade-inquiry.html';
+      window.location.href = '../student/document-request.html';
     }
 
     function navigateToAdminDashboard() {

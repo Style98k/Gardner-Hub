@@ -8,7 +8,7 @@ exports.getUserCount = async (req, res) => {
     const [facultyRows] = await pool.query("SELECT COUNT(*) AS count FROM users WHERE role = 'faculty'");
     const [threadRows] = await pool.query('SELECT COUNT(*) AS count FROM forum_threads');
     const [postRows] = await pool.query('SELECT COUNT(*) AS count FROM forum_posts');
-    const [inquiryRows] = await pool.query('SELECT COUNT(*) AS count FROM grade_inquiries');
+    const [inquiryRows] = await pool.query('SELECT COUNT(*) AS count FROM document_requests');
     const [announcementRows] = await pool.query("SELECT COUNT(*) AS count FROM forum_threads WHERE category = 'announcements'");
 
     res.json({
@@ -57,7 +57,7 @@ exports.getCategoryStats = async (req, res) => {
     const userId = req.user ? req.user.id : null;
     const userRole = req.user ? req.user.role : null;
 
-    let gradeInquiriesQuery = 'SELECT COUNT(*) AS count FROM grade_inquiries';
+    let gradeInquiriesQuery = 'SELECT COUNT(*) AS count FROM document_requests';
     let gradeInquiriesParams = [];
 
     if (userRole === 'student' && userId) {
@@ -88,23 +88,23 @@ exports.getCategoryStats = async (req, res) => {
       "SELECT title, created_at FROM forum_threads WHERE category = 'materials' ORDER BY created_at DESC LIMIT 1"
     );
 
-    // Grade inquiry latest: role-dependent
+    // Document request latest: role-dependent
     let latestGradeInquiry = null;
     if (userRole === 'student' && userId) {
       const [rows] = await pool.query(
-        "SELECT status, updated_at FROM grade_inquiries WHERE student_id = ? ORDER BY updated_at DESC LIMIT 1",
+        "SELECT status, updated_at FROM document_requests WHERE student_id = ? ORDER BY updated_at DESC LIMIT 1",
         [userId]
       );
       if (rows.length > 0) {
         const statusLabel = rows[0].status.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
-        latestGradeInquiry = { title: 'Grade inquiry is now ' + statusLabel, created_at: rows[0].updated_at };
+        latestGradeInquiry = { title: 'Document request is now ' + statusLabel, created_at: rows[0].updated_at };
       }
     } else if (userId && (userRole === 'admin' || userRole === 'faculty')) {
       const [rows] = await pool.query(
-        `SELECT gi.status, gi.updated_at, u.full_name
-         FROM grade_inquiries gi
-         JOIN users u ON gi.student_id = u.id
-         ORDER BY gi.updated_at DESC LIMIT 1`
+        `SELECT dr.status, dr.updated_at, u.full_name
+         FROM document_requests dr
+         JOIN users u ON dr.student_id = u.id
+         ORDER BY dr.updated_at DESC LIMIT 1`
       );
       if (rows.length > 0) {
         const statusLabel = rows[0].status.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
@@ -156,15 +156,15 @@ exports.getRecentActivity = async (req, res) => {
       `(SELECT id, category COLLATE utf8mb4_general_ci AS source, title COLLATE utf8mb4_general_ci AS label, created_at FROM forum_threads WHERE category IN ('announcements', 'academic', 'materials'))`
     );
 
-    // Grade inquiries — role-dependent
+    // Document requests — role-dependent
     if (userRole === 'student' && userId) {
       parts.push(
-        `(SELECT gi.id, 'grades' COLLATE utf8mb4_general_ci AS source, CONCAT('Grade inquiry is now ', REPLACE(CONCAT(UPPER(LEFT(gi.status,1)), LOWER(SUBSTRING(gi.status,2))), '_', ' ')) COLLATE utf8mb4_general_ci AS label, gi.updated_at AS created_at FROM grade_inquiries gi WHERE gi.student_id = ?)`
+        `(SELECT dr.id, 'grades' COLLATE utf8mb4_general_ci AS source, CONCAT('Document request is now ', REPLACE(CONCAT(UPPER(LEFT(dr.status,1)), LOWER(SUBSTRING(dr.status,2))), '_', ' ')) COLLATE utf8mb4_general_ci AS label, dr.updated_at AS created_at FROM document_requests dr WHERE dr.student_id = ?)`
       );
       params.push(userId);
     } else if (userId && (userRole === 'admin' || userRole === 'faculty')) {
       parts.push(
-        `(SELECT gi.id, 'grades' COLLATE utf8mb4_general_ci AS source, CONCAT(u.full_name, ' — ', REPLACE(CONCAT(UPPER(LEFT(gi.status,1)), LOWER(SUBSTRING(gi.status,2))), '_', ' ')) COLLATE utf8mb4_general_ci AS label, gi.updated_at AS created_at FROM grade_inquiries gi JOIN users u ON gi.student_id = u.id)`
+        `(SELECT dr.id, 'grades' COLLATE utf8mb4_general_ci AS source, CONCAT(u.full_name, ' \u2014 ', REPLACE(CONCAT(UPPER(LEFT(dr.status,1)), LOWER(SUBSTRING(dr.status,2))), '_', ' ')) COLLATE utf8mb4_general_ci AS label, dr.updated_at AS created_at FROM document_requests dr JOIN users u ON dr.student_id = u.id)`
       );
     }
     // Unauthenticated users: no grade inquiries in the union

@@ -8,8 +8,8 @@ exports.getAdminStats = async (req, res) => {
     const [[totalStudents]] = await pool.query("SELECT COUNT(*) AS c FROM users WHERE role = 'student'");
     const [[totalFaculty]] = await pool.query("SELECT COUNT(*) AS c FROM users WHERE role = 'faculty'");
     const [[totalThreads]] = await pool.query('SELECT COUNT(*) AS c FROM forum_threads');
-    const [[totalInquiries]] = await pool.query('SELECT COUNT(*) AS c FROM grade_inquiries');
-    const [[pendingInquiries]] = await pool.query("SELECT COUNT(*) AS c FROM grade_inquiries WHERE status = 'pending'");
+    const [[totalInquiries]] = await pool.query('SELECT COUNT(*) AS c FROM document_requests');
+    const [[pendingInquiries]] = await pool.query("SELECT COUNT(*) AS c FROM document_requests WHERE status = 'pending'");
 
     res.json({
       totalUsers: Number(totalUsers.c),
@@ -51,13 +51,13 @@ exports.getAuditLogs = async (req, res) => {
       UNION ALL
       (
         SELECT
-          gi.id,
+          dr.id,
           'inquiry'                                       AS type,
-          CONCAT('GCD-', gi.id) COLLATE utf8mb4_general_ci AS label,
+          CONCAT('DR-', dr.id) COLLATE utf8mb4_general_ci AS label,
           u.full_name           COLLATE utf8mb4_general_ci AS meta,
-          gi.created_at
-        FROM grade_inquiries gi
-        JOIN users u ON gi.student_id = u.id
+          dr.created_at
+        FROM document_requests dr
+        JOIN users u ON dr.student_id = u.id
       )
       ORDER BY created_at DESC
       LIMIT 10
