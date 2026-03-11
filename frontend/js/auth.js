@@ -28,6 +28,24 @@ function toggleTheme() {
   }
 }
 
+// ── PASSWORD VISIBILITY TOGGLE ──────────────────────────────
+function togglePasswordVisibility(button) {
+  const targetId = button.getAttribute('data-target');
+  const input = document.getElementById(targetId);
+  const eyeIcon = button.querySelector('.eye-icon');
+  const eyeOffIcon = button.querySelector('.eye-off-icon');
+
+  if (input.type === 'password') {
+    input.type = 'text';
+    eyeIcon.classList.add('hidden');
+    eyeOffIcon.classList.remove('hidden');
+  } else {
+    input.type = 'password';
+    eyeIcon.classList.remove('hidden');
+    eyeOffIcon.classList.add('hidden');
+  }
+}
+
 // ── LOGIN FORM HANDLER ─────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   initializeTheme();
@@ -36,6 +54,11 @@ document.addEventListener('DOMContentLoaded', () => {
   if (themeToggle) {
     themeToggle.addEventListener('click', toggleTheme);
   }
+
+  // Attach password toggle listeners
+  document.querySelectorAll('.toggle-password').forEach((btn) => {
+    btn.addEventListener('click', () => togglePasswordVisibility(btn));
+  });
 
   const loginForm = document.getElementById('loginForm');
   const registerForm = document.getElementById('registerForm');
