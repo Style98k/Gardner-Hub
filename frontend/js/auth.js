@@ -7,27 +7,6 @@
 
 const API_BASE = 'http://localhost:5000/api';
 
-// ── THEME MANAGEMENT ────────────────────────────────────────
-function initializeTheme() {
-  const savedTheme = localStorage.getItem('theme') || 'light';
-  if (savedTheme === 'dark') {
-    document.documentElement.classList.add('dark');
-  } else {
-    document.documentElement.classList.remove('dark');
-  }
-}
-
-function toggleTheme() {
-  const isDark = document.documentElement.classList.contains('dark');
-  if (isDark) {
-    document.documentElement.classList.remove('dark');
-    localStorage.setItem('theme', 'light');
-  } else {
-    document.documentElement.classList.add('dark');
-    localStorage.setItem('theme', 'dark');
-  }
-}
-
 // ── PASSWORD VISIBILITY TOGGLE ──────────────────────────────
 function togglePasswordVisibility(button) {
   const targetId = button.getAttribute('data-target');
@@ -48,12 +27,7 @@ function togglePasswordVisibility(button) {
 
 // ── LOGIN FORM HANDLER ─────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  initializeTheme();
-
-  const themeToggle = document.getElementById('themeToggle');
-  if (themeToggle) {
-    themeToggle.addEventListener('click', toggleTheme);
-  }
+  // Theme is already initialised by theme.js (loaded in <head>)
 
   // Attach password toggle listeners
   document.querySelectorAll('.toggle-password').forEach((btn) => {
@@ -213,7 +187,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ── LOGOUT HELPER ───────────────────────────────────────────
 function logout() {
-  localStorage.clear();
+  localStorage.removeItem('gardnerHub_token');
+  localStorage.removeItem('gardnerHub_user');
   window.location.href = '../index.html';
 }
 

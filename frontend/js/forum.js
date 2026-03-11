@@ -381,8 +381,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Logout functionality
   document.getElementById('logoutBtn').addEventListener('click', () => {
-    // Clear all stored session data
-    localStorage.clear();
+    // Clear session data (preserve theme preference)
+    localStorage.removeItem('gardnerHub_token');
+    localStorage.removeItem('gardnerHub_user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('full_name');
+    localStorage.removeItem('role');
+    localStorage.removeItem('department');
     sessionStorage.clear();
     
     // Show confirmation message and redirect

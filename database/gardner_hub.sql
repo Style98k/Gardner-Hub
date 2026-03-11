@@ -48,8 +48,9 @@ CREATE TABLE IF NOT EXISTS `document_requests` (
   `student_id` int NOT NULL,
   `document_type` varchar(100) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Cumulative Grade Report',
   `id_proof_path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `status` enum('pending','under_review','resolved') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'pending',
+  `status` enum('pending','under_review','resolved','rejected') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'pending',
   `grade_file_path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `issued_document_path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -59,9 +60,11 @@ CREATE TABLE IF NOT EXISTS `document_requests` (
   KEY `idx_student_updated` (`student_id`,`updated_at` DESC),
   KEY `idx_grade_inquiries_status` (`status`,`created_at` DESC),
   CONSTRAINT `document_requests_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table gardner_hub.document_requests: ~0 rows (approximately)
+INSERT INTO `document_requests` (`id`, `student_id`, `document_type`, `id_proof_path`, `status`, `grade_file_path`, `issued_document_path`, `created_at`, `updated_at`) VALUES
+	(2, 1, 'Cumulative Grade Report', 'C:/Users/Admin1/Desktop/Codes Projects/Gardner Hub/backend/uploads/id_proofs/1773232153907-pic1.png', 'pending', NULL, NULL, '2026-03-11 12:29:13', '2026-03-11 12:29:13');
 
 -- Dumping structure for table gardner_hub.forum_posts
 DROP TABLE IF EXISTS `forum_posts`;
@@ -186,13 +189,14 @@ CREATE TABLE IF NOT EXISTS `users` (
   UNIQUE KEY `school_id` (`school_id`),
   UNIQUE KEY `email` (`email`),
   KEY `idx_users_created_at` (`created_at` DESC)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table gardner_hub.users: ~2 rows (approximately)
 INSERT INTO `users` (`id`, `full_name`, `school_id`, `role`, `department_course`, `email`, `password`, `status`, `created_at`, `profile_photo`, `show_school_id`) VALUES
 	(1, 'Blady', 'GCD 2023 T111434', 'student', 'BSCS', 'blady@gmail.com', '$2b$10$UA2l5fGpW3BU5Sd30rLUVuCSfmOqSl/BjIFCovj2yfs2NVDUSxoxe', 'approved', '2026-02-24 10:13:40', NULL, 1),
 	(2, 'Charles', 'GCD 2022 T1136543', 'faculty', 'ADM', 'charles@gmail.com', '$2b$10$fBmhBh6oTI4DDshv5ZgJteEQbbyI0J2vcp9tOTNmWcc32.DDh9RpC', 'approved', '2026-02-25 04:22:02', NULL, 1),
-	(3, 'System Administrator', 'ADMIN-001', 'admin', 'Administration', 'admin@gmail.com', '$2b$10$Fd09OFM31XjX5mYbszxj3.PwZxfYMzSoepw77nV.WpCwNbe1ut7Vy', 'approved', '2026-02-25 05:17:26', NULL, 1);
+	(3, 'System Administrator', 'ADMIN-001', 'admin', 'Administration', 'admin@gmail.com', '$2b$10$Fd09OFM31XjX5mYbszxj3.PwZxfYMzSoepw77nV.WpCwNbe1ut7Vy', 'approved', '2026-02-25 05:17:26', NULL, 1),
+	(5, 'Juan Dela Cruz', 'GCD 2022 T1141332', 'faculty', 'Registrar Office', 'juan@gmail.com', '$2b$10$28LrQ0KiqAlJo6IGiBYhYuM0sfLjoZM2IKshYCQhR3Bg06mLjcsDm', 'approved', '2026-03-11 12:38:46', NULL, 1);
 
 -- Removing temporary table and create final VIEW structure
 DROP TABLE IF EXISTS `category_latest_activity`;

@@ -62,7 +62,12 @@ function loadProfile() {
 }
 
 function logout() {
-  localStorage.clear();
+  localStorage.removeItem('gardnerHub_token');
+  localStorage.removeItem('gardnerHub_user');
+  localStorage.removeItem('token');
+  localStorage.removeItem('full_name');
+  localStorage.removeItem('role');
+  localStorage.removeItem('department');
   window.location.href = '../../index.html';
 }
 

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark');</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The Gardner Hub — Login</title>
@@ -15,6 +16,9 @@
   
   <!-- Tailwind Configuration -->
   <script src="js/tailwind-config.js"></script>
+
+  <!-- Theme Management (loaded early to prevent flash) -->
+  <script src="js/theme.js"></script>
 </head>
 
 <body class="font-sans text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-black min-h-screen flex items-center justify-center p-4 transition-colors duration-300">

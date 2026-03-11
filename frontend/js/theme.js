@@ -3,20 +3,24 @@
  * THEME.JS — The Gardner Hub Theme Management
  * Vanilla JavaScript — Light/Dark mode toggle functionality
  * Persists across all pages via localStorage
+ * Must be loaded in <head> to prevent flash of wrong theme
  * ============================================================
  */
 
-// ── APPLY THEME IMMEDIATELY (prevent flash of wrong theme) ──
-(function () {
+// ── APPLY THEME IMMEDIATELY (runs before page renders) ──────
+function applyTheme() {
   const saved = localStorage.getItem('theme') || 'light';
   if (saved === 'dark') {
     document.documentElement.classList.add('dark');
   } else {
     document.documentElement.classList.remove('dark');
   }
-})();
+}
 
-// ── THEME MANAGEMENT ────────────────────────────────────────
+// Apply immediately on script load (before DOM is ready)
+applyTheme();
+
+// ── THEME TOGGLE ────────────────────────────────────────────
 function toggleTheme() {
   const isDark = document.documentElement.classList.contains('dark');
 

@@ -16,6 +16,9 @@
   <!-- Tailwind Configuration -->
   <script src="../../js/tailwind-config.js"></script>
 
+  <!-- Theme Management (loaded early to prevent flash) -->
+  <script src="../../js/theme.js"></script>
+
   <style>
     @keyframes slideUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
     .slide-up { animation: slideUp .3s ease-out forwards; }
@@ -916,7 +919,8 @@
     }
 
     function logout() {
-      localStorage.clear();
+      localStorage.removeItem('gardnerHub_token');
+      localStorage.removeItem('gardnerHub_user');
       window.location.href = '../../index.html';
     }
   </script>
