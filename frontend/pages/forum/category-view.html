@@ -339,7 +339,7 @@
           </button>
         </div>
 
-        <!-- Tab Switcher: Text / Image/Video -->
+        <!-- Tab Switcher: Text / Image -->
         <div class="flex mb-4 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
           <button id="tabTextBtn" onclick="switchAcademicTab('text')" class="flex-1 flex items-center justify-center space-x-2 py-2 rounded-md text-sm font-medium transition-colors duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12"/></svg>
@@ -347,7 +347,7 @@
           </button>
           <button id="tabImageBtn" onclick="switchAcademicTab('image')" class="flex-1 flex items-center justify-center space-x-2 py-2 rounded-md text-sm font-medium transition-colors duration-200 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/></svg>
-            <span>Image / Video</span>
+            <span>Image</span>
           </button>
         </div>
 
@@ -381,21 +381,20 @@
             <textarea id="academicContent" rows="5" required class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-y" placeholder="Share your thoughts, questions, or insights…"></textarea>
           </div>
 
-          <!-- Image/Video Upload (hidden by default, shown on Image tab) -->
+          <!-- Image Upload (hidden by default, shown on Image tab) -->
           <div class="mb-4 hidden" id="academicImageWrap">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Upload Image / Video</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Upload Image</label>
             <div class="relative">
-              <input type="file" id="academicImage" accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/mov,video/avi,video/webm" class="hidden" onchange="previewAcademicMedia()">
+              <input type="file" id="academicImage" accept="image/*" class="hidden" onchange="previewAcademicMedia()">
               <button type="button" onclick="document.getElementById('academicImage').click()" class="w-full flex flex-col items-center justify-center py-8 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-500 bg-gray-50 dark:bg-gray-800/50 transition-colors duration-200">
                 <svg class="w-8 h-8 text-indigo-400 mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
-                <span class="text-sm text-gray-500 dark:text-gray-400">Click to upload image or video</span>
-                <span class="text-xs text-gray-400 dark:text-gray-500 mt-1">JPG, PNG, GIF, WEBP, MP4, MOV (max 20MB)</span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">Click to upload image</span>
+                <span class="text-xs text-gray-400 dark:text-gray-500 mt-1">JPG, PNG, GIF, WEBP (max 20MB)</span>
               </button>
             </div>
             <!-- Preview -->
             <div id="academicMediaPreview" class="hidden mt-3 relative">
-              <img id="academicImgPreview" class="hidden w-full rounded-lg border border-gray-200 dark:border-gray-700 max-h-48 object-cover" src="" alt="Preview">
-              <video id="academicVidPreview" class="hidden w-full rounded-lg border border-gray-200 dark:border-gray-700 max-h-48" controls></video>
+              <img id="academicImgPreview" class="w-full rounded-lg border border-gray-200 dark:border-gray-700 max-h-48 object-cover" src="" alt="Preview">
               <button type="button" onclick="removeAcademicMedia()" class="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
@@ -2002,7 +2001,6 @@
       var input = document.getElementById('academicImage');
       var previewWrap = document.getElementById('academicMediaPreview');
       var imgPreview = document.getElementById('academicImgPreview');
-      var vidPreview = document.getElementById('academicVidPreview');
 
       if (!input.files || !input.files[0]) return;
 
@@ -2010,22 +2008,13 @@
       var url = URL.createObjectURL(file);
 
       previewWrap.classList.remove('hidden');
-      if (file.type.startsWith('video/')) {
-        imgPreview.classList.add('hidden');
-        vidPreview.classList.remove('hidden');
-        vidPreview.src = url;
-      } else {
-        vidPreview.classList.add('hidden');
-        imgPreview.classList.remove('hidden');
-        imgPreview.src = url;
-      }
+      imgPreview.src = url;
     }
 
     function removeAcademicMedia() {
       document.getElementById('academicImage').value = '';
       document.getElementById('academicMediaPreview').classList.add('hidden');
       document.getElementById('academicImgPreview').src = '';
-      document.getElementById('academicVidPreview').src = '';
     }
 
     function openAcademicModal() {
