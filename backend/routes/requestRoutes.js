@@ -79,13 +79,18 @@ const uploadIssuedDocMulter = multer({
   storage: issuedDocStorage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
   fileFilter: (req, file, cb) => {
-    const allowedTypes = /pdf/;
-    const ext = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mime = file.mimetype === "application/pdf";
+    const allowedExts = /pdf|doc|docx/;
+    const allowedMimes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+    const ext = allowedExts.test(path.extname(file.originalname).toLowerCase());
+    const mime = allowedMimes.includes(file.mimetype);
     if (ext && mime) {
       cb(null, true);
     } else {
-      cb(new Error("Only PDF files are allowed for official documents."));
+      cb(new Error("Only PDF, DOC, and DOCX files are allowed for official documents."));
     }
   },
 });
