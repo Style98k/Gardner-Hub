@@ -107,8 +107,19 @@ function renderCategories(data) {
 
   data.forEach((cat) => {
     const c = colorMap[cat.color];
-    const la = cat.latestActivity;
+    let la = cat.latestActivity;
     const badge = la ? (roleBadge[la.role] || 'bg-gray-100 text-gray-600') : '';
+
+    // Privacy: mask student names on document request cards for non-Registrar users
+    if (cat.id === 'grades' && la && la.author) {
+      const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      const dept = (user && user.department_course || '').toLowerCase().trim();
+      const isRegistrar = dept === 'registrar office';
+      const isStudent = user && user.role === 'student';
+      if (!isRegistrar && !isStudent) {
+        la = Object.assign({}, la, { title: 'New Request Received', author: '', role: '' });
+      }
+    }
 
     const card = document.createElement('div');
     card.className =

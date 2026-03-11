@@ -1,5 +1,12 @@
 const pool = require('../config/db');
 
+// ─── Privacy helper: check if user is authorized to see student names ────────
+function canViewStudentNames(user) {
+  if (!user) return false;
+  const dept = (user.department_course || '').toLowerCase().trim();
+  return dept === 'registrar office';
+}
+
 // ─── Get User Count (role-filtered) ──────────────────────────────────────────
 exports.getUserCount = async (req, res) => {
   try {
@@ -100,15 +107,28 @@ exports.getCategoryStats = async (req, res) => {
         latestGradeInquiry = { title: 'Document request is now ' + statusLabel, created_at: rows[0].updated_at };
       }
     } else if (userId && (userRole === 'admin' || userRole === 'faculty')) {
-      const [rows] = await pool.query(
-        `SELECT dr.status, dr.updated_at, u.full_name
-         FROM document_requests dr
-         JOIN users u ON dr.student_id = u.id
-         ORDER BY dr.updated_at DESC LIMIT 1`
-      );
-      if (rows.length > 0) {
-        const statusLabel = rows[0].status.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
-        latestGradeInquiry = { title: rows[0].full_name + ' — ' + statusLabel, created_at: rows[0].updated_at };
+      if (canViewStudentNames(req.user)) {
+        // Registrar Office: show student name
+        const [rows] = await pool.query(
+          `SELECT dr.status, dr.updated_at, u.full_name
+           FROM document_requests dr
+           JOIN users u ON dr.student_id = u.id
+           ORDER BY dr.updated_at DESC LIMIT 1`
+        );
+        if (rows.length > 0) {
+          const statusLabel = rows[0].status.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
+          latestGradeInquiry = { title: rows[0].full_name + ' — ' + statusLabel, created_at: rows[0].updated_at };
+        }
+      } else {
+        // Non-Registrar: mask student name
+        const [rows] = await pool.query(
+          `SELECT dr.status, dr.updated_at
+           FROM document_requests dr
+           ORDER BY dr.updated_at DESC LIMIT 1`
+        );
+        if (rows.length > 0) {
+          latestGradeInquiry = { title: 'New Request Received', created_at: rows[0].updated_at };
+        }
       }
     }
 
@@ -163,9 +183,17 @@ exports.getRecentActivity = async (req, res) => {
       );
       params.push(userId);
     } else if (userId && (userRole === 'admin' || userRole === 'faculty')) {
-      parts.push(
-        `(SELECT dr.id, 'grades' COLLATE utf8mb4_general_ci AS source, CONCAT(u.full_name, ' \u2014 ', REPLACE(CONCAT(UPPER(LEFT(dr.status,1)), LOWER(SUBSTRING(dr.status,2))), '_', ' ')) COLLATE utf8mb4_general_ci AS label, dr.updated_at AS created_at FROM document_requests dr JOIN users u ON dr.student_id = u.id)`
-      );
+      if (canViewStudentNames(req.user)) {
+        // Registrar Office: include student name
+        parts.push(
+          `(SELECT dr.id, 'grades' COLLATE utf8mb4_general_ci AS source, CONCAT(u.full_name, ' \u2014 ', REPLACE(CONCAT(UPPER(LEFT(dr.status,1)), LOWER(SUBSTRING(dr.status,2))), '_', ' ')) COLLATE utf8mb4_general_ci AS label, dr.updated_at AS created_at FROM document_requests dr JOIN users u ON dr.student_id = u.id)`
+        );
+      } else {
+        // Non-Registrar: mask student name
+        parts.push(
+          `(SELECT dr.id, 'grades' COLLATE utf8mb4_general_ci AS source, CONCAT('New Document Request \u2014 ', REPLACE(CONCAT(UPPER(LEFT(dr.status,1)), LOWER(SUBSTRING(dr.status,2))), '_', ' ')) COLLATE utf8mb4_general_ci AS label, dr.updated_at AS created_at FROM document_requests dr)`
+        );
+      }
     }
     // Unauthenticated users: no grade inquiries in the union
 
