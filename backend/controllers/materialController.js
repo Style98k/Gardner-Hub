@@ -62,6 +62,23 @@ exports.createMaterial = async (req, res) => {
       [title, content, material_type, filePath, thumbnailPath, downloadable, authorId, academic_level, course_strand, year_grade, semester, subject_name]
     );
 
+    // ── Notify ALL students matching this level/course about the new material ──
+    try {
+      const [students] = await pool.query(
+        "SELECT id FROM users WHERE role = 'student' AND department_course = ?",
+        [course_strand]
+      );
+      if (students.length > 0) {
+        const values = students.map((s) => [s.id, "materials", `New material uploaded: ${title}`, 0]);
+        await pool.query(
+          "INSERT INTO notifications (user_id, category, message, is_read) VALUES ?",
+          [values]
+        );
+      }
+    } catch (notifErr) {
+      console.error("Notification insert error (materials):", notifErr);
+    }
+
     res.status(201).json({
       message: "Learning material posted successfully.",
       material: {

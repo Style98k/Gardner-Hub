@@ -34,6 +34,22 @@ exports.submitRequest = async (req, res) => {
 
     const [rows] = await pool.query("SELECT * FROM document_requests WHERE id = ?", [result.insertId]);
 
+    // ── Notify ALL Registrar Office staff about the new request ──
+    try {
+      const [registrarStaff] = await pool.query(
+        "SELECT id FROM users WHERE department_course = 'Registrar Office' AND role IN ('faculty', 'admin')"
+      );
+      if (registrarStaff.length > 0) {
+        const values = registrarStaff.map((s) => [s.id, "document_request", `New document request: ${documentType}`, 0]);
+        await pool.query(
+          "INSERT INTO notifications (user_id, category, message, is_read) VALUES ?",
+          [values]
+        );
+      }
+    } catch (notifErr) {
+      console.error("Notification insert error (request submit):", notifErr);
+    }
+
     res.status(201).json({
       message: "Document request submitted successfully.",
       inquiry: rows[0],
@@ -181,6 +197,20 @@ exports.updateRequestStatus = async (req, res) => {
     }
 
     const [rows] = await pool.query("SELECT * FROM document_requests WHERE id = ?", [id]);
+
+    // ── Notify the student that their request status was updated ──
+    try {
+      if (rows.length > 0) {
+        const studentId = rows[0].student_id;
+        const statusLabel = status.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase());
+        await pool.query(
+          "INSERT INTO notifications (user_id, category, message, is_read) VALUES (?, 'document_request', ?, 0)",
+          [studentId, `Your document request is now: ${statusLabel}`]
+        );
+      }
+    } catch (notifErr) {
+      console.error("Notification insert error (status update):", notifErr);
+    }
 
     res.json({ message: "Status updated successfully.", inquiry: rows[0] });
   } catch (error) {

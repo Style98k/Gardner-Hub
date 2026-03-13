@@ -14,6 +14,7 @@ const forumRoutes = require("./routes/forumRoutes");
 const postRoutes = require("./routes/postRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const materialRoutes = require("./routes/materialRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 const app = express();
 
@@ -47,6 +48,7 @@ app.use("/api/inquiries", requestRoutes);
 app.use("/api/forum", forumRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/materials", materialRoutes);
+app.use("/api/notifications", notificationRoutes);
 app.use("/api/admin", adminRoutes);
 
 // Health check

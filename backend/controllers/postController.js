@@ -37,6 +37,23 @@ exports.createOfficialAnnouncement = async (req, res) => {
       [title, content, tag, image_url, link_url || null, authorId]
     );
 
+    // ── Notify ALL students and faculty about the new announcement ──
+    try {
+      const [recipients] = await pool.query(
+        "SELECT id FROM users WHERE id != ?",
+        [authorId]
+      );
+      if (recipients.length > 0) {
+        const values = recipients.map((r) => [r.id, "announcement", `New announcement: ${title}`, 0]);
+        await pool.query(
+          "INSERT INTO notifications (user_id, category, message, is_read) VALUES ?",
+          [values]
+        );
+      }
+    } catch (notifErr) {
+      console.error("Notification insert error (announcement):", notifErr);
+    }
+
     res.status(201).json({
       message: "Announcement created successfully.",
       announcement: {

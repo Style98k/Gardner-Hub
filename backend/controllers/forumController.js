@@ -91,6 +91,27 @@ exports.createThread = async (req, res) => {
       [category, title, content, postTag, image_url, authorId]
     );
 
+    // ── Notify ALL users when a new academic thread is created ──
+    if (category === "academic") {
+      try {
+        const [authorRow] = await pool.query("SELECT full_name FROM users WHERE id = ?", [authorId]);
+        const authorName = authorRow.length > 0 ? authorRow[0].full_name : "Someone";
+        const [recipients] = await pool.query(
+          "SELECT id FROM users WHERE id != ?",
+          [authorId]
+        );
+        if (recipients.length > 0) {
+          const values = recipients.map((r) => [r.id, "academic", `${authorName} started a new discussion: ${title}`, 0]);
+          await pool.query(
+            "INSERT INTO notifications (user_id, category, message, is_read) VALUES ?",
+            [values]
+          );
+        }
+      } catch (notifErr) {
+        console.error("Notification insert error (academic thread):", notifErr);
+      }
+    }
+
     res.status(201).json({
       message: "Thread created",
       thread: { id: result.insertId, category, title, content, tag: postTag, image_url, author_id: authorId },
@@ -212,6 +233,21 @@ exports.createPost = async (req, res) => {
       [id]
     );
 
+    // ── Notify thread author about the new reply (academic threads only) ──
+    try {
+      if (threadRows[0].category === "academic") {
+        const [threadAuthor] = await pool.query("SELECT author_id, title FROM forum_threads WHERE id = ?", [id]);
+        if (threadAuthor.length > 0 && threadAuthor[0].author_id !== authorId) {
+          await pool.query(
+            "INSERT INTO notifications (user_id, category, message, is_read) VALUES (?, 'academic', ?, 0)",
+            [threadAuthor[0].author_id, `New reply on your thread: ${threadAuthor[0].title}`]
+          );
+        }
+      }
+    } catch (notifErr) {
+      console.error("Notification insert error (academic reply):", notifErr);
+    }
+
     res.status(201).json({
       message: "Reply posted",
       post: { id: result.insertId, thread_id: id, author_id: authorId, content },
@@ -276,6 +312,22 @@ exports.addComment = async (req, res) => {
       "UPDATE forum_threads SET updated_at = CURRENT_TIMESTAMP WHERE id = ?",
       [id]
     );
+
+    // ── Notify thread author about the new comment (academic threads only) ──
+    try {
+      const [threadInfo] = await pool.query(
+        "SELECT author_id, category, title FROM forum_threads WHERE id = ?",
+        [id]
+      );
+      if (threadInfo.length > 0 && threadInfo[0].category === "academic" && threadInfo[0].author_id !== userId) {
+        await pool.query(
+          "INSERT INTO notifications (user_id, category, message, is_read) VALUES (?, 'academic', ?, 0)",
+          [threadInfo[0].author_id, `New comment on your thread: ${threadInfo[0].title}`]
+        );
+      }
+    } catch (notifErr) {
+      console.error("Notification insert error (academic comment):", notifErr);
+    }
 
     res.status(201).json({
       message: "Comment added.",

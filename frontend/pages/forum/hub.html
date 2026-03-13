@@ -114,7 +114,9 @@
     <div class="space-y-4 mb-8">
       
       <!-- Official Announcements -->
-      <div class="category-card bg-white dark:bg-black rounded-xl p-6 border border-gray-200 dark:border-gray-900 cursor-pointer hover:shadow-lg hover:dark:border-gray-800 transition-all duration-200" onclick="navigateToCategory('announcements')">
+      <div class="category-card relative bg-white dark:bg-black rounded-xl p-6 border border-gray-200 dark:border-gray-900 cursor-pointer hover:shadow-lg hover:dark:border-gray-800 transition-all duration-200" onclick="navigateToCategory('announcements')">
+        <!-- Notification Badge -->
+        <span id="badgeAnnouncement" class="hidden absolute -top-2 -right-2 inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 rounded-full shadow-lg ring-2 ring-white dark:ring-black"></span>
         <div class="flex items-start gap-4">
           <!-- Icon -->
           <div class="w-14 h-14 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
@@ -158,7 +160,9 @@
       </div>
 
       <!-- Academic Discussion -->
-      <div class="category-card bg-white dark:bg-black rounded-xl p-6 border border-gray-200 dark:border-gray-900 cursor-pointer hover:shadow-lg hover:dark:border-gray-800 transition-all duration-200" onclick="navigateToCategory('academic')">
+      <div class="category-card relative bg-white dark:bg-black rounded-xl p-6 border border-gray-200 dark:border-gray-900 cursor-pointer hover:shadow-lg hover:dark:border-gray-800 transition-all duration-200" onclick="navigateToCategory('academic')">
+        <!-- Notification Badge -->
+        <span id="badgeAcademic" class="hidden absolute -top-2 -right-2 inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 rounded-full shadow-lg ring-2 ring-white dark:ring-black"></span>
         <div class="flex items-start gap-4">
           <!-- Icon -->
           <div class="w-14 h-14 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
@@ -201,7 +205,9 @@
       </div>
 
       <!-- Learning Materials -->
-      <div class="category-card bg-white dark:bg-black rounded-xl p-6 border border-gray-200 dark:border-gray-900 cursor-pointer hover:shadow-lg hover:dark:border-gray-800 transition-all duration-200" onclick="navigateToCategory('materials')">
+      <div class="category-card relative bg-white dark:bg-black rounded-xl p-6 border border-gray-200 dark:border-gray-900 cursor-pointer hover:shadow-lg hover:dark:border-gray-800 transition-all duration-200" onclick="navigateToCategory('materials')">
+        <!-- Notification Badge -->
+        <span id="badgeMaterials" class="hidden absolute -top-2 -right-2 inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 rounded-full shadow-lg ring-2 ring-white dark:ring-black"></span>
         <div class="flex items-start gap-4">
           <!-- Icon -->
           <div class="w-14 h-14 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
@@ -244,7 +250,9 @@
       </div>
 
       <!-- Academic Document Request (Private) -->
-      <div class="category-card bg-white dark:bg-black rounded-xl p-6 border border-gray-200 dark:border-gray-900 cursor-pointer hover:shadow-lg hover:dark:border-gray-800 transition-all duration-200 relative" onclick="navigateToGradeInquiry()">
+      <div class="category-card relative bg-white dark:bg-black rounded-xl p-6 border border-gray-200 dark:border-gray-900 cursor-pointer hover:shadow-lg hover:dark:border-gray-800 transition-all duration-200" onclick="navigateToGradeInquiry()">
+        <!-- Notification Badge -->
+        <span id="badgeDocumentRequest" class="hidden absolute -top-2 -right-2 inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 rounded-full shadow-lg ring-2 ring-white dark:ring-black"></span>
         <div class="flex items-start gap-4">
           <!-- Icon -->
           <div class="w-14 h-14 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0 relative">
@@ -456,6 +464,12 @@
       fetchStats();
       fetchCategoryStats();
       fetchRecentActivity();
+      processPendingMarkAsRead();
+    });
+
+    // Re-fetch badges when user navigates back (bfcache or fresh load)
+    window.addEventListener('pageshow', function() {
+      processPendingMarkAsRead();
     });
 
     // ── Fetch global recent activity (sidebar) ──
@@ -672,22 +686,130 @@
     }
 
     // ── Navigation functions ──
+    // (Defined below in the Notification Badge System section)
+
+    function navigateToAdminDashboard() {
+      window.location.href = '../admin/panel.html';
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // ── Notification Badge System ────────────────────────────────
+    // ══════════════════════════════════════════════════════════════
+
+    // Map notification categories → badge element IDs
+    var badgeMap = {
+      announcement: 'badgeAnnouncement',
+      academic: 'badgeAcademic',
+      materials: 'badgeMaterials',
+      document_request: 'badgeDocumentRequest',
+    };
+
+    // Fetch unread counts from backend and update badge UI
+    function fetchNotificationBadges() {
+      var token = localStorage.getItem('gardnerHub_token');
+      if (!token) return;
+
+      fetch(API_BASE + '/notifications/unread-counts', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        var counts = data.counts || {};
+        var user = getCurrentUser();
+        var role = user ? user.role : '';
+        var dept = user ? (user.department_course || '') : '';
+        var isRegistrar = dept.toLowerCase().trim() === 'registrar office';
+
+        Object.keys(badgeMap).forEach(function(category) {
+          var el = document.getElementById(badgeMap[category]);
+          if (!el) return;
+
+          // Rule: Other Faculty (non-registrar) must NEVER see a badge for document_request
+          if (category === 'document_request' && role === 'faculty' && !isRegistrar) {
+            el.classList.add('hidden');
+            return;
+          }
+
+          var count = counts[category] || 0;
+          if (count > 0) {
+            el.textContent = '+' + count;
+            el.classList.remove('hidden');
+          } else {
+            el.classList.add('hidden');
+          }
+        });
+      })
+      .catch(function() {
+        // Backend unavailable — keep badges hidden
+      });
+    }
+
+    // Call mark-as-read API and return a Promise
+    function callMarkAsRead(category) {
+      var token = localStorage.getItem('gardnerHub_token');
+      if (!token) return Promise.resolve();
+
+      return fetch(API_BASE + '/notifications/mark-as-read', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token,
+        },
+        body: JSON.stringify({ category: category }),
+      })
+      .then(function(res) {
+        if (!res.ok) {
+          console.error('[Notifications] mark-as-read failed:', res.status);
+        }
+        return res;
+      })
+      .catch(function(err) {
+        console.error('[Notifications] mark-as-read network error:', err);
+      });
+    }
+
+    // Process any pending mark-as-read from sessionStorage (failsafe)
+    function processPendingMarkAsRead() {
+      var pending = sessionStorage.getItem('pendingMarkAsRead');
+      if (pending) {
+        sessionStorage.removeItem('pendingMarkAsRead');
+        callMarkAsRead(pending).then(function() {
+          fetchNotificationBadges();
+        });
+      } else {
+        fetchNotificationBadges();
+      }
+    }
+
+    // Mark notifications as read for a category, then navigate
+    function markAsReadAndNavigate(category, url) {
+      // Hide the badge immediately for responsive UX
+      var badgeEl = document.getElementById(badgeMap[category]);
+      if (badgeEl) badgeEl.classList.add('hidden');
+
+      // Store in sessionStorage as failsafe in case fetch is cancelled during navigation
+      sessionStorage.setItem('pendingMarkAsRead', category);
+
+      // Try to mark as read, then navigate
+      callMarkAsRead(category).then(function() {
+        sessionStorage.removeItem('pendingMarkAsRead');
+        window.location.href = url;
+      });
+    }
+
+    // ── Override navigation to clear badges on click ──
     function navigateToCategory(type) {
       if (type === 'academic') {
-        window.location.href = 'category-view.html?category=academic';
+        markAsReadAndNavigate('academic', 'category-view.html?category=academic');
       } else if (type === 'announcements') {
-        window.location.href = 'announcements.html';
+        markAsReadAndNavigate('announcement', 'announcements.html');
       } else if (type === 'materials') {
-        window.location.href = 'category-view.html?category=materials';
+        markAsReadAndNavigate('materials', 'category-view.html?category=materials');
       }
     }
 
     function navigateToGradeInquiry() {
-      window.location.href = '../student/document-request.html';
-    }
-
-    function navigateToAdminDashboard() {
-      window.location.href = '../admin/panel.html';
+      markAsReadAndNavigate('document_request', '../student/document-request.html');
     }
   </script>
 

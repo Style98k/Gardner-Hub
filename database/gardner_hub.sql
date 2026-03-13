@@ -74,11 +74,9 @@ CREATE TABLE IF NOT EXISTS `document_requests` (
   KEY `idx_student_updated` (`student_id`,`updated_at` DESC),
   KEY `idx_grade_inquiries_status` (`status`,`created_at` DESC),
   CONSTRAINT `document_requests_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table gardner_hub.document_requests: ~0 rows (approximately)
-INSERT INTO `document_requests` (`id`, `student_id`, `document_type`, `id_proof_path`, `status`, `grade_file_path`, `issued_document_path`, `created_at`, `updated_at`) VALUES
-	(2, 1, 'Cumulative Grade Report', 'C:/Users/Admin1/Desktop/Codes Projects/Gardner Hub/backend/uploads/id_proofs/1773232153907-pic1.png', 'pending', NULL, NULL, '2026-03-11 12:29:13', '2026-03-11 12:29:13');
 
 -- Dumping structure for table gardner_hub.forum_posts
 DROP TABLE IF EXISTS `forum_posts`;
@@ -127,14 +125,53 @@ CREATE TABLE IF NOT EXISTS `forum_threads` (
   KEY `idx_recent_activities_category` (`category`,`created_at` DESC),
   KEY `idx_category_created` (`category`,`created_at` DESC),
   CONSTRAINT `forum_threads_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Dumping data for table gardner_hub.forum_threads: ~3 rows (approximately)
 INSERT INTO `forum_threads` (`id`, `category`, `title`, `content`, `tag`, `material_type`, `file_path`, `thumbnail_path`, `is_downloadable`, `image_url`, `link_url`, `like_count`, `author_id`, `created_at`, `updated_at`, `academic_level`, `course_strand`, `year_grade`, `semester`, `subject_name`) VALUES
-	(3, 'academic', 'Class', 'May Class ba Tom?', 'Q&A', NULL, NULL, NULL, 1, NULL, NULL, 1, 1, '2026-02-28 14:31:12', '2026-02-28 14:32:33', NULL, NULL, NULL, NULL, NULL),
 	(5, 'announcements', '📢 𝐆𝐀𝐑𝐃𝐍𝐄𝐑 𝐁𝐀𝐋𝐈𝐓𝐀 𝐖𝐀𝐋𝐀𝐍𝐆 𝐏𝐀𝐒𝐎𝐊 | 𝐀𝐋𝐋 𝐋𝐄𝐕𝐄𝐋𝐒 | 𝐒𝐄𝐏𝐓𝐄𝐌𝐁𝐄𝐑 𝟐𝟐, 𝟐𝟎𝟐𝟓 (𝐌𝐎𝐍𝐃𝐀𝐘)', 'Based on Memorandum Circular No. 97, s. 2025 from Malacañang, all classes in Metro Manila are suspended tomorrow, September 22, 2025 (Monday), due to the expected bad weather caused by Bagyong Nando.', 'Class Suspension', NULL, NULL, NULL, 1, '1772718976474-864103673.jpg', NULL, 0, 2, '2026-03-05 13:56:16', '2026-03-05 13:56:16', NULL, NULL, NULL, NULL, NULL),
 	(6, 'announcements', 'ANNOUNCEMENT!', 'This is the class schedule for 1st Year BSIT 1C Term 2', 'Class Schedule', NULL, NULL, NULL, 1, '1772719247100-19177664.jpg', NULL, 0, 2, '2026-03-05 14:00:47', '2026-03-05 14:00:47', NULL, NULL, NULL, NULL, NULL),
-	(7, 'materials', 'Lesson 1', 'Sample', NULL, 'Reference', '1772721781166-121915552.docx', NULL, 1, NULL, NULL, 0, 2, '2026-03-05 14:43:01', '2026-03-05 14:43:01', 'College', 'BS Information Technology', '1st Year', '2nd Semester', NULL);
+	(13, 'announcements', 'ANNOUNCEMENT!', 'noo class', 'Class Suspension', NULL, NULL, NULL, 1, NULL, NULL, 0, 2, '2026-03-13 12:56:42', '2026-03-13 12:56:42', NULL, NULL, NULL, NULL, NULL),
+	(14, 'academic', 'fddfd', 'fdfdfd', 'Q&A', NULL, NULL, NULL, 1, NULL, NULL, 0, 1, '2026-03-13 12:57:45', '2026-03-13 12:59:30', NULL, NULL, NULL, NULL, NULL);
+
+-- Dumping structure for table gardner_hub.notifications
+DROP TABLE IF EXISTS `notifications`;
+CREATE TABLE IF NOT EXISTS `notifications` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `category` enum('announcement','academic','materials','document_request') NOT NULL,
+  `message` text NOT NULL,
+  `is_read` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_notifications_user_unread` (`user_id`,`is_read`),
+  KEY `idx_notifications_category` (`user_id`,`category`,`is_read`),
+  CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Dumping data for table gardner_hub.notifications: ~0 rows (approximately)
+INSERT INTO `notifications` (`id`, `user_id`, `category`, `message`, `is_read`, `created_at`) VALUES
+	(1, 1, 'academic', 'Test notification', 1, '2026-03-13 12:22:33'),
+	(2, 1, 'announcement', 'New announcement: ANNOUNCEMENT!', 1, '2026-03-13 12:25:14'),
+	(3, 2, 'announcement', 'New announcement: ANNOUNCEMENT!', 1, '2026-03-13 12:25:14'),
+	(4, 5, 'academic', 'Blady started a new discussion: Class', 1, '2026-03-13 12:33:38'),
+	(5, 3, 'academic', 'Blady started a new discussion: Class', 1, '2026-03-13 12:33:38'),
+	(6, 2, 'academic', 'Blady started a new discussion: Class', 1, '2026-03-13 12:33:38'),
+	(7, 1, 'announcement', 'New announcement: ANNOUNCEMENT!', 1, '2026-03-13 12:34:23'),
+	(8, 5, 'announcement', 'New announcement: ANNOUNCEMENT!', 1, '2026-03-13 12:34:23'),
+	(9, 5, 'announcement', 'New announcement: ANNOUNCEMENT!', 1, '2026-03-13 12:39:23'),
+	(10, 3, 'announcement', 'New announcement: ANNOUNCEMENT!', 1, '2026-03-13 12:39:23'),
+	(11, 1, 'announcement', 'New announcement: ANNOUNCEMENT!', 1, '2026-03-13 12:39:23'),
+	(12, 5, 'announcement', 'New announcement: ANNOUNCEMENT!', 1, '2026-03-13 12:56:42'),
+	(13, 3, 'announcement', 'New announcement: ANNOUNCEMENT!', 1, '2026-03-13 12:56:42'),
+	(14, 1, 'announcement', 'New announcement: ANNOUNCEMENT!', 1, '2026-03-13 12:56:42'),
+	(15, 5, 'academic', 'Blady started a new discussion: fddfd', 1, '2026-03-13 12:57:45'),
+	(16, 3, 'academic', 'Blady started a new discussion: fddfd', 0, '2026-03-13 12:57:45'),
+	(17, 2, 'academic', 'Blady started a new discussion: fddfd', 1, '2026-03-13 12:57:45'),
+	(18, 1, 'academic', 'New comment on your thread: fddfd', 1, '2026-03-13 12:59:02'),
+	(19, 5, 'document_request', 'New document request: Cumulative Grade Report', 1, '2026-03-13 13:00:44'),
+	(20, 1, 'document_request', 'Your document request is now: Pending', 1, '2026-03-13 13:01:25'),
+	(21, 1, 'document_request', 'Your document request is now: Pending', 1, '2026-03-13 13:01:36');
 
 -- Dumping structure for table gardner_hub.post_comments
 DROP TABLE IF EXISTS `post_comments`;
@@ -155,12 +192,12 @@ CREATE TABLE IF NOT EXISTS `post_comments` (
   CONSTRAINT `fk_comment_parent` FOREIGN KEY (`parent_id`) REFERENCES `post_comments` (`id`) ON DELETE CASCADE,
   CONSTRAINT `post_comments_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `forum_threads` (`id`) ON DELETE CASCADE,
   CONSTRAINT `post_comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Dumping data for table gardner_hub.post_comments: ~3 rows (approximately)
 INSERT INTO `post_comments` (`id`, `post_id`, `parent_id`, `user_id`, `content`, `like_count`, `created_at`) VALUES
-	(2, 3, NULL, 2, 'Yes', 0, '2026-02-28 14:31:58'),
-	(3, 3, 2, 1, 'thanks po', 0, '2026-02-28 14:32:23');
+	(4, 14, NULL, 2, 'yes', 0, '2026-03-13 12:59:02'),
+	(5, 14, 4, 1, 'thanks', 0, '2026-03-13 12:59:30');
 
 -- Dumping structure for table gardner_hub.post_likes
 DROP TABLE IF EXISTS `post_likes`;
@@ -176,8 +213,6 @@ CREATE TABLE IF NOT EXISTS `post_likes` (
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Dumping data for table gardner_hub.post_likes: ~1 rows (approximately)
-INSERT INTO `post_likes` (`id`, `post_id`, `user_id`) VALUES
-	(3, 3, 1);
 
 -- Dumping structure for view gardner_hub.recent_activities_view
 DROP VIEW IF EXISTS `recent_activities_view`;
@@ -205,7 +240,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   KEY `idx_users_created_at` (`created_at` DESC)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table gardner_hub.users: ~2 rows (approximately)
+-- Dumping data for table gardner_hub.users: ~4 rows (approximately)
 INSERT INTO `users` (`id`, `full_name`, `school_id`, `role`, `department_course`, `email`, `password`, `status`, `created_at`, `profile_photo`, `show_school_id`) VALUES
 	(1, 'Blady', 'GCD 2023 T111434', 'student', 'BSCS', 'blady@gmail.com', '$2b$10$UA2l5fGpW3BU5Sd30rLUVuCSfmOqSl/BjIFCovj2yfs2NVDUSxoxe', 'approved', '2026-02-24 10:13:40', NULL, 1),
 	(2, 'Charles', 'GCD 2022 T1136543', 'faculty', 'ADM', 'charles@gmail.com', '$2b$10$fBmhBh6oTI4DDshv5ZgJteEQbbyI0J2vcp9tOTNmWcc32.DDh9RpC', 'approved', '2026-02-25 04:22:02', NULL, 1),
