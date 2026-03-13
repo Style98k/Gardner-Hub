@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS `document_requests` (
   KEY `idx_student_updated` (`student_id`,`updated_at` DESC),
   KEY `idx_grade_inquiries_status` (`status`,`created_at` DESC),
   CONSTRAINT `document_requests_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table gardner_hub.document_requests: ~0 rows (approximately)
 
@@ -130,9 +130,7 @@ CREATE TABLE IF NOT EXISTS `forum_threads` (
 -- Dumping data for table gardner_hub.forum_threads: ~3 rows (approximately)
 INSERT INTO `forum_threads` (`id`, `category`, `title`, `content`, `tag`, `material_type`, `file_path`, `thumbnail_path`, `is_downloadable`, `image_url`, `link_url`, `like_count`, `author_id`, `created_at`, `updated_at`, `academic_level`, `course_strand`, `year_grade`, `semester`, `subject_name`) VALUES
 	(5, 'announcements', '📢 𝐆𝐀𝐑𝐃𝐍𝐄𝐑 𝐁𝐀𝐋𝐈𝐓𝐀 𝐖𝐀𝐋𝐀𝐍𝐆 𝐏𝐀𝐒𝐎𝐊 | 𝐀𝐋𝐋 𝐋𝐄𝐕𝐄𝐋𝐒 | 𝐒𝐄𝐏𝐓𝐄𝐌𝐁𝐄𝐑 𝟐𝟐, 𝟐𝟎𝟐𝟓 (𝐌𝐎𝐍𝐃𝐀𝐘)', 'Based on Memorandum Circular No. 97, s. 2025 from Malacañang, all classes in Metro Manila are suspended tomorrow, September 22, 2025 (Monday), due to the expected bad weather caused by Bagyong Nando.', 'Class Suspension', NULL, NULL, NULL, 1, '1772718976474-864103673.jpg', NULL, 0, 2, '2026-03-05 13:56:16', '2026-03-05 13:56:16', NULL, NULL, NULL, NULL, NULL),
-	(6, 'announcements', 'ANNOUNCEMENT!', 'This is the class schedule for 1st Year BSIT 1C Term 2', 'Class Schedule', NULL, NULL, NULL, 1, '1772719247100-19177664.jpg', NULL, 0, 2, '2026-03-05 14:00:47', '2026-03-05 14:00:47', NULL, NULL, NULL, NULL, NULL),
-	(13, 'announcements', 'ANNOUNCEMENT!', 'noo class', 'Class Suspension', NULL, NULL, NULL, 1, NULL, NULL, 0, 2, '2026-03-13 12:56:42', '2026-03-13 12:56:42', NULL, NULL, NULL, NULL, NULL),
-	(14, 'academic', 'fddfd', 'fdfdfd', 'Q&A', NULL, NULL, NULL, 1, NULL, NULL, 0, 1, '2026-03-13 12:57:45', '2026-03-13 12:59:30', NULL, NULL, NULL, NULL, NULL);
+	(6, 'announcements', 'ANNOUNCEMENT!', 'This is the class schedule for 1st Year BSIT 1C Term 2', 'Class Schedule', NULL, NULL, NULL, 1, '1772719247100-19177664.jpg', NULL, 0, 2, '2026-03-05 14:00:47', '2026-03-05 14:00:47', NULL, NULL, NULL, NULL, NULL);
 
 -- Dumping structure for table gardner_hub.notifications
 DROP TABLE IF EXISTS `notifications`;
@@ -147,7 +145,7 @@ CREATE TABLE IF NOT EXISTS `notifications` (
   KEY `idx_notifications_user_unread` (`user_id`,`is_read`),
   KEY `idx_notifications_category` (`user_id`,`category`,`is_read`),
   CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Dumping data for table gardner_hub.notifications: ~0 rows (approximately)
 INSERT INTO `notifications` (`id`, `user_id`, `category`, `message`, `is_read`, `created_at`) VALUES
@@ -171,7 +169,14 @@ INSERT INTO `notifications` (`id`, `user_id`, `category`, `message`, `is_read`, 
 	(18, 1, 'academic', 'New comment on your thread: fddfd', 1, '2026-03-13 12:59:02'),
 	(19, 5, 'document_request', 'New document request: Cumulative Grade Report', 1, '2026-03-13 13:00:44'),
 	(20, 1, 'document_request', 'Your document request is now: Pending', 1, '2026-03-13 13:01:25'),
-	(21, 1, 'document_request', 'Your document request is now: Pending', 1, '2026-03-13 13:01:36');
+	(21, 1, 'document_request', 'Your document request is now: Pending', 1, '2026-03-13 13:01:36'),
+	(22, 5, 'document_request', 'New document request: Cumulative Grade Report', 1, '2026-03-13 13:07:07'),
+	(23, 5, 'document_request', 'New document request: Form 137 (Permanent Record)', 1, '2026-03-13 13:29:44'),
+	(24, 1, 'document_request', 'Your document request is now: Pending', 1, '2026-03-13 13:33:29'),
+	(25, 1, 'document_request', 'Your request for Form 137 (Permanent Record) has been resolved. You can now view or download it.', 1, '2026-03-13 13:33:47'),
+	(26, 5, 'document_request', 'New document request: Certificate of Enrollment (COE)', 1, '2026-03-13 13:43:48'),
+	(27, 1, 'document_request', 'Your document request is now: Under Review', 1, '2026-03-13 13:45:14'),
+	(28, 1, 'document_request', 'Your request for Certificate of Enrollment (COE) has been resolved. You can now view or download it.', 1, '2026-03-13 13:45:39');
 
 -- Dumping structure for table gardner_hub.post_comments
 DROP TABLE IF EXISTS `post_comments`;
@@ -195,9 +200,6 @@ CREATE TABLE IF NOT EXISTS `post_comments` (
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Dumping data for table gardner_hub.post_comments: ~3 rows (approximately)
-INSERT INTO `post_comments` (`id`, `post_id`, `parent_id`, `user_id`, `content`, `like_count`, `created_at`) VALUES
-	(4, 14, NULL, 2, 'yes', 0, '2026-03-13 12:59:02'),
-	(5, 14, 4, 1, 'thanks', 0, '2026-03-13 12:59:30');
 
 -- Dumping structure for table gardner_hub.post_likes
 DROP TABLE IF EXISTS `post_likes`;

@@ -11,6 +11,9 @@ const {
   getAllRequests,
   updateRequestStatus,
   uploadDocumentFile,
+  fulfillRequest,
+  previewIssuedDocument,
+  getIssuedDocumentPath,
 } = require("../controllers/requestController");
 
 // ─── Multer Configuration: ID Proofs ────────────────────────────────────────
@@ -117,5 +120,15 @@ router.post("/:id/upload-grade", verifyToken, requireRole("faculty", "admin"), u
 
 // POST /api/inquiries/:id/upload-issued — Upload official issued document (Registrar only)
 router.post("/:id/upload-issued", verifyToken, requireRole("faculty", "admin"), uploadIssuedDocMulter.single("issuedDoc"), uploadDocumentFile);
+
+// POST /api/inquiries/:id/fulfill — Fulfill request: upload doc + set resolved + notify student
+router.post("/:id/fulfill", verifyToken, requireRole("faculty", "admin"), uploadIssuedDocMulter.single("issuedDoc"), fulfillRequest);
+
+// ─── Student Document Access Routes ─────────────────────────────────────────
+// GET /api/inquiries/:id/preview — Preview issued document (students only, inline view)
+router.get("/:id/preview", verifyToken, requireRole("student"), previewIssuedDocument);
+
+// GET /api/inquiries/:id/document-info — Check if document is available for student
+router.get("/:id/document-info", verifyToken, requireRole("student"), getIssuedDocumentPath);
 
 module.exports = router;

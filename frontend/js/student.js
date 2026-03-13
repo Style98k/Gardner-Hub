@@ -79,6 +79,7 @@ function getStatusBadge(status) {
       text: 'text-green-800 dark:text-green-300',
       label: 'Resolved',
       icon: '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>',
+      checkmark: true,
     },
     under_review: {
       bg: 'bg-orange-100 dark:bg-orange-900/50',
@@ -101,9 +102,13 @@ function getStatusBadge(status) {
   };
 
   const s = map[status] || map.pending;
+  const checkmarkIcon = s.checkmark 
+    ? `<svg class="w-4 h-4 ml-1 text-green-500" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>` 
+    : '';
   return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${s.bg} ${s.text}">
     <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">${s.icon}</svg>
     ${s.label}
+    ${checkmarkIcon}
   </span>`;
 }
 
@@ -122,14 +127,24 @@ function getActionButton(inquiry) {
     </button>`;
   }
 
-  // Student views
-  if (inquiry.status === 'resolved' && inquiry.grade_file_path) {
-    return `<button onclick="downloadRecord(${inquiry.id})" class="flex items-center space-x-1 bg-brand-900 dark:bg-white text-white dark:text-black px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-800 dark:hover:bg-gray-100 transition-colors duration-200">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-      </svg>
-      <span>Download</span>
-    </button>`;
+  // Student views — Resolved with document: show View & Download buttons
+  const hasDocument = inquiry.issued_document_path || inquiry.grade_file_path;
+  if (inquiry.status === 'resolved' && hasDocument) {
+    return `<div class="flex items-center space-x-2">
+      <button onclick="previewDocument(${inquiry.id})" class="flex items-center space-x-1 bg-blue-600 dark:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors duration-200">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+        </svg>
+        <span>View</span>
+      </button>
+      <button onclick="downloadRecord(${inquiry.id})" class="flex items-center space-x-1 bg-brand-900 dark:bg-white text-white dark:text-black px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-800 dark:hover:bg-gray-100 transition-colors duration-200">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        <span>Download</span>
+      </button>
+    </div>`;
   } else if (inquiry.status === 'resolved') {
     return `<span class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-green-600 dark:text-green-400">
       <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -162,8 +177,8 @@ function renderInquiriesTable(inquiries, showStudentCol = false) {
 
   if (!inquiries || inquiries.length === 0) {
     const emptyMsg = showStudentCol
-      ? 'No student grade requests found.'
-      : 'No grade requests submitted yet.';
+      ? 'No student document requests found.'
+      : 'No document requests submitted yet.';
     const emptyHint = showStudentCol
       ? 'Student requests will appear here once they are submitted.'
       : 'Use the button above to submit your first request.';
@@ -194,7 +209,7 @@ function renderInquiriesTable(inquiries, showStudentCol = false) {
     return `
       <tr class="${resolvedClass} hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
         <td class="px-6 py-4 whitespace-nowrap">
-          <div class="text-sm font-medium text-gray-900 dark:text-white">GR-${String(inq.id).padStart(4, '0')}</div>
+          <div class="text-sm font-medium text-gray-900 dark:text-white">ADR-${String(inq.id).padStart(4, '0')}</div>
         </td>
         ${studentCell}
         <td class="px-6 py-4 whitespace-nowrap">
@@ -348,28 +363,68 @@ function openReviewModal(inquiryId) {
   document.getElementById('reviewStudentName').textContent = inq.full_name || '—';
   document.getElementById('reviewStudentId').textContent = inq.school_id || '—';
   document.getElementById('reviewDocType').textContent = inq.document_type || '—';
-  document.getElementById('reviewRequestId').textContent = `GR-${String(inq.id).padStart(4, '0')}`;
+  document.getElementById('reviewRequestId').textContent = `ADR-${String(inq.id).padStart(4, '0')}`;
   document.getElementById('reviewStatus').value = inq.status || 'pending';
 
-  // Show ID photo
+  // Show ID photo with proper loading state
   const photo = document.getElementById('reviewIdPhoto');
   const placeholder = document.getElementById('reviewIdPlaceholder');
+  const loadingEl = document.getElementById('reviewIdPhotoLoading');
+
   if (inq.id_proof_path) {
-    const photoUrl = `${API_BASE.replace('/api', '')}/${inq.id_proof_path}`;
-    photo.src = photoUrl;
-    photo.classList.remove('hidden');
+    // Show loading spinner
+    if (loadingEl) loadingEl.classList.remove('hidden');
+    photo.classList.add('hidden');
     placeholder.classList.add('hidden');
+
+    // Construct the correct URL for the ID proof image
+    const photoUrl = `${API_BASE.replace('/api', '')}/${inq.id_proof_path}`;
+    
+    // Create new image to preload
+    const img = new Image();
+    img.onload = () => {
+      photo.src = photoUrl;
+      photo.classList.remove('hidden');
+      if (loadingEl) loadingEl.classList.add('hidden');
+      placeholder.classList.add('hidden');
+    };
+    img.onerror = () => {
+      if (loadingEl) loadingEl.classList.add('hidden');
+      photo.classList.add('hidden');
+      placeholder.textContent = 'Failed to load ID';
+      placeholder.classList.remove('hidden');
+    };
+    img.src = photoUrl;
   } else {
     photo.classList.add('hidden');
+    if (loadingEl) loadingEl.classList.add('hidden');
+    placeholder.textContent = 'No ID uploaded';
     placeholder.classList.remove('hidden');
   }
 
   // Reset file input
   document.getElementById('reviewFileUpload').value = '';
 
+  // Show/hide fulfillment notice based on status
+  updateFulfillmentNotice();
+
   // Open modal
   document.getElementById('registrarReviewModal').classList.remove('hidden');
   document.getElementById('registrarReviewModal').classList.add('flex');
+}
+
+function updateFulfillmentNotice() {
+  const notice = document.getElementById('fulfillmentNotice');
+  const status = document.getElementById('reviewStatus').value;
+  const hasFile = document.getElementById('reviewFileUpload').files.length > 0;
+  
+  if (notice) {
+    if (status === 'resolved' && hasFile) {
+      notice.classList.remove('hidden');
+    } else {
+      notice.classList.add('hidden');
+    }
+  }
 }
 
 function closeReviewModal() {
@@ -383,49 +438,76 @@ async function saveReviewChanges() {
 
   const btn = document.getElementById('reviewSaveBtn');
   const originalText = btn.textContent;
+  const newStatus = document.getElementById('reviewStatus').value;
+  const file = document.getElementById('reviewFileUpload').files[0];
+
+  // Show loading state
   btn.disabled = true;
-  btn.textContent = 'Saving...';
+  btn.innerHTML = `
+    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white dark:text-black inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+    Uploading...
+  `;
 
   try {
-    const newStatus = document.getElementById('reviewStatus').value;
-    const file = document.getElementById('reviewFileUpload').files[0];
-
-    // 1. Update status
-    const statusRes = await fetch(`${API_BASE}/inquiries/${_reviewInquiryId}/status`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeaders(),
-      },
-      body: JSON.stringify({ status: newStatus }),
-    });
-
-    if (!statusRes.ok) {
-      const data = await statusRes.json();
-      showToast(data.message || 'Failed to update status.', 'error');
-      return;
-    }
-
-    // 2. Upload file if provided
-    if (file) {
+    // If status is resolved AND a file is uploaded, use the fulfill endpoint
+    if (newStatus === 'resolved' && file) {
       const formData = new FormData();
       formData.append('issuedDoc', file);
 
-      const uploadRes = await fetch(`${API_BASE}/inquiries/${_reviewInquiryId}/upload-issued`, {
+      const fulfillRes = await fetch(`${API_BASE}/inquiries/${_reviewInquiryId}/fulfill`, {
         method: 'POST',
         headers: authHeaders(),
         body: formData,
       });
 
-      if (!uploadRes.ok) {
-        const data = await uploadRes.json();
-        showToast(data.message || 'Failed to upload document.', 'error');
+      if (!fulfillRes.ok) {
+        const data = await fulfillRes.json();
+        showToast(data.message || 'Failed to fulfill request.', 'error');
         return;
       }
 
-      showToast('Document uploaded successfully!', 'success');
+      showToast('Request fulfilled successfully! Student has been notified.', 'success');
     } else {
-      showToast('Status updated successfully!', 'success');
+      // Update status only (without file or not resolved)
+      const statusRes = await fetch(`${API_BASE}/inquiries/${_reviewInquiryId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders(),
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!statusRes.ok) {
+        const data = await statusRes.json();
+        showToast(data.message || 'Failed to update status.', 'error');
+        return;
+      }
+
+      // If file is provided but status is not resolved, upload it separately
+      if (file) {
+        const formData = new FormData();
+        formData.append('issuedDoc', file);
+
+        const uploadRes = await fetch(`${API_BASE}/inquiries/${_reviewInquiryId}/upload-issued`, {
+          method: 'POST',
+          headers: authHeaders(),
+          body: formData,
+        });
+
+        if (!uploadRes.ok) {
+          const data = await uploadRes.json();
+          showToast(data.message || 'Failed to upload document.', 'error');
+          return;
+        }
+
+        showToast('Document uploaded and status updated!', 'success');
+      } else {
+        showToast('Status updated successfully!', 'success');
+      }
     }
 
     closeReviewModal();
@@ -437,6 +519,111 @@ async function saveReviewChanges() {
     btn.disabled = false;
     btn.textContent = originalText;
   }
+}
+
+// ── Document Preview (Student View) ─────────────────────────
+function previewDocument(inquiryId) {
+  const inq = _loadedInquiries.find(i => i.id === inquiryId);
+  if (!inq) {
+    showToast('Request not found.', 'error');
+    return;
+  }
+
+  // Determine file path and type
+  const docPath = inq.issued_document_path || inq.grade_file_path;
+  if (!docPath) {
+    showToast('Document is not available for preview.', 'error');
+    return;
+  }
+
+  // Construct preview URL
+  const previewUrl = `${API_BASE}/inquiries/${inquiryId}/preview`;
+  const ext = docPath.split('.').pop().toLowerCase();
+
+  // Open preview modal
+  const modal = document.getElementById('documentPreviewModal');
+  const previewContent = document.getElementById('previewContent');
+  const previewTitle = document.getElementById('previewDocTitle');
+
+  if (previewTitle) {
+    previewTitle.textContent = inq.document_type || 'Document Preview';
+  }
+
+  // Clear previous content
+  previewContent.innerHTML = `
+    <div class="flex items-center justify-center h-64">
+      <svg class="animate-spin h-8 w-8 text-brand-600 dark:text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <span class="ml-3 text-gray-600 dark:text-gray-400">Loading preview...</span>
+    </div>
+  `;
+
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+
+  // Fetch with auth and display
+  fetch(previewUrl, { headers: authHeaders() })
+    .then(res => {
+      if (!res.ok) throw new Error('Failed to load preview');
+      return res.blob();
+    })
+    .then(blob => {
+      const blobUrl = URL.createObjectURL(blob);
+
+      if (ext === 'pdf') {
+        previewContent.innerHTML = `
+          <iframe src="${blobUrl}" class="w-full h-[70vh] rounded-lg border border-gray-200 dark:border-gray-700" frameborder="0"></iframe>
+        `;
+      } else if (['doc', 'docx'].includes(ext)) {
+        // DOC/DOCX cannot be displayed inline; show download prompt
+        previewContent.innerHTML = `
+          <div class="flex flex-col items-center justify-center h-64 text-center">
+            <svg class="w-16 h-16 text-blue-500 mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+            </svg>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">Word documents cannot be previewed directly in the browser.</p>
+            <p class="text-sm text-gray-500 dark:text-gray-500 mb-4">Please download the file to view it.</p>
+            <button onclick="closePreviewModal(); downloadRecord(${inquiryId});" class="px-4 py-2 bg-brand-900 dark:bg-white text-white dark:text-black rounded-lg font-medium hover:bg-brand-800 dark:hover:bg-gray-100 transition-colors">
+              Download Document
+            </button>
+          </div>
+        `;
+      } else {
+        // Fallback for other types
+        previewContent.innerHTML = `
+          <div class="flex flex-col items-center justify-center h-64 text-center">
+            <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+            </svg>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">This file type cannot be previewed.</p>
+            <button onclick="closePreviewModal(); downloadRecord(${inquiryId});" class="px-4 py-2 bg-brand-900 dark:bg-white text-white dark:text-black rounded-lg font-medium hover:bg-brand-800 dark:hover:bg-gray-100 transition-colors">
+              Download Document
+            </button>
+          </div>
+        `;
+      }
+    })
+    .catch(err => {
+      console.error('Preview error:', err);
+      previewContent.innerHTML = `
+        <div class="flex flex-col items-center justify-center h-64 text-center">
+          <svg class="w-16 h-16 text-red-400 mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
+          </svg>
+          <p class="text-gray-600 dark:text-gray-400">Failed to load document preview.</p>
+          <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">Please try downloading instead.</p>
+        </div>
+      `;
+    });
+}
+
+function closePreviewModal() {
+  const modal = document.getElementById('documentPreviewModal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+  document.getElementById('previewContent').innerHTML = '';
 }
 
 // ── Secure Download Flow ────────────────────────────────────
@@ -500,7 +687,7 @@ async function confirmSecureDownload() {
     // Success — download the blob
     const blob = await res.blob();
     const contentDisposition = res.headers.get('Content-Disposition');
-    let filename = 'grade-file';
+    let filename = 'document-file';
     if (contentDisposition) {
       const match = contentDisposition.match(/filename="?(.+?)"?$/);
       if (match) filename = match[1];
@@ -516,7 +703,7 @@ async function confirmSecureDownload() {
     URL.revokeObjectURL(url);
 
     closePasswordModal();
-    showToast('Grade file downloaded successfully!', 'success');
+    showToast('Document downloaded successfully!', 'success');
   } catch (err) {
     console.error('Secure download error:', err);
     errorEl.textContent = 'Unable to connect to the server.';
@@ -626,6 +813,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Update fulfillment notice when status or file changes
+  const reviewStatus = document.getElementById('reviewStatus');
+  const reviewFileUpload = document.getElementById('reviewFileUpload');
+  if (reviewStatus) {
+    reviewStatus.addEventListener('change', updateFulfillmentNotice);
+  }
+  if (reviewFileUpload) {
+    reviewFileUpload.addEventListener('change', updateFulfillmentNotice);
+  }
+
   // Enter key on password field
   const passwordInput = document.getElementById('downloadPassword');
   if (passwordInput) {
@@ -648,5 +845,13 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
     profileDropdown.addEventListener('click', (e) => e.stopPropagation());
+  }
+
+  // Document preview modal backdrop click
+  const previewModal = document.getElementById('documentPreviewModal');
+  if (previewModal) {
+    previewModal.addEventListener('click', (e) => {
+      if (e.target === previewModal) closePreviewModal();
+    });
   }
 });
