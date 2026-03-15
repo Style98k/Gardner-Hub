@@ -117,7 +117,7 @@ CREATE TABLE IF NOT EXISTS `forum_threads` (
   `academic_level` varchar(50) DEFAULT NULL,
   `course_strand` varchar(100) DEFAULT NULL,
   `year_grade` varchar(50) DEFAULT NULL,
-  `semester` varchar(50) DEFAULT NULL,
+  `semester` varchar(50) DEFAULT NULL COMMENT 'Stores semester (1st/2nd/3rd Semester) or trimester (1st/2nd/3rd Trimester) values based on course',
   `module_number` int DEFAULT NULL,
   `quarter_number` int DEFAULT NULL,
   `subject_name` varchar(255) DEFAULT NULL,
@@ -128,12 +128,15 @@ CREATE TABLE IF NOT EXISTS `forum_threads` (
   KEY `idx_category_created` (`category`,`created_at` DESC),
   KEY `idx_shs_module_quarter` (`module_number`,`quarter_number`),
   CONSTRAINT `forum_threads_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Dumping data for table gardner_hub.forum_threads: ~2 rows (approximately)
 INSERT INTO `forum_threads` (`id`, `category`, `title`, `content`, `tag`, `material_type`, `file_path`, `thumbnail_path`, `is_downloadable`, `image_url`, `link_url`, `like_count`, `author_id`, `created_at`, `updated_at`, `academic_level`, `course_strand`, `year_grade`, `semester`, `module_number`, `quarter_number`, `subject_name`) VALUES
 	(5, 'announcements', '📢 𝐆𝐀𝐑𝐃𝐍𝐄𝐑 𝐁𝐀𝐋𝐈𝐓𝐀 𝐖𝐀𝐋𝐀𝐍𝐆 𝐏𝐀𝐒𝐎𝐊 | 𝐀𝐋𝐋 𝐋𝐄𝐕𝐄𝐋𝐒 | 𝐒𝐄𝐏𝐓𝐄𝐌𝐁𝐄𝐑 𝟐𝟐, 𝟐𝟎𝟐𝟓 (𝐌𝐎𝐍𝐃𝐀𝐘)', 'Based on Memorandum Circular No. 97, s. 2025 from Malacañang, all classes in Metro Manila are suspended tomorrow, September 22, 2025 (Monday), due to the expected bad weather caused by Bagyong Nando.', 'Class Suspension', NULL, NULL, NULL, 1, '1772718976474-864103673.jpg', NULL, 0, 2, '2026-03-05 13:56:16', '2026-03-05 13:56:16', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-	(6, 'announcements', 'ANNOUNCEMENT!', 'This is the class schedule for 1st Year BSIT 1C Term 2', 'Class Schedule', NULL, NULL, NULL, 1, '1772719247100-19177664.jpg', NULL, 0, 2, '2026-03-05 14:00:47', '2026-03-05 14:00:47', NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+	(6, 'announcements', 'ANNOUNCEMENT!', 'This is the class schedule for 1st Year BSIT 1C Term 2', 'Class Schedule', NULL, NULL, NULL, 1, '1772719247100-19177664.jpg', NULL, 0, 2, '2026-03-05 14:00:47', '2026-03-05 14:00:47', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+	(15, 'materials', 'IT111 Lecture Notes', 'Introduction to Computing lecture notes', NULL, 'Handout', NULL, NULL, 1, NULL, NULL, 0, 1, '2026-03-15 15:51:57', '2026-03-15 15:51:57', 'College', 'BS Computer Science', '1st Year', '1st Trimester', NULL, NULL, 'IT111: Intro to Computing'),
+	(16, 'materials', 'IT122 Lecture Notes - Pointers in C++', 'Comprehensive guide to pointers and memory management in C/C++', NULL, 'Handout', NULL, NULL, 1, NULL, NULL, 0, 1, '2026-03-15 15:56:13', '2026-03-15 15:56:13', 'College', 'BS Information Technology', '1st Year', '2nd Trimester', NULL, NULL, 'IT122: Computer Programming 2 (C/C++)'),
+	(17, 'materials', 'BA111 Introduction to Leadership', 'Comprehensive guide to leadership principles and management development', NULL, 'Handout', NULL, NULL, 1, NULL, NULL, 0, 1, '2026-03-15 15:59:25', '2026-03-15 15:59:25', 'College', 'BS Business Administration', '1st Year', '1st Trimester', NULL, NULL, 'BA111: Leadership and Management Development');
 
 -- Dumping structure for table gardner_hub.notifications
 DROP TABLE IF EXISTS `notifications`;

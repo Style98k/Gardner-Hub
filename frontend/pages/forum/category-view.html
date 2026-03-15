@@ -462,9 +462,9 @@
                 <option value="">Select level first...</option>
               </select>
             </div>
-            <!-- Semester (College only) -->
+            <!-- Semester/Trimester (College only) -->
             <div id="matSemesterContainer">
-              <label class="block text-xs font-semibold text-emerald-700 dark:text-emerald-400 mb-1">Semester <span class="text-red-500">*</span></label>
+              <label id="matSemesterLabel" class="block text-xs font-semibold text-emerald-700 dark:text-emerald-400 mb-1">Semester <span class="text-red-500">*</span></label>
               <select id="matSemester" onchange="updateMatSubjectDropdown()" class="w-full px-2.5 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 <option value="">Select semester...</option>
                 <option value="1st Semester">1st Semester</option>
@@ -749,6 +749,10 @@
     var collegeYears = ['1st Year', '2nd Year', '3rd Year'];
     var shsGrades = ['Grade 11', 'Grade 12'];
     var semesterOptions = ['1st Semester', '2nd Semester', '3rd Semester'];
+    var trimesterOptions = ['1st Trimester', '2nd Trimester', '3rd Trimester'];
+
+    // Courses that use Trimester system instead of Semester
+    var trimesterCourses = ['BS Computer Science', 'BS Information Technology', 'BS Business Administration'];
 
     // SHS Module/Quarter options
     var shsModules = ['Module 1', 'Module 2'];
@@ -757,19 +761,243 @@
       'Module 2': ['3rd Quarter', '4th Quarter']
     };
 
-    // ─── Subject data per course/year/semester ─────────────────────────────────
+    // ─── Subject data per course/year/trimester ─────────────────────────────────
     var subjectData = {
       'BS Information Technology': {
         '1st Year': {
-          '2nd Semester': [
-            { code: 'IT122-3', name: 'Computer Programming 2 C/C++ (Intermediate)', icon: '💻' },
-            { code: 'IT124-3', name: 'Web Application PHP', icon: '🌐' },
-            { code: 'IT123-3', name: 'Information Management (DBMS)', icon: '🗄️' },
-            { code: 'IT121-3', name: 'Program Design', icon: '📐' },
-            { code: 'IT131-3', name: 'Computer Architecture and Organization', icon: '🖥️' },
-            { code: 'IT214-3', name: 'PC Troubleshooting', icon: '🔧' },
-            { code: 'IT213-3', name: 'Multimedia Technologies', icon: '🎨' },
-            { code: 'PE2-3', name: 'Rhythmic Activity', icon: '🏃' }
+          '1st Trimester': [
+            { code: 'IT111', name: 'Intro to Computing', icon: '💻' },
+            { code: 'IT112', name: 'Fundamentals of Programming', icon: '🖥️' },
+            { code: 'IT113', name: 'Math for Computing', icon: '🔢' },
+            { code: 'IT114', name: 'Web Development (HTML/CSS/JS)', icon: '🌐' },
+            { code: 'GE104', name: 'Math in Modern World', icon: '📐' },
+            { code: 'IT134', name: 'Logic Design', icon: '⚡' },
+            { code: 'PE1', name: 'Physical Education 1', icon: '🏃' }
+          ],
+          '2nd Trimester': [
+            { code: 'IT213', name: 'Multimedia Technologies', icon: '🎨' },
+            { code: 'IT131', name: 'Computer Architecture and Organization', icon: '🖥️' },
+            { code: 'IT121', name: 'Program Design', icon: '📐' },
+            { code: 'IT122', name: 'Computer Programming 2 (C/C++)', icon: '💻' },
+            { code: 'IT123', name: 'Information Management (DBMS)', icon: '🗄️' },
+            { code: 'IT124', name: 'Web Application PHP', icon: '🌐' },
+            { code: 'IT214', name: 'PC Troubleshooting', icon: '🔧' },
+            { code: 'PE2', name: 'Physical Education 2', icon: '🏃' }
+          ],
+          '3rd Trimester': [
+            { code: 'IT221', name: 'Discrete Mathematics', icon: '🔢' },
+            { code: 'IT132', name: 'Computer Programming 3 (VB.NET)', icon: '💻' },
+            { code: 'IT133', name: 'RDBMS', icon: '🗄️' },
+            { code: 'IT135', name: 'Data Structures and Algorithms', icon: '📊' },
+            { code: 'IT215', name: 'Python Programming', icon: '🐍' },
+            { code: 'BA221', name: 'Principles of Accounting', icon: '💰' },
+            { code: 'PE3', name: 'Physical Education 3', icon: '🏃' },
+            { code: 'NSTP1', name: 'NSTP 1', icon: '🇵🇭' }
+          ]
+        },
+        '2nd Year': {
+          '1st Trimester': [
+            { code: 'GE101', name: 'Understanding the Self', icon: '🧠' },
+            { code: 'GE102', name: 'Purposive Communication', icon: '🗣️' },
+            { code: 'GE103', name: 'Readings in Philippine History', icon: '📜' },
+            { code: 'GE105', name: 'Science, Technology and Society', icon: '🔬' },
+            { code: 'GE106', name: 'The Contemporary World', icon: '🌍' },
+            { code: 'GE108', name: 'Reading Visual Arts', icon: '🎨' },
+            { code: 'GE110', name: 'Art Appreciation', icon: '🖼️' },
+            { code: 'NSTP2', name: 'NSTP 2', icon: '🇵🇭' }
+          ],
+          '2nd Trimester': [
+            { code: 'IT211', name: 'Principles of Operating Systems', icon: '🖥️' },
+            { code: 'IT212', name: 'Computer Programming 4 (Intro to Java)', icon: '☕' },
+            { code: 'IT232', name: 'Systems Analysis and Design', icon: '📊' },
+            { code: 'IT233', name: 'Software Quality Assurance', icon: '✅' },
+            { code: 'ITE1', name: 'IT Elective 1 (Cryptography)', icon: '🔐' },
+            { code: 'FEL1', name: 'Free Elective 1 (Cisco 1)', icon: '🌐' },
+            { code: 'PE4', name: 'Physical Education 4', icon: '🏃' }
+          ],
+          '3rd Trimester': [
+            { code: 'IT231', name: 'Data Communication and Networking', icon: '🌐' },
+            { code: 'IT223', name: 'Object-Oriented Programming (Java)', icon: '☕' },
+            { code: 'IT311', name: 'Software Engineering', icon: '⚙️' },
+            { code: 'IT312', name: 'Project Management', icon: '📋' },
+            { code: 'ITE2', name: 'IT Elective 2 (Android Basic)', icon: '📱' },
+            { code: 'FEL2', name: 'Free Elective 2 (Cisco 2)', icon: '🌐' }
+          ]
+        },
+        '3rd Year': {
+          '1st Trimester': [
+            { code: 'GE111', name: 'The Entrepreneurial Mind', icon: '💼' },
+            { code: 'IT222', name: 'IT Trends', icon: '📊' },
+            { code: 'GE109', name: 'Professional Ethics', icon: '⚖️' },
+            { code: 'GE107', name: 'Living in the IT Era', icon: '💻' },
+            { code: 'IT34A', name: 'Capstone Project 1', icon: '🎓' },
+            { code: 'NSTP2', name: 'NSTP 2', icon: '🇵🇭' }
+          ],
+          '2nd Trimester': [
+            { code: 'IT34B', name: 'Capstone Project 2', icon: '🎓' },
+            { code: 'ITE3', name: 'IT Elective 3 (Android Advance)', icon: '📱' },
+            { code: 'FEL3', name: 'Free Elective 3 (Cisco 3)', icon: '🌐' }
+          ],
+          '3rd Trimester': [
+            { code: 'OJT331', name: 'On-the-Job Training (500 hrs)', icon: '👔' }
+          ]
+        }
+      },
+      'BS Computer Science': {
+        '1st Year': {
+          '1st Trimester': [
+            { code: 'IT111', name: 'Intro to Computing', icon: '💻' },
+            { code: 'IT112', name: 'Computer Programming 1', icon: '🖥️' },
+            { code: 'IT113', name: 'Math for Computing', icon: '🔢' },
+            { code: 'IT114', name: 'Web Development', icon: '🌐' },
+            { code: 'GE104', name: 'Math in Modern World', icon: '📐' },
+            { code: 'IT134', name: 'Logic Design', icon: '⚡' },
+            { code: 'PE1', name: 'Physical Education 1', icon: '🏃' }
+          ],
+          '2nd Trimester': [
+            { code: 'IT121', name: 'Program Design', icon: '📐' },
+            { code: 'IT122', name: 'Computer Programming 2', icon: '💻' },
+            { code: 'IT123', name: 'Information Management (DBMS)', icon: '🗄️' },
+            { code: 'IT124', name: 'Web Application PHP', icon: '🌐' },
+            { code: 'CS221', name: 'Principles of Programming Languages', icon: '📚' },
+            { code: 'IT131', name: 'Computer Architecture', icon: '🖥️' },
+            { code: 'PE2', name: 'Physical Education 2', icon: '🏃' }
+          ],
+          '3rd Trimester': [
+            { code: 'IT221', name: 'Discrete Mathematics', icon: '🔢' },
+            { code: 'IT132', name: 'Computer Programming 3', icon: '💻' },
+            { code: 'IT133', name: 'RDBMS', icon: '🗄️' },
+            { code: 'IT135', name: 'Data Structures & Algorithms', icon: '📊' },
+            { code: 'IT215', name: 'Python Programming', icon: '🐍' },
+            { code: 'BA221', name: 'Accounting', icon: '💰' },
+            { code: 'PE3', name: 'Physical Education 3', icon: '🏃' },
+            { code: 'NSTP1', name: 'NSTP 1', icon: '🇵🇭' }
+          ]
+        },
+        '2nd Year': {
+          '1st Trimester': [
+            { code: 'GE101', name: 'Understanding the Self', icon: '🧠' },
+            { code: 'GE102', name: 'Purposive Communication', icon: '🗣️' },
+            { code: 'GE103', name: 'Philippine History', icon: '📜' },
+            { code: 'GE105', name: 'Science, Technology & Society', icon: '🔬' },
+            { code: 'GE108', name: 'Visual Arts', icon: '🎨' },
+            { code: 'GE110', name: 'Art Appreciation', icon: '🖼️' },
+            { code: 'GE112', name: 'Life and Works of Rizal', icon: '📖' },
+            { code: 'NSTP2', name: 'NSTP 2', icon: '🇵🇭' }
+          ],
+          '2nd Trimester': [
+            { code: 'IT211', name: 'Operating Systems', icon: '🖥️' },
+            { code: 'IT212', name: 'Intro to Java', icon: '☕' },
+            { code: 'IT232', name: 'Systems Analysis & Design', icon: '📊' },
+            { code: 'IT233', name: 'Software Quality Assurance', icon: '✅' },
+            { code: 'CS312', name: 'Automata Theory', icon: '🤖' },
+            { code: 'ITE1', name: 'VB Advance', icon: '💻' },
+            { code: 'GE109', name: 'Ethics', icon: '⚖️' },
+            { code: 'PE4', name: 'Physical Education 4', icon: '🏃' }
+          ],
+          '3rd Trimester': [
+            { code: 'IT223', name: 'Object-Oriented Programming (Java)', icon: '☕' },
+            { code: 'CS313', name: 'Modelling & Simulation', icon: '📈' },
+            { code: 'IT231', name: 'Networking', icon: '🌐' },
+            { code: 'IT311', name: 'Software Engineering', icon: '⚙️' },
+            { code: 'IT312', name: 'Project Management', icon: '📋' },
+            { code: 'FEL1', name: 'AutoCAD', icon: '📐' },
+            { code: 'ITE2', name: 'C# Programming', icon: '💻' }
+          ]
+        },
+        '3rd Year': {
+          '1st Trimester': [
+            { code: 'GE111', name: 'The Entrepreneurial Mind', icon: '💼' },
+            { code: 'FEL2', name: 'AutoCAD 2', icon: '📐' },
+            { code: 'IT34A', name: 'Capstone Project 1', icon: '🎓' },
+            { code: 'CS222', name: 'Software & File Organization', icon: '📁' },
+            { code: 'CS321', name: 'Compiler Design', icon: '⚙️' },
+            { code: 'IT222', name: 'IT Trends', icon: '📊' }
+          ],
+          '2nd Trimester': [
+            { code: 'IT34B', name: 'Capstone Project 2', icon: '🎓' },
+            { code: 'ITE3', name: 'Android Advance', icon: '📱' },
+            { code: 'FEL3', name: 'Game Development', icon: '🎮' },
+            { code: 'GE107', name: 'Living in the IT Era', icon: '💻' }
+          ],
+          '3rd Trimester': [
+            { code: 'OJT331', name: 'On-the-Job Training', icon: '👔' }
+          ]
+        }
+      },
+      'BS Business Administration': {
+        '1st Year': {
+          '1st Trimester': [
+            { code: 'BA111', name: 'Leadership and Management Development', icon: '👔' },
+            { code: 'BA221', name: 'Basic Microeconomics', icon: '📈' },
+            { code: 'BA228', name: 'Business Research', icon: '🔍' },
+            { code: 'GE104', name: 'Mathematics in Modern World', icon: '📐' },
+            { code: 'ST109A', name: 'Computer Applications 1 (Web Dev)', icon: '🌐' },
+            { code: 'ELEC3', name: 'Direct Marketing', icon: '📣' },
+            { code: 'PE1', name: 'Physical Fitness', icon: '🏃' },
+            { code: 'ELEC1', name: 'Personal Finance', icon: '💵' }
+          ],
+          '2nd Trimester': [
+            { code: 'ELEC2', name: 'E-Commerce', icon: '🛒' },
+            { code: 'BA223', name: 'International Business & Trade', icon: '🌍' },
+            { code: 'BA225', name: 'Taxation (Income Taxation)', icon: '📋' },
+            { code: 'BA226', name: 'Retail Management', icon: '🏪' },
+            { code: 'GE-ELEC1', name: 'GE Elective 1 (Math, Science & Tech)', icon: '🔬' },
+            { code: 'BA227', name: 'Business Law', icon: '⚖️' },
+            { code: 'IT215', name: 'Python Programming', icon: '🐍' },
+            { code: 'PE2', name: 'Rhythmic Activities', icon: '🏃' }
+          ],
+          '3rd Trimester': [
+            { code: 'GE105', name: 'Science, Technology and Society', icon: '🔬' },
+            { code: 'GE106', name: 'The Contemporary World', icon: '🌍' },
+            { code: 'GE108', name: 'Arts and Humanities', icon: '🎨' },
+            { code: 'GE109', name: 'Ethics', icon: '⚖️' },
+            { code: 'GE-ELEC2', name: 'GE Elective 2 (Social Science & Philosophy)', icon: '📚' },
+            { code: 'GE107', name: 'Living in the IT Era', icon: '💻' },
+            { code: 'NSTP1', name: 'NSTP 1', icon: '🇵🇭' }
+          ]
+        },
+        '2nd Year': {
+          '1st Trimester': [
+            { code: 'GE101', name: 'Understanding the Self', icon: '🧠' },
+            { code: 'GE102', name: 'Purposive Communication', icon: '🗣️' },
+            { code: 'BA222', name: 'Good Governance & Social Responsibility', icon: '🏛️' },
+            { code: 'GE103', name: 'Readings in Philippine History', icon: '📜' },
+            { code: 'GE112', name: 'Life and Works of Rizal', icon: '📖' },
+            { code: 'GE110', name: 'Art Appreciation', icon: '🖼️' },
+            { code: 'NSTP2', name: 'NSTP 2', icon: '🇵🇭' }
+          ],
+          '2nd Trimester': [
+            { code: 'BA230', name: 'Business Application Software', icon: '💻' },
+            { code: 'BA231', name: 'Human Resource Management', icon: '👥' },
+            { code: 'BA232', name: 'Professional Salesmanship', icon: '🤝' },
+            { code: 'ELEC4', name: 'International Marketing', icon: '🌐' },
+            { code: 'BA229', name: 'Risk Management', icon: '⚠️' },
+            { code: 'PE3', name: 'Individual and Dual Sports', icon: '🏃' }
+          ],
+          '3rd Trimester': [
+            { code: 'BA334', name: 'Marketing Research', icon: '📊' },
+            { code: 'BA338', name: 'Distribution Management', icon: '🚚' },
+            { code: 'BA339', name: 'Advertising', icon: '📺' },
+            { code: 'GE111', name: 'The Entrepreneurial Mind', icon: '💼' },
+            { code: 'ELEC5', name: 'Franchising', icon: '🏪' },
+            { code: 'BA337', name: 'Pricing Strategy', icon: '💲' },
+            { code: 'PE4', name: 'Team Sports', icon: '🏃' }
+          ]
+        },
+        '3rd Year': {
+          '1st Trimester': [
+            { code: 'BA331', name: 'Operations Management', icon: '⚙️' },
+            { code: 'BA332', name: 'Strategic Management', icon: '🎯' },
+            { code: 'BA335', name: 'Product Management', icon: '📦' },
+            { code: 'BA336', name: 'Marketing Management', icon: '📈' },
+            { code: 'BA400A', name: 'Thesis A (Mini Enterprise)', icon: '🎓' }
+          ],
+          '2nd Trimester': [
+            { code: 'BA400B', name: 'Thesis B (Mini Enterprise)', icon: '🎓' }
+          ],
+          '3rd Trimester': [
+            { code: 'BA340', name: 'Business Practicum (Prototype Defense)', icon: '👔' }
           ]
         }
       }
@@ -967,12 +1195,13 @@
         };
         return shsLabels[step] || 'Select';
       } else {
-        // College: 1=Level, 2=Course, 3=Year, 4=Semester, 5=Subject
+        // College: 1=Level, 2=Course, 3=Year, 4=Semester/Trimester, 5=Subject
+        var isTrimester = trimesterCourses.indexOf(materialNav.course) !== -1;
         var collegeLabels = {
           1: 'Select Academic Level',
           2: 'Select Course',
           3: 'Select Year',
-          4: 'Select Semester',
+          4: isTrimester ? 'Select Trimester' : 'Select Semester',
           5: 'Select Subject'
         };
         return collegeLabels[step] || 'Select';
@@ -1456,7 +1685,7 @@
           cards.push(buildNavCard(opt, "selectNavYear('" + escapedOpt + "')", '📅'));
         });
       } else if (step === 4) {
-        // Step 4: Module (SHS) or Semester (College)
+        // Step 4: Module (SHS) or Semester/Trimester (College)
         if (materialNav.level === 'Senior High School') {
           // SHS: Show Module cards
           shsModules.forEach(function(opt) {
@@ -1465,8 +1694,10 @@
             cards.push(buildNavCard(opt, "selectNavModule('" + escapedOpt + "')", '📦', subtitle));
           });
         } else {
-          // College: Show Semester cards
-          semesterOptions.forEach(function(opt) {
+          // College: Show Semester or Trimester cards based on course
+          var isTrimester = trimesterCourses.indexOf(materialNav.course) !== -1;
+          var termOptions = isTrimester ? trimesterOptions : semesterOptions;
+          termOptions.forEach(function(opt) {
             var escapedOpt = opt.replace(/'/g, "\\'");
             cards.push(buildNavCard(opt, "selectNavSemester('" + escapedOpt + "')", '📆'));
           });
@@ -1896,6 +2127,7 @@
         onMatLevelChange(); // populate dependent dropdowns and toggle visibility
         // Set course/strand
         document.getElementById('matCourseStrand').value = materialNav.course;
+        onMatStrandChange(); // update semester/trimester options based on course
         // Set year/grade
         document.getElementById('matYearGrade').value = materialNav.year;
 
@@ -1907,7 +2139,7 @@
           var quarterMap = { '1st Quarter': '1', '2nd Quarter': '2', '3rd Quarter': '3', '4th Quarter': '4' };
           document.getElementById('matQuarter').value = quarterMap[materialNav.quarter] || '';
         } else {
-          // Set semester for College
+          // Set semester/trimester for College
           document.getElementById('matSemester').value = materialNav.semester;
         }
 
@@ -2014,8 +2246,31 @@
       updateMatSubjectDropdown();
     }
 
-    // Handle Course/Strand change - populate Subject dropdown
+    // Handle Course/Strand change - populate Subject dropdown and update Semester/Trimester
     function onMatStrandChange() {
+      var courseStrand = document.getElementById('matCourseStrand').value;
+      var semesterLabel = document.getElementById('matSemesterLabel');
+      var semesterSelect = document.getElementById('matSemester');
+
+      // Check if this course uses Trimester system
+      var isTrimester = trimesterCourses.indexOf(courseStrand) !== -1;
+
+      if (isTrimester) {
+        // Update label and options to Trimester
+        semesterLabel.innerHTML = 'Trimester <span class="text-red-500">*</span>';
+        semesterSelect.innerHTML = '<option value="">Select trimester...</option>' +
+          '<option value="1st Trimester">1st Trimester</option>' +
+          '<option value="2nd Trimester">2nd Trimester</option>' +
+          '<option value="3rd Trimester">3rd Trimester</option>';
+      } else {
+        // Use default Semester options
+        semesterLabel.innerHTML = 'Semester <span class="text-red-500">*</span>';
+        semesterSelect.innerHTML = '<option value="">Select semester...</option>' +
+          '<option value="1st Semester">1st Semester</option>' +
+          '<option value="2nd Semester">2nd Semester</option>' +
+          '<option value="3rd Semester">3rd Semester</option>';
+      }
+
       updateMatSubjectDropdown();
     }
 
