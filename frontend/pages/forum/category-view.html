@@ -462,13 +462,30 @@
                 <option value="">Select level first...</option>
               </select>
             </div>
-            <div>
+            <!-- Semester (College only) -->
+            <div id="matSemesterContainer">
               <label class="block text-xs font-semibold text-emerald-700 dark:text-emerald-400 mb-1">Semester <span class="text-red-500">*</span></label>
-              <select id="matSemester" required class="w-full px-2.5 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <select id="matSemester" class="w-full px-2.5 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 <option value="">Select semester...</option>
                 <option value="1st Semester">1st Semester</option>
                 <option value="2nd Semester">2nd Semester</option>
                 <option value="3rd Semester">3rd Semester</option>
+              </select>
+            </div>
+            <!-- Module (SHS only) -->
+            <div id="matModuleContainer" class="hidden">
+              <label class="block text-xs font-semibold text-emerald-700 dark:text-emerald-400 mb-1">Module <span class="text-red-500">*</span></label>
+              <select id="matModule" onchange="onMatModuleChange()" class="w-full px-2.5 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="">Select module...</option>
+                <option value="1">Module 1</option>
+                <option value="2">Module 2</option>
+              </select>
+            </div>
+            <!-- Quarter (SHS only, depends on Module) -->
+            <div id="matQuarterContainer" class="hidden">
+              <label class="block text-xs font-semibold text-emerald-700 dark:text-emerald-400 mb-1">Quarter <span class="text-red-500">*</span></label>
+              <select id="matQuarter" class="w-full px-2.5 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="">Select module first...</option>
               </select>
             </div>
             <div class="sm:col-span-2">
@@ -715,7 +732,9 @@
     var currentCategory = '';
 
     // ─── Hierarchical Navigation State & Data ─────────────────────────────────
-    var materialNav = { step: 1, level: null, course: null, year: null, semester: null, subject: null };
+    // SHS uses: level -> course -> year -> module -> quarter -> subject
+    // College uses: level -> course -> year -> semester -> subject
+    var materialNav = { step: 1, level: null, course: null, year: null, semester: null, module: null, quarter: null, subject: null };
 
     var collegePrograms = [
       'BS Computer Science', 'BS Information Technology', 'BS Information System',
@@ -728,6 +747,13 @@
     var collegeYears = ['1st Year', '2nd Year', '3rd Year'];
     var shsGrades = ['Grade 11', 'Grade 12'];
     var semesterOptions = ['1st Semester', '2nd Semester', '3rd Semester'];
+
+    // SHS Module/Quarter options
+    var shsModules = ['Module 1', 'Module 2'];
+    var shsQuartersByModule = {
+      'Module 1': ['1st Quarter', '2nd Quarter'],
+      'Module 2': ['3rd Quarter', '4th Quarter']
+    };
 
     // ─── Subject data per course/year/semester ─────────────────────────────────
     var subjectData = {
@@ -761,16 +787,40 @@
       2: '📚',
       3: '📅',
       4: '📆',
-      5: '📖'
+      5: '📖',
+      6: '📖'
     };
 
-    var navStepLabels = {
-      1: 'Select Academic Level',
-      2: 'Select Course / Strand',
-      3: 'Select Year / Grade Level',
-      4: 'Select Semester',
-      5: 'Select Subject'
-    };
+    // Dynamic step labels - returns label based on level and step
+    function getNavStepLabel(step) {
+      if (materialNav.level === 'Senior High School') {
+        // SHS: 1=Level, 2=Strand, 3=Grade, 4=Module, 5=Quarter, 6=Subject
+        var shsLabels = {
+          1: 'Select Academic Level',
+          2: 'Select Strand',
+          3: 'Select Grade Level',
+          4: 'Select Module',
+          5: 'Select Quarter',
+          6: 'Select Subject'
+        };
+        return shsLabels[step] || 'Select';
+      } else {
+        // College: 1=Level, 2=Course, 3=Year, 4=Semester, 5=Subject
+        var collegeLabels = {
+          1: 'Select Academic Level',
+          2: 'Select Course',
+          3: 'Select Year',
+          4: 'Select Semester',
+          5: 'Select Subject'
+        };
+        return collegeLabels[step] || 'Select';
+      }
+    }
+
+    // Get total steps based on level
+    function getTotalSteps() {
+      return materialNav.level === 'Senior High School' ? 6 : 5;
+    }
 
     // ─── Material type colors & icons ──────────────────────────────────────────
     var materialTypeConfig = {
@@ -1012,11 +1062,23 @@
     // ─── Breadcrumb Renderer ──────────────────────────────────────────────────
     function renderBreadcrumb() {
       var crumbs = [{ label: 'Materials', step: 0, icon: '📦' }];
-      if (materialNav.step >= 2 && materialNav.level) crumbs.push({ label: materialNav.level, step: 1, icon: materialNav.level === 'College' ? '🎓' : '🏫' });
-      if (materialNav.step >= 3 && materialNav.course) crumbs.push({ label: materialNav.course, step: 2, icon: '📘' });
-      if (materialNav.step >= 4 && materialNav.year) crumbs.push({ label: materialNav.year, step: 3, icon: '📅' });
-      if (materialNav.step >= 5 && materialNav.semester) crumbs.push({ label: materialNav.semester, step: 4, icon: '📆' });
-      if (materialNav.subject) crumbs.push({ label: materialNav.subject, step: 5, icon: '📖' });
+
+      if (materialNav.level === 'Senior High School') {
+        // SHS path: Materials > SHS > Strand > Grade > Module > Quarter > Subject
+        if (materialNav.step >= 2 && materialNav.level) crumbs.push({ label: 'SHS', step: 1, icon: '🏫' });
+        if (materialNav.step >= 3 && materialNav.course) crumbs.push({ label: materialNav.course, step: 2, icon: '📘' });
+        if (materialNav.step >= 4 && materialNav.year) crumbs.push({ label: materialNav.year, step: 3, icon: '📅' });
+        if (materialNav.step >= 5 && materialNav.module) crumbs.push({ label: materialNav.module, step: 4, icon: '📦' });
+        if (materialNav.step >= 6 && materialNav.quarter) crumbs.push({ label: materialNav.quarter, step: 5, icon: '📆' });
+        if (materialNav.subject) crumbs.push({ label: materialNav.subject, step: 6, icon: '📖' });
+      } else {
+        // College path: Materials > College > Course > Year > Semester > Subject
+        if (materialNav.step >= 2 && materialNav.level) crumbs.push({ label: materialNav.level, step: 1, icon: materialNav.level === 'College' ? '🎓' : '🏫' });
+        if (materialNav.step >= 3 && materialNav.course) crumbs.push({ label: materialNav.course, step: 2, icon: '📘' });
+        if (materialNav.step >= 4 && materialNav.year) crumbs.push({ label: materialNav.year, step: 3, icon: '📅' });
+        if (materialNav.step >= 5 && materialNav.semester) crumbs.push({ label: materialNav.semester, step: 4, icon: '📆' });
+        if (materialNav.subject) crumbs.push({ label: materialNav.subject, step: 5, icon: '📖' });
+      }
 
       var html = '<nav class="flex items-center flex-wrap gap-1.5 mb-6 mat-animate-fade">';
       html += '<div class="flex items-center flex-wrap gap-1.5 px-4 py-2.5 rounded-xl bg-white/60 dark:bg-gray-800/50 backdrop-blur border border-gray-200/60 dark:border-gray-700/40 shadow-sm">';
@@ -1035,32 +1097,47 @@
 
     function navJumpToStep(step) {
       if (step === 0) {
-        materialNav = { step: 1, level: null, course: null, year: null, semester: null, subject: null };
-      } else if (step === 1) {
-        materialNav.step = 2;
-        materialNav.course = null;
-        materialNav.year = null;
-        materialNav.semester = null;
-        materialNav.subject = null;
-      } else if (step === 2) {
-        materialNav.step = 3;
-        materialNav.year = null;
-        materialNav.semester = null;
-        materialNav.subject = null;
-      } else if (step === 3) {
-        materialNav.step = 4;
-        materialNav.semester = null;
-        materialNav.subject = null;
-      } else if (step === 4) {
-        materialNav.step = 5;
-        materialNav.subject = null;
+        materialNav = { step: 1, level: null, course: null, year: null, semester: null, module: null, quarter: null, subject: null };
+      } else if (materialNav.level === 'Senior High School') {
+        // SHS flow: level(1) -> course(2) -> year(3) -> module(4) -> quarter(5) -> subject(6)
+        if (step === 1) {
+          materialNav.step = 2;
+          materialNav.course = null; materialNav.year = null; materialNav.module = null; materialNav.quarter = null; materialNav.subject = null;
+        } else if (step === 2) {
+          materialNav.step = 3;
+          materialNav.year = null; materialNav.module = null; materialNav.quarter = null; materialNav.subject = null;
+        } else if (step === 3) {
+          materialNav.step = 4;
+          materialNav.module = null; materialNav.quarter = null; materialNav.subject = null;
+        } else if (step === 4) {
+          materialNav.step = 5;
+          materialNav.quarter = null; materialNav.subject = null;
+        } else if (step === 5) {
+          materialNav.step = 6;
+          materialNav.subject = null;
+        }
+      } else {
+        // College flow: level(1) -> course(2) -> year(3) -> semester(4) -> subject(5)
+        if (step === 1) {
+          materialNav.step = 2;
+          materialNav.course = null; materialNav.year = null; materialNav.semester = null; materialNav.subject = null;
+        } else if (step === 2) {
+          materialNav.step = 3;
+          materialNav.year = null; materialNav.semester = null; materialNav.subject = null;
+        } else if (step === 3) {
+          materialNav.step = 4;
+          materialNav.semester = null; materialNav.subject = null;
+        } else if (step === 4) {
+          materialNav.step = 5;
+          materialNav.subject = null;
+        }
       }
       renderNavigationStep();
     }
 
     // Quick nav from sidebar — jump straight to a level's step 2
     function quickNavLevel(level) {
-      materialNav = { step: 2, level: level, course: null, year: null, semester: null, subject: null };
+      materialNav = { step: 2, level: level, course: null, year: null, semester: null, module: null, quarter: null, subject: null };
       renderNavigationStep();
     }
 
@@ -1114,11 +1191,23 @@
         return;
       }
       materialNav.step--;
-      if (materialNav.step === 1) { materialNav.level = null; materialNav.course = null; materialNav.year = null; materialNav.semester = null; materialNav.subject = null; }
-      if (materialNav.step === 2) { materialNav.course = null; materialNav.year = null; materialNav.semester = null; materialNav.subject = null; }
-      if (materialNav.step === 3) { materialNav.year = null; materialNav.semester = null; materialNav.subject = null; }
-      if (materialNav.step === 4) { materialNav.semester = null; materialNav.subject = null; }
-      if (materialNav.step === 5) { materialNav.subject = null; }
+
+      if (materialNav.level === 'Senior High School') {
+        // SHS flow: level(1) -> course(2) -> year(3) -> module(4) -> quarter(5) -> subject(6)
+        if (materialNav.step === 1) { materialNav.level = null; materialNav.course = null; materialNav.year = null; materialNav.module = null; materialNav.quarter = null; materialNav.subject = null; }
+        if (materialNav.step === 2) { materialNav.course = null; materialNav.year = null; materialNav.module = null; materialNav.quarter = null; materialNav.subject = null; }
+        if (materialNav.step === 3) { materialNav.year = null; materialNav.module = null; materialNav.quarter = null; materialNav.subject = null; }
+        if (materialNav.step === 4) { materialNav.module = null; materialNav.quarter = null; materialNav.subject = null; }
+        if (materialNav.step === 5) { materialNav.quarter = null; materialNav.subject = null; }
+        if (materialNav.step === 6) { materialNav.subject = null; }
+      } else {
+        // College flow: level(1) -> course(2) -> year(3) -> semester(4) -> subject(5)
+        if (materialNav.step === 1) { materialNav.level = null; materialNav.course = null; materialNav.year = null; materialNav.semester = null; materialNav.subject = null; }
+        if (materialNav.step === 2) { materialNav.course = null; materialNav.year = null; materialNav.semester = null; materialNav.subject = null; }
+        if (materialNav.step === 3) { materialNav.year = null; materialNav.semester = null; materialNav.subject = null; }
+        if (materialNav.step === 4) { materialNav.semester = null; materialNav.subject = null; }
+        if (materialNav.step === 5) { materialNav.subject = null; }
+      }
       renderNavigationStep();
     }
 
@@ -1205,24 +1294,49 @@
           cards.push(buildNavCard(opt, "selectNavYear('" + escapedOpt + "')", '📅'));
         });
       } else if (step === 4) {
-        // Step 4: Semester
-        semesterOptions.forEach(function(opt) {
-          var escapedOpt = opt.replace(/'/g, "\\'");
-          cards.push(buildNavCard(opt, "selectNavSemester('" + escapedOpt + "')", '📆'));
-        });
-      } else if (step === 5) {
-        // Step 5: Subject (data-driven)
-        var subjects = getSubjectsForNav();
-        if (subjects && subjects.length > 0) {
-          subjects.forEach(function(subj) {
-            var escapedName = (subj.code + ': ' + subj.name).replace(/'/g, "\\'");
-            cards.push(buildNavCard(subj.code + ': ' + subj.name, "selectNavSubject('" + escapedName + "')", subj.icon, subj.code));
+        // Step 4: Module (SHS) or Semester (College)
+        if (materialNav.level === 'Senior High School') {
+          // SHS: Show Module cards
+          shsModules.forEach(function(opt) {
+            var escapedOpt = opt.replace(/'/g, "\\'");
+            var subtitle = opt === 'Module 1' ? '1st & 2nd Quarter' : '3rd & 4th Quarter';
+            cards.push(buildNavCard(opt, "selectNavModule('" + escapedOpt + "')", '📦', subtitle));
           });
         } else {
-          // Fallback: no subjects defined for this combination — skip directly to materials
-          loadFilteredMaterials();
-          return;
+          // College: Show Semester cards
+          semesterOptions.forEach(function(opt) {
+            var escapedOpt = opt.replace(/'/g, "\\'");
+            cards.push(buildNavCard(opt, "selectNavSemester('" + escapedOpt + "')", '📆'));
+          });
         }
+      } else if (step === 5) {
+        // Step 5: Quarter (SHS) or Subject (College)
+        if (materialNav.level === 'Senior High School') {
+          // SHS: Show Quarter cards based on selected Module
+          var quarterOptions = shsQuartersByModule[materialNav.module] || [];
+          quarterOptions.forEach(function(opt) {
+            var escapedOpt = opt.replace(/'/g, "\\'");
+            cards.push(buildNavCard(opt, "selectNavQuarter('" + escapedOpt + "')", '📆'));
+          });
+        } else {
+          // College: Subject (data-driven)
+          var subjects = getSubjectsForNav();
+          if (subjects && subjects.length > 0) {
+            subjects.forEach(function(subj) {
+              var escapedName = (subj.code + ': ' + subj.name).replace(/'/g, "\\'");
+              cards.push(buildNavCard(subj.code + ': ' + subj.name, "selectNavSubject('" + escapedName + "')", subj.icon, subj.code));
+            });
+          } else {
+            // Fallback: no subjects defined for this combination — skip directly to materials
+            loadFilteredMaterials();
+            return;
+          }
+        }
+      } else if (step === 6) {
+        // Step 6: Subject (SHS only)
+        // Fallback: no subjects defined for SHS — skip directly to materials
+        loadFilteredMaterials();
+        return;
       }
 
       var html = '<div class="mat-animate-fade">';
@@ -1235,12 +1349,13 @@
         '<svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>' +
       '</button>';
       html += '<div>';
-      html += '<p class="text-xs text-emerald-600 dark:text-emerald-400 uppercase tracking-wider font-bold">Step ' + step + ' of 5</p>';
-      html += '<h3 class="text-xl font-bold text-gray-900 dark:text-white">' + navStepLabels[step] + '</h3>';
+      var totalSteps = getTotalSteps();
+      html += '<p class="text-xs text-emerald-600 dark:text-emerald-400 uppercase tracking-wider font-bold">Step ' + step + ' of ' + totalSteps + '</p>';
+      html += '<h3 class="text-xl font-bold text-gray-900 dark:text-white">' + getNavStepLabel(step) + '</h3>';
       html += '</div></div>';
       // Step progress dots
       html += '<div class="flex items-center gap-2">';
-      for (var d = 1; d <= 5; d++) {
+      for (var d = 1; d <= totalSteps; d++) {
         if (d < step) html += '<div class="w-8 h-1.5 rounded-full bg-emerald-500"></div>';
         else if (d === step) html += '<div class="w-8 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>';
         else html += '<div class="w-8 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700"></div>';
@@ -1289,12 +1404,29 @@
       renderNavigationStep();
     }
 
+    // SHS-specific handlers
+    function selectNavModule(module) {
+      materialNav.module = module;
+      materialNav.step = 5;
+      materialNav.quarter = null;
+      materialNav.subject = null;
+      renderNavigationStep();
+    }
+
+    function selectNavQuarter(quarter) {
+      materialNav.quarter = quarter;
+      materialNav.step = 6;
+      materialNav.subject = null;
+      // For SHS, skip to materials directly (no subject step for now)
+      loadFilteredMaterials();
+    }
+
     function selectNavSubject(subject) {
       materialNav.subject = subject;
       loadFilteredMaterials();
     }
 
-    // ─── Load filtered materials (after all 4 steps chosen) ─────────────────
+    // ─── Load filtered materials (after all steps chosen) ─────────────────
     function loadFilteredMaterials() {
       var user = getCurrentUser();
       var token = localStorage.getItem('gardnerHub_token');
@@ -1305,7 +1437,27 @@
       params.append('academic_level', materialNav.level);
       params.append('course_strand', materialNav.course);
       params.append('year_grade', materialNav.year);
-      params.append('semester', materialNav.semester);
+
+      // SHS uses module/quarter; College uses semester
+      if (materialNav.level === 'Senior High School') {
+        if (materialNav.module) {
+          // Convert "Module 1" -> 1, "Module 2" -> 2
+          var moduleNum = materialNav.module === 'Module 1' ? 1 : 2;
+          params.append('module_number', moduleNum);
+        }
+        if (materialNav.quarter) {
+          // Convert "1st Quarter" -> 1, "2nd Quarter" -> 2, etc.
+          var quarterMap = { '1st Quarter': 1, '2nd Quarter': 2, '3rd Quarter': 3, '4th Quarter': 4 };
+          var quarterNum = quarterMap[materialNav.quarter] || 1;
+          params.append('quarter_number', quarterNum);
+        }
+      } else {
+        // College uses semester
+        if (materialNav.semester) {
+          params.append('semester', materialNav.semester);
+        }
+      }
+
       if (materialNav.subject) {
         params.append('subject_name', materialNav.subject);
       }
@@ -1323,8 +1475,14 @@
         '</button>';
         h += '<div>';
         h += '<p class="text-xs text-emerald-600 dark:text-emerald-400 uppercase tracking-wider font-bold">Viewing Materials</p>';
-        var subtitle = escapeHtml(materialNav.course) + ' — ' + escapeHtml(materialNav.year) + ', ' + escapeHtml(materialNav.semester);
-        if (materialNav.subject) subtitle = escapeHtml(materialNav.subject);
+        var subtitle;
+        if (materialNav.subject) {
+          subtitle = escapeHtml(materialNav.subject);
+        } else if (materialNav.level === 'Senior High School') {
+          subtitle = escapeHtml(materialNav.course) + ' — ' + escapeHtml(materialNav.year) + ', ' + escapeHtml(materialNav.module) + ', ' + escapeHtml(materialNav.quarter);
+        } else {
+          subtitle = escapeHtml(materialNav.course) + ' — ' + escapeHtml(materialNav.year) + ', ' + escapeHtml(materialNav.semester);
+        }
         h += '<h3 class="text-xl font-bold text-gray-900 dark:text-white">' + subtitle + '</h3>';
         h += '</div></div>';
         // Show completed progress dots + New Material button (faculty/admin only)
@@ -1336,7 +1494,8 @@
           '</button>';
         }
         h += '<div class="flex items-center gap-2">';
-        for (var d = 1; d <= 5; d++) h += '<div class="w-8 h-1.5 rounded-full bg-emerald-500"></div>';
+        var totalStepsHeader = getTotalSteps();
+        for (var d = 1; d <= totalStepsHeader; d++) h += '<div class="w-8 h-1.5 rounded-full bg-emerald-500"></div>';
         h += '</div></div></div>';
         return h;
       }
@@ -1551,18 +1710,36 @@
       document.getElementById('fileLabel').textContent = 'Choose file (PDF, Word, etc.)';
       document.getElementById('thumbLabel').textContent = 'Choose image';
 
-      // If opened from inside a subject view, auto-fill and lock classification fields
-      if (materialNav.level && materialNav.course && materialNav.year && materialNav.semester) {
+      // Check if we should auto-fill from navigation context
+      var shouldAutoFill = materialNav.level && materialNav.course && materialNav.year;
+      // SHS needs module/quarter; College needs semester
+      if (materialNav.level === 'Senior High School') {
+        shouldAutoFill = shouldAutoFill && materialNav.module && materialNav.quarter;
+      } else {
+        shouldAutoFill = shouldAutoFill && materialNav.semester;
+      }
+
+      if (shouldAutoFill) {
         // Set academic level
         var levelSel = document.getElementById('matAcademicLevel');
         levelSel.value = materialNav.level;
-        onMatLevelChange(); // populate dependent dropdowns
+        onMatLevelChange(); // populate dependent dropdowns and toggle visibility
         // Set course/strand
         document.getElementById('matCourseStrand').value = materialNav.course;
         // Set year/grade
         document.getElementById('matYearGrade').value = materialNav.year;
-        // Set semester
-        document.getElementById('matSemester').value = materialNav.semester;
+
+        if (materialNav.level === 'Senior High School') {
+          // Set module and quarter for SHS
+          var moduleNum = materialNav.module === 'Module 1' ? '1' : '2';
+          document.getElementById('matModule').value = moduleNum;
+          onMatModuleChange(); // populate quarter options
+          var quarterMap = { '1st Quarter': '1', '2nd Quarter': '2', '3rd Quarter': '3', '4th Quarter': '4' };
+          document.getElementById('matQuarter').value = quarterMap[materialNav.quarter] || '';
+        } else {
+          // Set semester for College
+          document.getElementById('matSemester').value = materialNav.semester;
+        }
 
         // Set subject if present
         var subjectInput = document.getElementById('matSubjectName');
@@ -1573,6 +1750,10 @@
         // Reset dependent dropdowns to placeholder state
         document.getElementById('matCourseStrand').innerHTML = '<option value="">Select level first...</option>';
         document.getElementById('matYearGrade').innerHTML = '<option value="">Select level first...</option>';
+        // Reset visibility to default (show Semester, hide Module/Quarter)
+        document.getElementById('matSemesterContainer').classList.remove('hidden');
+        document.getElementById('matModuleContainer').classList.add('hidden');
+        document.getElementById('matQuarterContainer').classList.add('hidden');
         var subjectInput = document.getElementById('matSubjectName');
         if (subjectInput) subjectInput.value = '';
       }
@@ -1599,6 +1780,26 @@
       var courseSelect = document.getElementById('matCourseStrand');
       var yearSelect = document.getElementById('matYearGrade');
 
+      // Toggle Semester (College) vs Module/Quarter (SHS) containers
+      var semesterContainer = document.getElementById('matSemesterContainer');
+      var moduleContainer = document.getElementById('matModuleContainer');
+      var quarterContainer = document.getElementById('matQuarterContainer');
+
+      if (level === 'Senior High School') {
+        // Show Module/Quarter for SHS, hide Semester
+        semesterContainer.classList.add('hidden');
+        moduleContainer.classList.remove('hidden');
+        quarterContainer.classList.remove('hidden');
+        // Reset Module/Quarter dropdowns
+        document.getElementById('matModule').value = '';
+        document.getElementById('matQuarter').innerHTML = '<option value="">Select module first...</option>';
+      } else {
+        // Show Semester for College (or default), hide Module/Quarter
+        semesterContainer.classList.remove('hidden');
+        moduleContainer.classList.add('hidden');
+        quarterContainer.classList.add('hidden');
+      }
+
       // Reset dependent dropdowns
       courseSelect.innerHTML = '<option value="">Select course/strand...</option>';
       yearSelect.innerHTML = '<option value="">Select year/grade...</option>';
@@ -1620,6 +1821,24 @@
       }
     }
 
+    // Handle Module change for SHS - populate Quarter options
+    function onMatModuleChange() {
+      var moduleVal = document.getElementById('matModule').value;
+      var quarterSelect = document.getElementById('matQuarter');
+
+      quarterSelect.innerHTML = '<option value="">Select quarter...</option>';
+
+      if (moduleVal === '1') {
+        // Module 1: 1st Quarter, 2nd Quarter
+        quarterSelect.innerHTML += '<option value="1">1st Quarter</option>';
+        quarterSelect.innerHTML += '<option value="2">2nd Quarter</option>';
+      } else if (moduleVal === '2') {
+        // Module 2: 3rd Quarter, 4th Quarter
+        quarterSelect.innerHTML += '<option value="3">3rd Quarter</option>';
+        quarterSelect.innerHTML += '<option value="4">4th Quarter</option>';
+      }
+    }
+
     function submitMaterial(e) {
       e.preventDefault();
       var token = localStorage.getItem('gardnerHub_token');
@@ -1629,12 +1848,31 @@
       var academicLevel = document.getElementById('matAcademicLevel').value;
       var courseStrand = document.getElementById('matCourseStrand').value;
       var yearGrade = document.getElementById('matYearGrade').value;
-      var semester = document.getElementById('matSemester').value;
       var subjectName = document.getElementById('matSubjectName').value.trim();
 
-      if (!academicLevel || !courseStrand || !yearGrade || !semester || !subjectName) {
-        alert('Please fill in all classification fields (Academic Level, Course/Strand, Year/Grade, Semester, Subject).');
+      // Get semester (College) or module/quarter (SHS)
+      var semester = document.getElementById('matSemester').value;
+      var moduleNum = document.getElementById('matModule').value;
+      var quarterNum = document.getElementById('matQuarter').value;
+
+      // Validate based on level
+      if (!academicLevel || !courseStrand || !yearGrade || !subjectName) {
+        alert('Please fill in all classification fields (Academic Level, Course/Strand, Year/Grade, Subject).');
         return;
+      }
+
+      if (academicLevel === 'Senior High School') {
+        // SHS requires Module and Quarter
+        if (!moduleNum || !quarterNum) {
+          alert('Please select both Module and Quarter for Senior High School.');
+          return;
+        }
+      } else {
+        // College requires Semester
+        if (!semester) {
+          alert('Please select a Semester for College.');
+          return;
+        }
       }
 
       submitBtn.disabled = true;
@@ -1648,8 +1886,15 @@
       formData.append('academic_level', academicLevel);
       formData.append('course_strand', courseStrand);
       formData.append('year_grade', yearGrade);
-      formData.append('semester', semester);
       formData.append('subject_name', subjectName);
+
+      // Send semester for College, module_number & quarter_number for SHS
+      if (academicLevel === 'Senior High School') {
+        formData.append('module_number', moduleNum);
+        formData.append('quarter_number', quarterNum);
+      } else {
+        formData.append('semester', semester);
+      }
 
       var fileInput = document.getElementById('materialFile');
       if (fileInput.files[0]) formData.append('material_file', fileInput.files[0]);
@@ -1673,8 +1918,8 @@
         }
         alert('Learning material uploaded successfully!');
         closeMaterialModal();
-        // Reload materials within the current subject view if available
-        if (materialNav.subject) {
+        // Reload materials within the current view if available
+        if (materialNav.step >= getTotalSteps()) {
           loadFilteredMaterials();
         } else {
           loadCategory(getCurrentUser());
