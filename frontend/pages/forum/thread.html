@@ -19,22 +19,23 @@
     /* Reddit-style thread lines */
     .comment-thread-line {
       position: absolute;
-      left: 16px;
-      top: 40px;
+      left: 12px;
+      top: 0;
       bottom: 0;
       width: 2px;
       background: transparent;
       cursor: pointer;
-      transition: background-color 0.2s;
+      transition: background-color 0.15s ease;
+      border-radius: 1px;
     }
     .comment-thread-line:hover {
-      background-color: rgb(99 102 241 / 0.5) !important;
+      background-color: rgb(99 102 241 / 0.6) !important;
     }
     .comment-thread-line::before {
       content: '';
       position: absolute;
-      left: -4px;
-      right: -4px;
+      left: -6px;
+      right: -6px;
       top: 0;
       bottom: 0;
     }
@@ -42,7 +43,30 @@
       background-color: rgb(55 65 81);
     }
     .comment-thread-line {
-      background-color: rgb(229 231 235);
+      background-color: rgb(209 213 219);
+    }
+    /* Collapsed state */
+    .comment-collapsed .comment-content,
+    .comment-collapsed .comment-actions,
+    .comment-collapsed .comment-replies {
+      display: none;
+    }
+    .comment-collapsed .collapse-indicator {
+      display: inline;
+    }
+    /* Reply input animation */
+    .reply-input-wrap {
+      animation: slideDown 0.2s ease-out;
+    }
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
@@ -148,14 +172,20 @@
 
       <!-- Add Comment Box -->
       <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 mb-6">
+        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+          <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+          </svg>
+          Join the conversation
+        </h4>
         <div class="flex items-start space-x-3">
           <div class="w-8 h-8 rounded-full bg-brand-900 dark:bg-white flex items-center justify-center flex-shrink-0 mt-1">
             <span id="commentUserInitial" class="text-white dark:text-black font-semibold text-xs">U</span>
           </div>
           <div class="flex-1">
-            <textarea id="commentInput" rows="3" class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none" placeholder="What are your thoughts?"></textarea>
+            <textarea id="commentInput" rows="3" class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none placeholder-gray-400 dark:placeholder-gray-500" placeholder="Share your thoughts..."></textarea>
             <div class="flex justify-end mt-2">
-              <button onclick="submitComment()" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors duration-200">Comment</button>
+              <button onclick="submitComment()" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors duration-200 shadow-sm">Comment</button>
             </div>
           </div>
         </div>
@@ -163,7 +193,21 @@
 
       <!-- Comments Section -->
       <div class="mb-4">
-        <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Comments</h3>
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+            </svg>
+            Comments
+            <span id="commentsCountBadge" class="px-2 py-0.5 text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-full">0</span>
+          </h3>
+          <button onclick="window.scrollTo({top: document.getElementById('commentInput').offsetTop - 100, behavior: 'smooth'})" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+            Add comment
+          </button>
+        </div>
       </div>
       <div id="commentsContainer" class="space-y-1">
         <!-- Comments rendered by JS -->
@@ -295,6 +339,7 @@
           // Hearts
           document.getElementById('threadLikeCount').textContent = t.like_count || 0;
           document.getElementById('threadCommentCount').textContent = t.comment_count || 0;
+          document.getElementById('commentsCountBadge').textContent = t.comment_count || 0;
           updateHeartUI(t.liked && t.liked > 0);
 
           // Comments (nested tree)
@@ -420,6 +465,28 @@
       }
     }
 
+    // ─── Cancel Reply ───────────────────────────────────────────────────────────
+    function cancelReply(commentId) {
+      var wrap = document.getElementById('reply-wrap-' + commentId);
+      var input = document.getElementById('reply-input-' + commentId);
+      input.value = '';
+      wrap.classList.add('hidden');
+    }
+
+    // ─── Get Current User Initial ───────────────────────────────────────────────
+    function getCurrentUserInitial() {
+      var user = getCurrentUser();
+      return user ? (user.full_name || 'U').charAt(0).toUpperCase() : 'U';
+    }
+
+    // ─── Collapse Thread (Reddit-style) ─────────────────────────────────────────
+    function collapseThread(commentId) {
+      var wrapper = document.querySelector('.comment-wrapper[data-comment-id="' + commentId + '"]');
+      if (wrapper) {
+        wrapper.classList.toggle('comment-collapsed');
+      }
+    }
+
     // ═══════════════════════════════════════════════════════════════════════════
     // RENDER THREADED COMMENTS (Reddit-style with indentation)
     // ═══════════════════════════════════════════════════════════════════════════
@@ -427,16 +494,22 @@
     function renderComments(comments) {
       var container = document.getElementById('commentsContainer');
       if (!comments || comments.length === 0) {
-        container.innerHTML = '<div class="text-center py-8"><p class="text-gray-400 dark:text-gray-500 text-sm">No comments yet. Be the first to share your thoughts!</p></div>';
+        container.innerHTML = '<div class="text-center py-10 bg-white dark:bg-gray-900/50 rounded-xl border border-dashed border-gray-200 dark:border-gray-800">' +
+          '<svg class="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">' +
+            '<path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>' +
+          '</svg>' +
+          '<p class="text-gray-400 dark:text-gray-500 text-sm font-medium">No comments yet</p>' +
+          '<p class="text-gray-400 dark:text-gray-600 text-xs mt-1">Be the first to share your thoughts!</p>' +
+        '</div>';
         return;
       }
       container.innerHTML = comments.map(function(c) { return renderCommentNode(c, 0); }).join('');
     }
 
     function renderCommentNode(comment, depth) {
-      var maxIndent = 6;
+      var maxIndent = 8;
       var effectiveDepth = Math.min(depth, maxIndent);
-      var marginLeft = effectiveDepth * 24; // 24px per level
+      var marginLeft = effectiveDepth * 20; // 20px per level for tighter nesting
 
       var roleBadge = getRoleBadgeClass(comment.author_role);
       var roleLabel = getRoleLabel(comment.author_role);
@@ -447,14 +520,15 @@
 
       var hasReplies = comment.replies && comment.replies.length > 0;
 
-      var html = '<div class="relative" style="margin-left:' + marginLeft + 'px">';
+      var html = '<div class="comment-wrapper relative" style="margin-left:' + marginLeft + 'px" data-comment-id="' + comment.id + '">';
 
-      // Thread line for nesting
+      // Vertical thread line for nested comments
       if (depth > 0) {
-        html += '<div class="absolute -left-3 top-0 w-3 h-5 border-l-2 border-b-2 border-gray-200 dark:border-gray-700 rounded-bl-lg"></div>';
+        html += '<div class="comment-thread-line" onclick="collapseThread(' + comment.id + ')" title="Click to collapse"></div>';
       }
 
-      html += '<div class="bg-white dark:bg-gray-900 rounded-lg p-4 ' + (depth === 0 ? 'border border-gray-200 dark:border-gray-800' : 'border-l-2 border-gray-100 dark:border-gray-800 pl-4') + ' mb-2">';
+      // Comment card
+      html += '<div class="comment-card bg-white dark:bg-gray-900/50 rounded-lg py-3 ' + (depth > 0 ? 'pl-5' : 'p-4 border border-gray-200 dark:border-gray-800') + ' mb-2">';
 
       // Author row
       html += '<div class="flex items-center space-x-2 mb-2">' +
@@ -464,28 +538,39 @@
         '<span class="text-xs font-semibold text-gray-900 dark:text-white">' + escapeHtml(comment.author_name) + '</span>' +
         '<span class="px-1.5 py-0.5 rounded text-[9px] font-semibold ' + roleBadge + '">' + roleLabel + '</span>' +
         '<span class="text-[11px] text-gray-400 dark:text-gray-500">&bull; ' + timeAgo(comment.created_at) + '</span>' +
+        '<span class="collapse-indicator hidden text-[11px] text-gray-400 dark:text-gray-500 ml-2">[collapsed]</span>' +
       '</div>';
 
       // Content
-      html += '<p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-2 whitespace-pre-wrap">' + escapeHtml(comment.content) + '</p>';
+      html += '<div class="comment-content">';
+      html += '<p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-3 whitespace-pre-wrap">' + escapeHtml(comment.content) + '</p>';
+      html += '</div>';
 
       // Actions: Heart + Reply
-      html += '<div class="flex items-center space-x-4">' +
-        '<button onclick="event.stopPropagation(); toggleCommentHeart(' + comment.id + ', this)" class="flex items-center space-x-1 transition-colors duration-200 ' + heartColor + '">' +
-          '<svg class="w-3.5 h-3.5" ' + heartFill + ' stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg>' +
+      html += '<div class="comment-actions flex items-center space-x-4">' +
+        '<button onclick="event.stopPropagation(); toggleCommentHeart(' + comment.id + ', this)" class="flex items-center space-x-1 transition-colors duration-200 ' + heartColor + ' group">' +
+          '<svg class="w-3.5 h-3.5 transition-transform group-hover:scale-110" ' + heartFill + ' stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg>' +
           '<span class="text-[11px] font-medium comment-like-count">' + (comment.like_count || 0) + '</span>' +
         '</button>' +
-        '<button onclick="toggleReplyInput(' + comment.id + ')" class="flex items-center space-x-1 text-gray-400 dark:text-gray-500 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors duration-200">' +
-          '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>' +
+        '<button onclick="toggleReplyInput(' + comment.id + ')" class="flex items-center space-x-1 text-gray-400 dark:text-gray-500 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors duration-200 group">' +
+          '<svg class="w-3.5 h-3.5 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>' +
           '<span class="text-[11px] font-medium">Reply</span>' +
         '</button>' +
       '</div>';
 
       // Nested reply input (hidden by default)
-      html += '<div id="reply-wrap-' + comment.id + '" class="hidden mt-3">' +
+      html += '<div id="reply-wrap-' + comment.id + '" class="reply-input-wrap hidden mt-3">' +
         '<div class="flex items-start space-x-2">' +
-          '<textarea id="reply-input-' + comment.id + '" rows="2" class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none" placeholder="Write a reply..."></textarea>' +
-          '<button onclick="submitComment(' + comment.id + ')" class="px-3 py-2 text-xs font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors duration-200 flex-shrink-0">Reply</button>' +
+          '<div class="w-5 h-5 rounded-full bg-brand-900 dark:bg-white flex items-center justify-center flex-shrink-0 mt-1">' +
+            '<span class="text-white dark:text-black font-semibold" style="font-size:8px">' + getCurrentUserInitial() + '</span>' +
+          '</div>' +
+          '<div class="flex-1">' +
+            '<textarea id="reply-input-' + comment.id + '" rows="2" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none placeholder-gray-400 dark:placeholder-gray-500" placeholder="Write a reply..."></textarea>' +
+            '<div class="flex justify-end space-x-2 mt-2">' +
+              '<button onclick="cancelReply(' + comment.id + ')" class="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">Cancel</button>' +
+              '<button onclick="submitComment(' + comment.id + ')" class="px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors duration-200">Reply</button>' +
+            '</div>' +
+          '</div>' +
         '</div>' +
       '</div>';
 
@@ -493,9 +578,11 @@
 
       // Render child replies recursively
       if (hasReplies) {
+        html += '<div class="comment-replies">';
         comment.replies.forEach(function(reply) {
           html += renderCommentNode(reply, depth + 1);
         });
+        html += '</div>';
       }
 
       html += '</div>'; // close relative wrapper
