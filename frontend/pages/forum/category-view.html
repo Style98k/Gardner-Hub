@@ -452,20 +452,20 @@
             </div>
             <div>
               <label class="block text-xs font-semibold text-emerald-700 dark:text-emerald-400 mb-1">Course / Strand <span class="text-red-500">*</span></label>
-              <select id="matCourseStrand" required class="w-full px-2.5 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <select id="matCourseStrand" required onchange="onMatStrandChange()" class="w-full px-2.5 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 <option value="">Select level first...</option>
               </select>
             </div>
             <div>
               <label class="block text-xs font-semibold text-emerald-700 dark:text-emerald-400 mb-1">Year / Grade <span class="text-red-500">*</span></label>
-              <select id="matYearGrade" required class="w-full px-2.5 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <select id="matYearGrade" required onchange="updateMatSubjectDropdown()" class="w-full px-2.5 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 <option value="">Select level first...</option>
               </select>
             </div>
             <!-- Semester (College only) -->
             <div id="matSemesterContainer">
               <label class="block text-xs font-semibold text-emerald-700 dark:text-emerald-400 mb-1">Semester <span class="text-red-500">*</span></label>
-              <select id="matSemester" class="w-full px-2.5 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <select id="matSemester" onchange="updateMatSubjectDropdown()" class="w-full px-2.5 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 <option value="">Select semester...</option>
                 <option value="1st Semester">1st Semester</option>
                 <option value="2nd Semester">2nd Semester</option>
@@ -490,7 +490,9 @@
             </div>
             <div class="sm:col-span-2">
               <label class="block text-xs font-semibold text-emerald-700 dark:text-emerald-400 mb-1">Subject <span class="text-red-500">*</span></label>
-              <input type="text" id="matSubjectName" required class="w-full px-2.5 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="e.g. IT122-3: Computer Programming 2 C/C++ (Intermediate)">
+              <select id="matSubjectName" required class="w-full px-2.5 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="">Select strand/course first...</option>
+              </select>
             </div>
           </div>
 
@@ -772,6 +774,166 @@
         }
       }
     };
+
+    // ─── SHS Subject Mapping by Strand ────────────────────────────────────────
+    // Common Core subjects available to all strands
+    var shsCoreSubjects = {
+      '1st Semester': [
+        { code: 'ORALCOMM', name: 'Oral Communication', icon: '🗣️' },
+        { code: 'GENMATH', name: 'General Mathematics', icon: '📐' },
+        { code: 'EARTHLIFE', name: 'Earth and Life Science', icon: '🌍' },
+        { code: 'KOMSA', name: 'Komunikasyon at Pananaliksik sa Wika at Kulturang Pilipino', icon: '📝' },
+        { code: 'PE1', name: 'Physical Education and Health 1', icon: '🏃' },
+        { code: '21STLIT', name: '21st Century Literature from the Philippines and the World', icon: '📖' }
+      ],
+      '2nd Semester': [
+        { code: 'UCSP', name: 'Understanding Culture, Society, and Politics', icon: '🌐' },
+        { code: 'MIL', name: 'Media and Information Literacy', icon: '📱' },
+        { code: 'PR1', name: 'Practical Research 1', icon: '🔬' },
+        { code: 'PR2', name: 'Practical Research 2', icon: '📊' },
+        { code: 'PE2', name: 'Physical Education and Health 2', icon: '🏃' }
+      ]
+    };
+
+    // Strand-specific subjects
+    var shsStrandSubjects = {
+      'STEM': {
+        '1st Semester': [
+          { code: 'PRECAL', name: 'Pre-Calculus', icon: '📈' },
+          { code: 'BASICCALC', name: 'Basic Calculus', icon: '∫' },
+          { code: 'GENBIO1', name: 'General Biology 1', icon: '🧬' },
+          { code: 'GENCHEM1', name: 'General Chemistry 1', icon: '⚗️' }
+        ],
+        '2nd Semester': [
+          { code: 'PHYSICS1', name: 'General Physics 1', icon: '⚡' },
+          { code: 'PHYSICS2', name: 'General Physics 2', icon: '🔭' },
+          { code: 'GENBIO2', name: 'General Biology 2', icon: '🦠' },
+          { code: 'GENCHEM2', name: 'General Chemistry 2', icon: '🧪' }
+        ]
+      },
+      'ABM': {
+        '1st Semester': [
+          { code: 'BUSMATH', name: 'Business Mathematics', icon: '💹' },
+          { code: 'ORGMGT', name: 'Organization and Management', icon: '🏢' },
+          { code: 'FUNDBUSF', name: 'Fundamentals of ABM 1', icon: '📋' }
+        ],
+        '2nd Semester': [
+          { code: 'BUSFIN', name: 'Business Finance', icon: '💰' },
+          { code: 'APPECON', name: 'Applied Economics', icon: '📉' },
+          { code: 'PRINMKTG', name: 'Principles of Marketing', icon: '📣' },
+          { code: 'FUNDBUSF2', name: 'Fundamentals of ABM 2', icon: '📑' }
+        ]
+      },
+      'HUMSS': {
+        '1st Semester': [
+          { code: 'CREAWRIT', name: 'Creative Writing', icon: '✍️' },
+          { code: 'INTROPHIL', name: 'Introduction to World Religions and Belief Systems', icon: '🕊️' },
+          { code: 'PHILPOL', name: 'Philippine Politics and Governance', icon: '🏛️' }
+        ],
+        '2nd Semester': [
+          { code: 'DIASS', name: 'Disciplines and Ideas in the Social Sciences', icon: '🎓' },
+          { code: 'DISS', name: 'Disciplines and Ideas in Applied Social Sciences', icon: '👥' },
+          { code: 'INTROPHILO', name: 'Introduction to Philosophy of the Human Person', icon: '🤔' },
+          { code: 'COMARTS', name: 'Community Engagement, Solidarity, and Citizenship', icon: '🤝' }
+        ]
+      },
+      'TVL - Computer Programming (NC IV)': {
+        '1st Semester': [
+          { code: 'CPJAVA', name: 'Computer Programming (Java)', icon: '☕' },
+          { code: 'CPPYTHON', name: 'Computer Programming (Python)', icon: '🐍' },
+          { code: 'WEBDEV', name: 'Web Development Fundamentals', icon: '🌐' }
+        ],
+        '2nd Semester': [
+          { code: 'CPNETVB', name: 'Computer Programming (.NET/VB)', icon: '💻' },
+          { code: 'CPNCIV', name: 'Computer Programming NC IV', icon: '🏆' },
+          { code: 'DBMS', name: 'Database Management Systems', icon: '🗄️' }
+        ]
+      },
+      'TVL - Animation (NC II)': {
+        '1st Semester': [
+          { code: 'ANIM2D', name: '2D Animation', icon: '🎨' },
+          { code: 'DIGDRAW', name: 'Digital Drawing and Illustration', icon: '✏️' },
+          { code: 'ANIMFUND', name: 'Animation Fundamentals', icon: '🎬' }
+        ],
+        '2nd Semester': [
+          { code: 'ANIM3D', name: '3D Animation', icon: '🎮' },
+          { code: 'ANIMNCII', name: 'TVL-Animation NC II', icon: '🏆' },
+          { code: 'MOTGRAPH', name: 'Motion Graphics', icon: '📽️' }
+        ]
+      },
+      'GAS': {
+        '1st Semester': [
+          { code: 'HUMSS1', name: 'Humanities 1', icon: '🎭' },
+          { code: 'SOCST1', name: 'Social Science 1', icon: '🌍' }
+        ],
+        '2nd Semester': [
+          { code: 'HUMSS2', name: 'Humanities 2', icon: '🎨' },
+          { code: 'APPLRES', name: 'Applied Research', icon: '🔍' },
+          { code: 'EMTECH', name: 'Empowerment Technologies', icon: '💡' }
+        ]
+      },
+      'Arts and Design': {
+        '1st Semester': [
+          { code: 'ARTAPP', name: 'Art Appreciation', icon: '🖼️' },
+          { code: 'CREIND', name: 'Creative Industries I', icon: '🎨' },
+          { code: 'PHLARTS', name: 'Philippine Arts', icon: '🇵🇭' }
+        ],
+        '2nd Semester': [
+          { code: 'CREIND2', name: 'Creative Industries II', icon: '🎭' },
+          { code: 'INTEG', name: 'Integrative Arts', icon: '🎪' },
+          { code: 'ARTPROD', name: 'Art Production', icon: '🖌️' }
+        ]
+      }
+    };
+
+    /**
+     * Get SHS subjects based on strand and module
+     * @param {string} strand - The selected SHS strand
+     * @param {string} module - 'Module 1' (1st Sem) or 'Module 2' (2nd Sem)
+     * @returns {Array} - Combined array of core + strand-specific subjects
+     */
+    function filterSubjectsForSHS(strand, module) {
+      // Determine semester from module: Module 1 = 1st Semester, Module 2 = 2nd Semester
+      var semester = (module === 'Module 1') ? '1st Semester' : '2nd Semester';
+
+      // Get core subjects for this semester
+      var coreSubjects = shsCoreSubjects[semester] || [];
+
+      // Get strand-specific subjects for this semester
+      var strandSubjects = [];
+      if (shsStrandSubjects[strand] && shsStrandSubjects[strand][semester]) {
+        strandSubjects = shsStrandSubjects[strand][semester];
+      }
+
+      // Combine: core subjects first, then strand-specific
+      return coreSubjects.concat(strandSubjects);
+    }
+
+    /**
+     * Get all available subjects for a strand (both semesters combined)
+     * Used for teacher upload dropdown
+     */
+    function getAllSubjectsForStrand(strand) {
+      var allSubjects = [];
+
+      // Add all core subjects
+      Object.keys(shsCoreSubjects).forEach(function(sem) {
+        shsCoreSubjects[sem].forEach(function(subj) {
+          allSubjects.push({ ...subj, semester: sem });
+        });
+      });
+
+      // Add strand-specific subjects
+      if (shsStrandSubjects[strand]) {
+        Object.keys(shsStrandSubjects[strand]).forEach(function(sem) {
+          shsStrandSubjects[strand][sem].forEach(function(subj) {
+            allSubjects.push({ ...subj, semester: sem });
+          });
+        });
+      }
+
+      return allSubjects;
+    }
 
     function getSubjectsForNav() {
       if (!materialNav.course || !materialNav.year || !materialNav.semester) return null;
@@ -1333,10 +1495,18 @@
           }
         }
       } else if (step === 6) {
-        // Step 6: Subject (SHS only)
-        // Fallback: no subjects defined for SHS — skip directly to materials
-        loadFilteredMaterials();
-        return;
+        // Step 6: Subject (SHS only) - filtered by strand and module
+        var shsSubjects = filterSubjectsForSHS(materialNav.course, materialNav.module);
+        if (shsSubjects && shsSubjects.length > 0) {
+          shsSubjects.forEach(function(subj) {
+            var escapedName = (subj.code + ': ' + subj.name).replace(/'/g, "\\'");
+            cards.push(buildNavCard(subj.code + ': ' + subj.name, "selectNavSubject('" + escapedName + "')", subj.icon, subj.code));
+          });
+        } else {
+          // Fallback: no subjects defined for this strand — skip directly to materials
+          loadFilteredMaterials();
+          return;
+        }
       }
 
       var html = '<div class="mat-animate-fade">';
@@ -1417,8 +1587,8 @@
       materialNav.quarter = quarter;
       materialNav.step = 6;
       materialNav.subject = null;
-      // For SHS, skip to materials directly (no subject step for now)
-      loadFilteredMaterials();
+      // Navigate to Step 6 to select subject (filtered by strand)
+      renderNavigationStep();
     }
 
     function selectNavSubject(subject) {
@@ -1779,6 +1949,7 @@
       var level = document.getElementById('matAcademicLevel').value;
       var courseSelect = document.getElementById('matCourseStrand');
       var yearSelect = document.getElementById('matYearGrade');
+      var subjectSelect = document.getElementById('matSubjectName');
 
       // Toggle Semester (College) vs Module/Quarter (SHS) containers
       var semesterContainer = document.getElementById('matSemesterContainer');
@@ -1803,6 +1974,7 @@
       // Reset dependent dropdowns
       courseSelect.innerHTML = '<option value="">Select course/strand...</option>';
       yearSelect.innerHTML = '<option value="">Select year/grade...</option>';
+      subjectSelect.innerHTML = '<option value="">Select strand/course first...</option>';
 
       if (level === 'College') {
         collegePrograms.forEach(function(p) {
@@ -1821,7 +1993,7 @@
       }
     }
 
-    // Handle Module change for SHS - populate Quarter options
+    // Handle Module change for SHS - populate Quarter options and refresh subjects
     function onMatModuleChange() {
       var moduleVal = document.getElementById('matModule').value;
       var quarterSelect = document.getElementById('matQuarter');
@@ -1836,6 +2008,73 @@
         // Module 2: 3rd Quarter, 4th Quarter
         quarterSelect.innerHTML += '<option value="3">3rd Quarter</option>';
         quarterSelect.innerHTML += '<option value="4">4th Quarter</option>';
+      }
+
+      // Also refresh subjects dropdown since subjects depend on module (semester)
+      updateMatSubjectDropdown();
+    }
+
+    // Handle Course/Strand change - populate Subject dropdown
+    function onMatStrandChange() {
+      updateMatSubjectDropdown();
+    }
+
+    // Update the Subject dropdown based on current selections
+    function updateMatSubjectDropdown() {
+      var academicLevel = document.getElementById('matAcademicLevel').value;
+      var courseStrand = document.getElementById('matCourseStrand').value;
+      var subjectSelect = document.getElementById('matSubjectName');
+
+      // Reset subject dropdown
+      subjectSelect.innerHTML = '<option value="">Select subject...</option>';
+
+      if (!academicLevel || !courseStrand) {
+        subjectSelect.innerHTML = '<option value="">Select strand/course first...</option>';
+        return;
+      }
+
+      if (academicLevel === 'Senior High School') {
+        // SHS: Get subjects based on strand and module
+        var moduleVal = document.getElementById('matModule').value;
+        var subjects;
+
+        if (moduleVal) {
+          // If module is selected, show semester-specific subjects
+          var moduleStr = moduleVal === '1' ? 'Module 1' : 'Module 2';
+          subjects = filterSubjectsForSHS(courseStrand, moduleStr);
+        } else {
+          // If no module selected yet, show all subjects for the strand
+          subjects = getAllSubjectsForStrand(courseStrand);
+        }
+
+        if (subjects && subjects.length > 0) {
+          subjects.forEach(function(subj) {
+            var displayName = subj.code + ': ' + subj.name;
+            subjectSelect.innerHTML += '<option value="' + escapeHtml(displayName) + '">' + escapeHtml(displayName) + '</option>';
+          });
+        } else {
+          subjectSelect.innerHTML = '<option value="">No subjects available for this strand</option>';
+        }
+      } else if (academicLevel === 'College') {
+        // College: Get subjects from subjectData if available
+        var yearGrade = document.getElementById('matYearGrade').value;
+        var semester = document.getElementById('matSemester').value;
+
+        if (subjectData[courseStrand] && yearGrade && semester) {
+          var yearData = subjectData[courseStrand][yearGrade];
+          if (yearData && yearData[semester]) {
+            yearData[semester].forEach(function(subj) {
+              var displayName = subj.code + ': ' + subj.name;
+              subjectSelect.innerHTML += '<option value="' + escapeHtml(displayName) + '">' + escapeHtml(displayName) + '</option>';
+            });
+          }
+        }
+
+        // If no predefined subjects, allow manual entry by showing a placeholder option
+        if (subjectSelect.options.length <= 1) {
+          // Add a text hint or keep dropdown with option to type
+          subjectSelect.innerHTML = '<option value="">Enter subject below or select year/semester first...</option>';
+        }
       }
     }
 
