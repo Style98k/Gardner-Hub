@@ -118,19 +118,22 @@ CREATE TABLE IF NOT EXISTS `forum_threads` (
   `course_strand` varchar(100) DEFAULT NULL,
   `year_grade` varchar(50) DEFAULT NULL,
   `semester` varchar(50) DEFAULT NULL,
+  `module_number` int DEFAULT NULL,
+  `quarter_number` int DEFAULT NULL,
   `subject_name` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `author_id` (`author_id`),
   KEY `idx_recent_activities_created_at` (`created_at` DESC),
   KEY `idx_recent_activities_category` (`category`,`created_at` DESC),
   KEY `idx_category_created` (`category`,`created_at` DESC),
+  KEY `idx_shs_module_quarter` (`module_number`,`quarter_number`),
   CONSTRAINT `forum_threads_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Dumping data for table gardner_hub.forum_threads: ~3 rows (approximately)
-INSERT INTO `forum_threads` (`id`, `category`, `title`, `content`, `tag`, `material_type`, `file_path`, `thumbnail_path`, `is_downloadable`, `image_url`, `link_url`, `like_count`, `author_id`, `created_at`, `updated_at`, `academic_level`, `course_strand`, `year_grade`, `semester`, `subject_name`) VALUES
-	(5, 'announcements', '📢 𝐆𝐀𝐑𝐃𝐍𝐄𝐑 𝐁𝐀𝐋𝐈𝐓𝐀 𝐖𝐀𝐋𝐀𝐍𝐆 𝐏𝐀𝐒𝐎𝐊 | 𝐀𝐋𝐋 𝐋𝐄𝐕𝐄𝐋𝐒 | 𝐒𝐄𝐏𝐓𝐄𝐌𝐁𝐄𝐑 𝟐𝟐, 𝟐𝟎𝟐𝟓 (𝐌𝐎𝐍𝐃𝐀𝐘)', 'Based on Memorandum Circular No. 97, s. 2025 from Malacañang, all classes in Metro Manila are suspended tomorrow, September 22, 2025 (Monday), due to the expected bad weather caused by Bagyong Nando.', 'Class Suspension', NULL, NULL, NULL, 1, '1772718976474-864103673.jpg', NULL, 0, 2, '2026-03-05 13:56:16', '2026-03-05 13:56:16', NULL, NULL, NULL, NULL, NULL),
-	(6, 'announcements', 'ANNOUNCEMENT!', 'This is the class schedule for 1st Year BSIT 1C Term 2', 'Class Schedule', NULL, NULL, NULL, 1, '1772719247100-19177664.jpg', NULL, 0, 2, '2026-03-05 14:00:47', '2026-03-05 14:00:47', NULL, NULL, NULL, NULL, NULL);
+-- Dumping data for table gardner_hub.forum_threads: ~2 rows (approximately)
+INSERT INTO `forum_threads` (`id`, `category`, `title`, `content`, `tag`, `material_type`, `file_path`, `thumbnail_path`, `is_downloadable`, `image_url`, `link_url`, `like_count`, `author_id`, `created_at`, `updated_at`, `academic_level`, `course_strand`, `year_grade`, `semester`, `module_number`, `quarter_number`, `subject_name`) VALUES
+	(5, 'announcements', '📢 𝐆𝐀𝐑𝐃𝐍𝐄𝐑 𝐁𝐀𝐋𝐈𝐓𝐀 𝐖𝐀𝐋𝐀𝐍𝐆 𝐏𝐀𝐒𝐎𝐊 | 𝐀𝐋𝐋 𝐋𝐄𝐕𝐄𝐋𝐒 | 𝐒𝐄𝐏𝐓𝐄𝐌𝐁𝐄𝐑 𝟐𝟐, 𝟐𝟎𝟐𝟓 (𝐌𝐎𝐍𝐃𝐀𝐘)', 'Based on Memorandum Circular No. 97, s. 2025 from Malacañang, all classes in Metro Manila are suspended tomorrow, September 22, 2025 (Monday), due to the expected bad weather caused by Bagyong Nando.', 'Class Suspension', NULL, NULL, NULL, 1, '1772718976474-864103673.jpg', NULL, 0, 2, '2026-03-05 13:56:16', '2026-03-05 13:56:16', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+	(6, 'announcements', 'ANNOUNCEMENT!', 'This is the class schedule for 1st Year BSIT 1C Term 2', 'Class Schedule', NULL, NULL, NULL, 1, '1772719247100-19177664.jpg', NULL, 0, 2, '2026-03-05 14:00:47', '2026-03-05 14:00:47', NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- Dumping structure for table gardner_hub.notifications
 DROP TABLE IF EXISTS `notifications`;
@@ -147,7 +150,7 @@ CREATE TABLE IF NOT EXISTS `notifications` (
   CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Dumping data for table gardner_hub.notifications: ~0 rows (approximately)
+-- Dumping data for table gardner_hub.notifications: ~28 rows (approximately)
 INSERT INTO `notifications` (`id`, `user_id`, `category`, `message`, `is_read`, `created_at`) VALUES
 	(1, 1, 'academic', 'Test notification', 1, '2026-03-13 12:22:33'),
 	(2, 1, 'announcement', 'New announcement: ANNOUNCEMENT!', 1, '2026-03-13 12:25:14'),
@@ -199,7 +202,7 @@ CREATE TABLE IF NOT EXISTS `post_comments` (
   CONSTRAINT `post_comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Dumping data for table gardner_hub.post_comments: ~3 rows (approximately)
+-- Dumping data for table gardner_hub.post_comments: ~0 rows (approximately)
 
 -- Dumping structure for table gardner_hub.post_likes
 DROP TABLE IF EXISTS `post_likes`;
