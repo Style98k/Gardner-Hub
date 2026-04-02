@@ -20,47 +20,47 @@
   <script src="../../js/theme.js"></script>
 </head>
 
-<body class="font-sans text-gray-800 dark:text-gray-200 min-h-screen bg-gray-50 dark:bg-black transition-colors duration-300">
+<body class="font-sans text-gray-800 dark:text-gray-200 min-h-screen bg-slate-50 dark:bg-black transition-colors duration-300">
 
   <!-- Header -->
-  <header class="bg-white dark:bg-black border-b border-gray-200 dark:border-gray-900 sticky top-0 z-50 transition-colors duration-300">
+  <header class="bg-gardner dark:bg-black border-b border-gardner-light dark:border-gray-900 sticky top-0 z-50 transition-colors duration-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
         
         <!-- Logo & Brand -->
         <div class="flex items-center space-x-4">
-          <div class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-brand-900 dark:bg-white shadow-md">
-            <span class="text-white dark:text-black font-bold text-lg">G</span>
+          <div class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-white dark:bg-white shadow-md">
+            <span class="text-gardner dark:text-black font-bold text-lg">G</span>
           </div>
           <div>
-            <h1 class="text-xl font-bold text-gray-900 dark:text-white">The Gardner Hub</h1>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Student Community Platform</p>
+            <h1 class="text-xl font-bold text-white dark:text-white">The Gardner Hub</h1>
+            <p class="text-xs text-gray-300 dark:text-gray-400">Student Community Platform</p>
           </div>
         </div>
 
         <!-- Profile & Settings -->
         <div class="flex items-center space-x-4">
           <!-- Theme Toggle -->
-          <button id="themeToggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200" title="Toggle theme">
+          <button id="themeToggle" class="p-2 rounded-lg bg-gardner-light dark:bg-gray-800 hover:bg-white/20 dark:hover:bg-gray-700 transition-colors duration-200" title="Toggle theme">
             <svg class="w-5 h-5 text-yellow-500 hidden dark:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
             </svg>
-            <svg class="w-5 h-5 text-gray-600 block dark:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 text-yellow-300 block dark:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
             </svg>
           </button>
           
           <!-- Profile Dropdown -->
-          <div class="relative pl-4 border-l border-gray-200 dark:border-gray-700">
+          <div class="relative pl-4 border-l border-white/20 dark:border-gray-700">
             <button id="profileMenuBtn" class="flex items-center space-x-3 hover:opacity-80 transition-opacity duration-200">
-              <div class="w-8 h-8 rounded-full bg-brand-900 dark:bg-white flex items-center justify-center">
-                <span class="text-white dark:text-black font-semibold text-sm" id="userInitial">S</span>
+              <div class="w-8 h-8 rounded-full bg-white dark:bg-white flex items-center justify-center">
+                <span class="text-gardner dark:text-black font-semibold text-sm" id="userInitial">S</span>
               </div>
               <div class="text-sm text-left">
-                <p class="font-medium text-gray-900 dark:text-white" id="userName">Student User</p>
-                <p class="text-gray-500 dark:text-gray-400" id="userRole">Student</p>
+                <p class="font-medium text-white dark:text-white" id="userName">Student User</p>
+                <p class="text-gray-300 dark:text-gray-400" id="userRole">Student</p>
               </div>
-              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-gray-300 dark:text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
               </svg>
             </button>
@@ -105,8 +105,8 @@
     <!-- Categories Header -->
     <div class="flex items-center justify-between mb-6">
       <div>
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Categories</h2>
-        <p class="text-gray-600 dark:text-gray-400">Browse discussion categories or start a new topic</p>
+        <h2 class="text-3xl font-bold text-gardner dark:text-white mb-2">Categories</h2>
+        <p class="text-slate-600 dark:text-gray-400">Browse discussion categories or start a new topic</p>
       </div>
     </div>
 
@@ -114,7 +114,7 @@
     <div class="space-y-4 mb-8">
       
       <!-- Official Announcements -->
-      <div class="category-card relative bg-white dark:bg-black rounded-xl p-6 border border-gray-200 dark:border-gray-900 cursor-pointer hover:shadow-lg hover:dark:border-gray-800 transition-all duration-200" onclick="navigateToCategory('announcements')">
+      <div class="category-card relative bg-white dark:bg-black rounded-xl p-6 border border-blue-50 dark:border-gray-900 shadow-sm dark:shadow-none cursor-pointer hover:shadow-lg hover:scale-[1.01] hover:dark:border-gray-800 transition-all duration-300 ease-in-out" onclick="navigateToCategory('announcements')">
         <!-- Notification Badge -->
         <span id="badgeAnnouncement" class="hidden absolute -top-2 -right-2 inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 rounded-full shadow-lg ring-2 ring-white dark:ring-black"></span>
         <div class="flex items-start gap-4">
@@ -128,9 +128,9 @@
           <!-- Content -->
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between mb-2">
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white">Official Announcements</h3>
+              <h3 class="text-xl font-bold text-gardner dark:text-white">Official Announcements</h3>
             </div>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Stay updated with the latest school-wide announcements, policy changes, and important notices from the administration.</p>
+            <p class="text-sm text-slate-600 dark:text-gray-400 mb-3">Stay updated with the latest school-wide announcements, policy changes, and important notices from the administration.</p>
             
             <!-- Tags -->
             <div class="flex flex-wrap gap-2">
@@ -160,7 +160,7 @@
       </div>
 
       <!-- Academic Discussion -->
-      <div class="category-card relative bg-white dark:bg-black rounded-xl p-6 border border-gray-200 dark:border-gray-900 cursor-pointer hover:shadow-lg hover:dark:border-gray-800 transition-all duration-200" onclick="navigateToCategory('academic')">
+      <div class="category-card relative bg-white dark:bg-black rounded-xl p-6 border border-blue-50 dark:border-gray-900 shadow-sm dark:shadow-none cursor-pointer hover:shadow-lg hover:scale-[1.01] hover:dark:border-gray-800 transition-all duration-300 ease-in-out" onclick="navigateToCategory('academic')">
         <!-- Notification Badge -->
         <span id="badgeAcademic" class="hidden absolute -top-2 -right-2 inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 rounded-full shadow-lg ring-2 ring-white dark:ring-black"></span>
         <div class="flex items-start gap-4">
@@ -174,9 +174,9 @@
           <!-- Content -->
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between mb-2">
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white">Academic Discussion</h3>
+              <h3 class="text-xl font-bold text-gardner dark:text-white">Academic Discussion</h3>
             </div>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Engage in meaningful academic conversations — ask questions, share insights on lessons, and collaborate with school organizations.</p>
+            <p class="text-sm text-slate-600 dark:text-gray-400 mb-3">Engage in meaningful academic conversations — ask questions, share insights on lessons, and collaborate with school organizations.</p>
             
             <!-- Tags -->
             <div class="flex flex-wrap gap-2">
@@ -205,7 +205,7 @@
       </div>
 
       <!-- Learning Materials -->
-      <div class="category-card relative bg-white dark:bg-black rounded-xl p-6 border border-gray-200 dark:border-gray-900 cursor-pointer hover:shadow-lg hover:dark:border-gray-800 transition-all duration-200" onclick="navigateToCategory('materials')">
+      <div class="category-card relative bg-white dark:bg-black rounded-xl p-6 border border-blue-50 dark:border-gray-900 shadow-sm dark:shadow-none cursor-pointer hover:shadow-lg hover:scale-[1.01] hover:dark:border-gray-800 transition-all duration-300 ease-in-out" onclick="navigateToCategory('materials')">
         <!-- Notification Badge -->
         <span id="badgeMaterials" class="hidden absolute -top-2 -right-2 inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 rounded-full shadow-lg ring-2 ring-white dark:ring-black"></span>
         <div class="flex items-start gap-4">
@@ -219,9 +219,9 @@
           <!-- Content -->
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between mb-2">
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white">Learning Materials</h3>
+              <h3 class="text-xl font-bold text-gardner dark:text-white">Learning Materials</h3>
             </div>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Access and share educational resources including PDFs, handouts, lecture notes, and supplementary reading materials.</p>
+            <p class="text-sm text-slate-600 dark:text-gray-400 mb-3">Access and share educational resources including PDFs, handouts, lecture notes, and supplementary reading materials.</p>
             
             <!-- Tags -->
             <div class="flex flex-wrap gap-2">
@@ -250,7 +250,7 @@
       </div>
 
       <!-- Academic Document Request (Private) -->
-      <div class="category-card relative bg-white dark:bg-black rounded-xl p-6 border border-gray-200 dark:border-gray-900 cursor-pointer hover:shadow-lg hover:dark:border-gray-800 transition-all duration-200" onclick="navigateToGradeInquiry()">
+      <div class="category-card relative bg-white dark:bg-black rounded-xl p-6 border border-blue-50 dark:border-gray-900 shadow-sm dark:shadow-none cursor-pointer hover:shadow-lg hover:scale-[1.01] hover:dark:border-gray-800 transition-all duration-300 ease-in-out" onclick="navigateToGradeInquiry()">
         <!-- Notification Badge -->
         <span id="badgeDocumentRequest" class="hidden absolute -top-2 -right-2 inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 rounded-full shadow-lg ring-2 ring-white dark:ring-black"></span>
         <div class="flex items-start gap-4">
@@ -270,10 +270,10 @@
           <!-- Content -->
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 mb-2">
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white">Academic Document Request</h3>
+              <h3 class="text-xl font-bold text-gardner dark:text-white">Academic Document Request</h3>
               <span class="text-xs px-2 py-1 rounded-full font-medium bg-gradient-to-r from-yellow-200 to-yellow-300 text-yellow-800">🔒 Secure</span>
             </div>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">A secure and encrypted portal to request official academic documents such as transcripts, certifications, and grade reports from the Registrar.</p>
+            <p class="text-sm text-slate-600 dark:text-gray-400 mb-3">A secure and encrypted portal to request official academic documents such as transcripts, certifications, and grade reports from the Registrar.</p>
             
             <!-- Tags -->
             <div class="flex flex-wrap gap-2">
@@ -307,8 +307,8 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       
       <!-- Recent Activity -->
-      <div class="bg-white dark:bg-black rounded-xl p-6 border border-gray-200 dark:border-gray-900">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Activity</h3>
+      <div class="bg-white dark:bg-black rounded-xl p-6 border border-blue-50 dark:border-gray-900 shadow-sm dark:shadow-none">
+        <h3 class="text-lg font-semibold text-gardner dark:text-white mb-4">Recent Activity</h3>
         <div class="space-y-3" id="recentActivityList">
           <div class="flex items-center justify-center py-6 text-sm text-gray-400 dark:text-gray-500 italic">
             No activity yet
@@ -317,8 +317,8 @@
       </div>
 
       <!-- Quick Stats -->
-      <div class="bg-white dark:bg-black rounded-xl p-6 border border-gray-200 dark:border-gray-900">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Community Stats</h3>
+      <div class="bg-white dark:bg-black rounded-xl p-6 border border-blue-50 dark:border-gray-900 shadow-sm dark:shadow-none">
+        <h3 class="text-lg font-semibold text-gardner dark:text-white mb-4">Community Stats</h3>
         <div class="grid grid-cols-2 gap-4">
           <div>
             <p class="text-2xl font-bold text-gray-900 dark:text-white" id="statActiveStudents">0</p>
@@ -368,7 +368,7 @@
         </div>
         <div class="flex justify-end space-x-3">
           <button onclick="closeNewTopicModal()" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700">Cancel</button>
-          <button onclick="submitNewTopic()" class="px-4 py-2 text-sm font-medium text-white bg-brand-900 dark:bg-white dark:text-black rounded-lg hover:bg-brand-800 dark:hover:bg-gray-100">Post Topic</button>
+          <button onclick="submitNewTopic()" class="px-4 py-2 text-sm font-medium text-white bg-gardner dark:bg-white dark:text-black rounded-lg hover:bg-gardner-light dark:hover:bg-gray-100">Post Topic</button>
         </div>
       </div>
     </div>

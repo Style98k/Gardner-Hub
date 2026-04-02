@@ -49,47 +49,47 @@
   </style>
 </head>
 
-<body class="font-sans text-gray-800 dark:text-gray-200 min-h-screen bg-gray-50 dark:bg-black transition-colors duration-300">
+<body class="font-sans text-gray-800 dark:text-gray-200 min-h-screen bg-slate-50 dark:bg-black transition-colors duration-300">
 
   <!-- Header -->
-  <header class="bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50 transition-colors duration-300">
+  <header class="bg-gardner dark:bg-black border-b border-gardner-light dark:border-gray-800 sticky top-0 z-50 transition-colors duration-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
 
         <!-- Back + Brand -->
         <div class="flex items-center space-x-4">
-          <button onclick="goBack()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
-            <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <button onclick="goBack()" class="p-2 rounded-lg hover:bg-white/20 dark:hover:bg-gray-800 transition-colors duration-200">
+            <svg class="w-5 h-5 text-white dark:text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
             </svg>
           </button>
-          <div class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-brand-900 dark:bg-white shadow-md">
-            <span class="text-white dark:text-black font-bold text-lg">G</span>
+          <div class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-white dark:bg-slate-800 dark:border dark:border-slate-700 shadow-md">
+            <span class="text-gardner dark:text-white font-bold text-lg">G</span>
           </div>
           <div>
-            <h1 class="text-xl font-bold text-gray-900 dark:text-white">The Gardner Hub</h1>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Official Announcements</p>
+            <h1 class="text-xl font-bold text-white dark:text-white">The Gardner Hub</h1>
+            <p class="text-xs text-gray-300 dark:text-gray-400">Official Announcements</p>
           </div>
         </div>
 
         <!-- Right side -->
         <div class="flex items-center space-x-3">
           <!-- Theme Toggle -->
-          <button id="themeToggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200" title="Toggle theme">
+          <button id="themeToggle" class="p-2 rounded-lg bg-gardner-light dark:bg-gray-800 hover:bg-white/20 dark:hover:bg-gray-700 transition-colors duration-200" title="Toggle theme">
             <svg class="w-5 h-5 text-yellow-500 hidden dark:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
             </svg>
-            <svg class="w-5 h-5 text-gray-600 block dark:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 text-yellow-300 block dark:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
             </svg>
           </button>
           <!-- Profile Dropdown -->
           <div class="relative">
             <button id="profileMenuBtn" class="flex items-center space-x-2 hover:opacity-80 transition-opacity duration-200">
-              <div class="w-8 h-8 rounded-full bg-brand-900 dark:bg-white flex items-center justify-center">
-                <span class="text-white dark:text-black font-semibold text-sm" id="userInitial">U</span>
+              <div class="w-8 h-8 rounded-full bg-white dark:bg-white flex items-center justify-center">
+                <span class="text-gardner dark:text-black font-semibold text-sm" id="userInitial">U</span>
               </div>
-              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-gray-300 dark:text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
               </svg>
             </button>
@@ -482,7 +482,7 @@
           '<a href="' + escapeHtml(a.link_url) + '" target="_blank" rel="noopener noreferrer" class="text-green-600 dark:text-green-400 hover:underline truncate" onclick="event.stopPropagation()">' + escapeHtml(a.link_url) + '</a></div>';
       }
 
-      return '<div class="slide-up bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden" style="animation-delay:' + (idx * 50) + 'ms" onclick="openDetail(' + a.id + ')">' +
+      return '<div class="slide-up bg-white dark:bg-gray-900 rounded-xl border-t-4 border-[#00334e] dark:border-gray-800 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden" style="animation-delay:' + (idx * 50) + 'ms" onclick="openDetail(' + a.id + ')">' +
         '<div class="p-5">' +
           // Flair Tag
           '<div class="flex items-center justify-between mb-3">' +
@@ -491,16 +491,16 @@
           '</div>' +
           // Author Info
           '<div class="flex items-center space-x-2 mb-3">' +
-            '<div class="w-7 h-7 rounded-full bg-brand-900 dark:bg-white flex items-center justify-center flex-shrink-0">' +
+            '<div class="w-7 h-7 rounded-full bg-[#00334e] dark:bg-white flex items-center justify-center flex-shrink-0">' +
               '<span class="text-white dark:text-black font-semibold text-xs">' + (a.author_name || 'U').charAt(0) + '</span>' +
             '</div>' +
             '<span class="text-sm font-medium text-gray-800 dark:text-gray-200">' + escapeHtml(a.author_name) + verifiedIcon + '</span>' +
             '<span class="px-2 py-0.5 rounded-full text-[10px] font-medium ' + roleBadge + '">' + roleLabel + '</span>' +
           '</div>' +
           // Title
-          '<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 leading-snug">' + escapeHtml(a.title) + '</h3>' +
+          '<h3 class="text-lg font-bold text-[#00334e] dark:text-white mb-2 leading-snug">' + escapeHtml(a.title) + '</h3>' +
           // Content preview
-          '<p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-3">' + escapeHtml(a.content) + '</p>' +
+          '<p class="text-sm text-slate-700 dark:text-gray-400 line-clamp-3">' + escapeHtml(a.content) + '</p>' +
           // Image
           imageHtml +
           // Link
@@ -509,19 +509,19 @@
         // Interaction Bar
         '<div class="px-5 py-3 border-t border-gray-100 dark:border-gray-800 flex items-center space-x-6" onclick="event.stopPropagation()">' +
           // Like
-          '<button onclick="toggleLike(' + a.id + ', this)" class="flex items-center space-x-1.5 text-sm transition-colors ' + (liked ? 'text-red-500' : 'text-gray-500 dark:text-gray-400 hover:text-red-500') + '">' +
+          '<button onclick="toggleLike(' + a.id + ', this)" class="flex items-center space-x-1.5 text-sm transition-colors ' + (liked ? 'text-red-500' : 'text-gray-500 dark:text-gray-400 hover:text-[#00334e]') + '">' +
             (liked
               ? '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'
               : '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>') +
             '<span class="like-count-' + a.id + '">' + (a.like_count || 0) + '</span>' +
           '</button>' +
           // Comment count
-          '<button onclick="openDetail(' + a.id + ')" class="flex items-center space-x-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-blue-500 transition-colors">' +
+          '<button onclick="openDetail(' + a.id + ')" class="flex items-center space-x-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-[#00334e] transition-colors">' +
             '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>' +
             '<span>' + (a.comment_count || 0) + '</span>' +
           '</button>' +
           // Share
-          '<button onclick="sharePost(' + a.id + ')" class="flex items-center space-x-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors">' +
+          '<button onclick="sharePost(' + a.id + ')" class="flex items-center space-x-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-[#00334e] transition-colors">' +
             '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>' +
             '<span>Share</span>' +
           '</button>' +
@@ -535,9 +535,9 @@
       // Update active filter button styles
       document.querySelectorAll('.filter-tag').forEach(function(btn) {
         if (btn.getAttribute('data-tag') === tag) {
-          btn.classList.add('ring-2', 'ring-offset-1', 'ring-green-500');
+          btn.classList.add('ring-2', 'ring-offset-1', 'ring-[#00334e]');
         } else {
-          btn.classList.remove('ring-2', 'ring-offset-1', 'ring-green-500');
+          btn.classList.remove('ring-2', 'ring-offset-1', 'ring-[#00334e]');
         }
       });
       renderAnnouncements();

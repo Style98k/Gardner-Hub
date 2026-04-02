@@ -20,6 +20,10 @@ tailwind.config = {
           900: '#18181b',
           950: '#09090b',
         },
+        gardner: {
+          DEFAULT: '#00334e',
+          light: '#0a4263',
+        },
       },
     },
   },
