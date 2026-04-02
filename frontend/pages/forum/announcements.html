@@ -365,11 +365,15 @@
       var existing = document.querySelector('.toast');
       if (existing) existing.remove();
       var toast = document.createElement('div');
-      toast.className = 'toast hide ' + (type === 'error' ? 'bg-red-600 text-white' : 'bg-gray-900 dark:bg-white text-white dark:text-black');
+      var bgClass = 'bg-gray-900 dark:bg-white text-white dark:text-black';
+      if (type === 'error') bgClass = 'bg-red-600 text-white';
+      if (type === 'warning') bgClass = 'bg-amber-500 text-white';
+      toast.className = 'toast hide ' + bgClass;
       toast.textContent = msg;
       document.body.appendChild(toast);
       requestAnimationFrame(function() { toast.classList.remove('hide'); toast.classList.add('show'); });
-      setTimeout(function() { toast.classList.remove('show'); toast.classList.add('hide'); setTimeout(function() { toast.remove(); }, 300); }, 2500);
+      var duration = type === 'warning' ? 5000 : 2500;
+      setTimeout(function() { toast.classList.remove('show'); toast.classList.add('hide'); setTimeout(function() { toast.remove(); }, 300); }, duration);
     }
 
     // ─── Init ──────────────────────────────────────────────────────────────────
@@ -751,7 +755,14 @@
       .then(function(result) {
         if (!result.ok) { showToast(result.data.message || 'Failed to comment.', 'error'); return; }
         input.value = '';
-        showToast('Comment added!');
+        
+        // Show moderation notice if content was filtered
+        if (result.data.moderated) {
+          showToast('Academic Decorum: Your comment was automatically moderated to ensure professional language.', 'warning');
+        } else {
+          showToast('Comment added!');
+        }
+        
         // Re-open detail to refresh comments
         openDetail(postId);
         // Also update comment count in feed

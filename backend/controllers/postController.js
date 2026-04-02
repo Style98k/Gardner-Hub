@@ -1,12 +1,22 @@
 const pool = require("../config/db");
+const { cleanText, containsBadWords } = require("../utils/badwordsFilter");
 
 // ─── Create Official Announcement ────────────────────────────────────────────
 // Strict: Only admin/faculty can post. Students get 403.
 exports.createOfficialAnnouncement = async (req, res) => {
   try {
-    const { title, content, tag, link_url } = req.body;
+    const { title: rawTitle, content: rawContent, tag, link_url } = req.body;
     const userRole = req.user.role;
     const authorId = req.user.id;
+    
+    // Check for bad words before sanitizing
+    const titleHasBadWords = containsBadWords(rawTitle);
+    const contentHasBadWords = containsBadWords(rawContent);
+    const wasModerated = titleHasBadWords || contentHasBadWords;
+    
+    // Sanitize user-generated content
+    const title = cleanText(rawTitle);
+    const content = cleanText(rawContent);
 
     // Strict role check
     if (userRole === "student") {
@@ -37,6 +47,20 @@ exports.createOfficialAnnouncement = async (req, res) => {
       [title, content, tag, image_url, link_url || null, authorId]
     );
 
+    // ── Log moderation event if bad words were detected ──
+    if (wasModerated) {
+      try {
+        const [userRow] = await pool.query("SELECT full_name FROM users WHERE id = ?", [authorId]);
+        const userName = userRow.length > 0 ? userRow[0].full_name : "Unknown User";
+        await pool.query(
+          "INSERT INTO audit_logs (type, label, meta) VALUES (?, ?, ?)",
+          ["MODERATION", "Profanity Detected", `${userName} | Official Announcements`]
+        );
+      } catch (logErr) {
+        console.error("Audit log insert error (moderation):", logErr);
+      }
+    }
+
     // ── Notify ALL students and faculty about the new announcement ──
     try {
       const [recipients] = await pool.query(
@@ -56,6 +80,7 @@ exports.createOfficialAnnouncement = async (req, res) => {
 
     res.status(201).json({
       message: "Announcement created successfully.",
+      moderated: wasModerated,
       announcement: {
         id: result.insertId,
         category: "announcements",
@@ -204,11 +229,17 @@ exports.addComment = async (req, res) => {
   try {
     const { id } = req.params; // post_id
     const userId = req.user.id;
-    const { content } = req.body;
+    const { content: rawContent } = req.body;
 
-    if (!content || !content.trim()) {
+    if (!rawContent || !rawContent.trim()) {
       return res.status(400).json({ message: "Comment content is required." });
     }
+
+    // Check for bad words before sanitizing
+    const wasModerated = containsBadWords(rawContent.trim());
+
+    // Sanitize user-generated content
+    const content = cleanText(rawContent.trim());
 
     // Verify the announcement exists
     const [threadRows] = await pool.query(
@@ -221,8 +252,22 @@ exports.addComment = async (req, res) => {
 
     const [result] = await pool.query(
       "INSERT INTO post_comments (post_id, user_id, content) VALUES (?, ?, ?)",
-      [id, userId, content.trim()]
+      [id, userId, content]
     );
+
+    // ── Log moderation event if bad words were detected ──
+    if (wasModerated) {
+      try {
+        const [userRow] = await pool.query("SELECT full_name FROM users WHERE id = ?", [userId]);
+        const userName = userRow.length > 0 ? userRow[0].full_name : "Unknown User";
+        await pool.query(
+          "INSERT INTO audit_logs (type, label, meta) VALUES (?, ?, ?)",
+          ["MODERATION", "Profanity Detected", `${userName} | Official Announcements (Comment)`]
+        );
+      } catch (logErr) {
+        console.error("Audit log insert error (moderation):", logErr);
+      }
+    }
 
     // Fetch inserted comment with author info
     const [commentRows] = await pool.query(
@@ -235,6 +280,7 @@ exports.addComment = async (req, res) => {
 
     res.status(201).json({
       message: "Comment added.",
+      moderated: wasModerated,
       comment: commentRows[0],
     });
   } catch (error) {

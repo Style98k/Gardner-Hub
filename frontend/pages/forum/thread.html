@@ -421,10 +421,32 @@
           if (replyWrap) replyWrap.classList.add('hidden');
         }
 
+        // Show moderation notice if content was filtered
+        if (result.data.moderated) {
+          showModerationToast();
+        }
+
         // Reload to get updated nested tree
         loadThread();
       })
       .catch(function() { alert('Unable to connect to server.'); });
+    }
+
+    // ─── Show Moderation Toast ─────────────────────────────────────────────────
+    function showModerationToast() {
+      var existing = document.querySelector('.moderation-toast');
+      if (existing) existing.remove();
+      
+      var toast = document.createElement('div');
+      toast.className = 'moderation-toast fixed bottom-6 right-6 z-50 bg-amber-500 text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 animate-fade-in';
+      toast.innerHTML = '<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg><span>Academic Decorum: Your post was automatically moderated to ensure professional language.</span>';
+      document.body.appendChild(toast);
+      
+      setTimeout(function() {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(function() { toast.remove(); }, 300);
+      }, 5000);
     }
 
     // ─── Toggle Comment Heart ──────────────────────────────────────────────────

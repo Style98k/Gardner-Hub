@@ -2,13 +2,23 @@ const pool = require("../config/db");
 const fs = require("fs");
 const path = require("path");
 const mime = require("mime-types");
+const { cleanText, containsBadWords } = require("../utils/badwordsFilter");
 
 // ─── Create Learning Material (Faculty/Admin Only) ──────────────────────────
 exports.createMaterial = async (req, res) => {
   try {
-    const { title, content, material_type, is_downloadable, academic_level, course_strand, year_grade, semester, module_number, quarter_number, subject_name } = req.body;
+    const { title: rawTitle, content: rawContent, material_type, is_downloadable, academic_level, course_strand, year_grade, semester, module_number, quarter_number, subject_name } = req.body;
     const authorId = req.user.id;
     const userRole = req.user.role;
+    
+    // Check for bad words before sanitizing
+    const titleHasBadWords = containsBadWords(rawTitle);
+    const contentHasBadWords = containsBadWords(rawContent);
+    const wasModerated = titleHasBadWords || contentHasBadWords;
+    
+    // Sanitize user-generated content
+    const title = cleanText(rawTitle);
+    const content = cleanText(rawContent);
 
     // Block students from creating materials
     if (userRole === "student") {
@@ -78,6 +88,20 @@ exports.createMaterial = async (req, res) => {
       [title, content, material_type, filePath, thumbnailPath, downloadable, authorId, academic_level, course_strand, year_grade, semester || null, moduleNum, quarterNum, subject_name]
     );
 
+    // ── Log moderation event if bad words were detected ──
+    if (wasModerated) {
+      try {
+        const [userRow] = await pool.query("SELECT full_name FROM users WHERE id = ?", [authorId]);
+        const userName = userRow.length > 0 ? userRow[0].full_name : "Unknown User";
+        await pool.query(
+          "INSERT INTO audit_logs (type, label, meta) VALUES (?, ?, ?)",
+          ["MODERATION", "Profanity Detected", `${userName} | Learning Materials`]
+        );
+      } catch (logErr) {
+        console.error("Audit log insert error (moderation):", logErr);
+      }
+    }
+
     // ── Notify ALL students matching this level/course about the new material ──
     try {
       const [students] = await pool.query(
@@ -97,6 +121,7 @@ exports.createMaterial = async (req, res) => {
 
     res.status(201).json({
       message: "Learning material posted successfully.",
+      moderated: wasModerated,
       material: {
         id: result.insertId,
         title,

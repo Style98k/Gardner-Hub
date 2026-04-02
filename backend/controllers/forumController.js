@@ -1,4 +1,5 @@
 const pool = require("../config/db");
+const { cleanText, containsBadWords } = require("../utils/badwordsFilter");
 
 // Category → allowed roles mapping
 const CATEGORY_PERMISSIONS = {
@@ -49,9 +50,18 @@ exports.getThreads = async (req, res) => {
 // ─── Create Thread (supports academic image upload) ──────────────────────────
 exports.createThread = async (req, res) => {
   try {
-    const { category, title, content, tag } = req.body;
+    const { category, title: rawTitle, content: rawContent, tag } = req.body;
     const authorId = req.user.id;
     const userRole = req.user.role;
+    
+    // Check for bad words before sanitizing
+    const titleHasBadWords = containsBadWords(rawTitle);
+    const contentHasBadWords = containsBadWords(rawContent);
+    const wasModerated = titleHasBadWords || contentHasBadWords;
+    
+    // Sanitize user-generated content
+    const title = cleanText(rawTitle);
+    const content = cleanText(rawContent);
 
     // Validate category
     const validCategories = ["announcements", "academic", "materials", "grades"];
@@ -91,6 +101,21 @@ exports.createThread = async (req, res) => {
       [category, title, content, postTag, image_url, authorId]
     );
 
+    // ── Log moderation event if bad words were detected ──
+    if (wasModerated) {
+      try {
+        const [userRow] = await pool.query("SELECT full_name FROM users WHERE id = ?", [authorId]);
+        const userName = userRow.length > 0 ? userRow[0].full_name : "Unknown User";
+        const categoryLabel = category === "academic" ? "Academic Discussion" : category.charAt(0).toUpperCase() + category.slice(1);
+        await pool.query(
+          "INSERT INTO audit_logs (type, label, meta) VALUES (?, ?, ?)",
+          ["MODERATION", "Profanity Detected", `${userName} | ${categoryLabel}`]
+        );
+      } catch (logErr) {
+        console.error("Audit log insert error (moderation):", logErr);
+      }
+    }
+
     // ── Notify ALL users when a new academic thread is created ──
     if (category === "academic") {
       try {
@@ -114,6 +139,7 @@ exports.createThread = async (req, res) => {
 
     res.status(201).json({
       message: "Thread created",
+      moderated: wasModerated,
       thread: { id: result.insertId, category, title, content, tag: postTag, image_url, author_id: authorId },
     });
   } catch (error) {
@@ -206,12 +232,18 @@ exports.getThread = async (req, res) => {
 exports.createPost = async (req, res) => {
   try {
     const { id } = req.params; // thread_id
-    const { content } = req.body;
+    const { content: rawContent } = req.body;
     const authorId = req.user.id;
 
-    if (!content) {
+    if (!rawContent) {
       return res.status(400).json({ message: "Content is required" });
     }
+
+    // Check for bad words before sanitizing
+    const wasModerated = containsBadWords(rawContent);
+
+    // Sanitize user-generated content
+    const content = cleanText(rawContent);
 
     // Check thread exists
     const [threadRows] = await pool.query(
@@ -226,6 +258,21 @@ exports.createPost = async (req, res) => {
       "INSERT INTO forum_posts (thread_id, author_id, content) VALUES (?, ?, ?)",
       [id, authorId, content]
     );
+
+    // ── Log moderation event if bad words were detected ──
+    if (wasModerated) {
+      try {
+        const [userRow] = await pool.query("SELECT full_name FROM users WHERE id = ?", [authorId]);
+        const userName = userRow.length > 0 ? userRow[0].full_name : "Unknown User";
+        const categoryLabel = threadRows[0].category === "academic" ? "Academic Discussion (Reply)" : threadRows[0].category + " (Reply)";
+        await pool.query(
+          "INSERT INTO audit_logs (type, label, meta) VALUES (?, ?, ?)",
+          ["MODERATION", "Profanity Detected", `${userName} | ${categoryLabel}`]
+        );
+      } catch (logErr) {
+        console.error("Audit log insert error (moderation):", logErr);
+      }
+    }
 
     // Update thread's updated_at
     await pool.query(
@@ -250,6 +297,7 @@ exports.createPost = async (req, res) => {
 
     res.status(201).json({
       message: "Reply posted",
+      moderated: wasModerated,
       post: { id: result.insertId, thread_id: id, author_id: authorId, content },
     });
   } catch (error) {
@@ -263,15 +311,21 @@ exports.addComment = async (req, res) => {
   try {
     const { id } = req.params; // post_id (thread id)
     const userId = req.user.id;
-    const { content, parent_id } = req.body;
+    const { content: rawContent, parent_id } = req.body;
 
-    if (!content || !content.trim()) {
+    if (!rawContent || !rawContent.trim()) {
       return res.status(400).json({ message: "Comment content is required." });
     }
 
+    // Check for bad words before sanitizing
+    const wasModerated = containsBadWords(rawContent.trim());
+
+    // Sanitize user-generated content
+    const content = cleanText(rawContent.trim());
+
     // Verify thread exists
     const [threadRows] = await pool.query(
-      "SELECT id FROM forum_threads WHERE id = ?",
+      "SELECT id, category FROM forum_threads WHERE id = ?",
       [id]
     );
     if (threadRows.length === 0) {
@@ -291,8 +345,23 @@ exports.addComment = async (req, res) => {
 
     const [result] = await pool.query(
       "INSERT INTO post_comments (post_id, user_id, content, parent_id) VALUES (?, ?, ?, ?)",
-      [id, userId, content.trim(), parent_id || null]
+      [id, userId, content, parent_id || null]
     );
+
+    // ── Log moderation event if bad words were detected ──
+    if (wasModerated) {
+      try {
+        const [userRow] = await pool.query("SELECT full_name FROM users WHERE id = ?", [userId]);
+        const userName = userRow.length > 0 ? userRow[0].full_name : "Unknown User";
+        const categoryLabel = threadRows[0].category === "academic" ? "Academic Discussion (Comment)" : threadRows[0].category + " (Comment)";
+        await pool.query(
+          "INSERT INTO audit_logs (type, label, meta) VALUES (?, ?, ?)",
+          ["MODERATION", "Profanity Detected", `${userName} | ${categoryLabel}`]
+        );
+      } catch (logErr) {
+        console.error("Audit log insert error (moderation):", logErr);
+      }
+    }
 
     // Fetch inserted comment with author info
     const [commentRows] = await pool.query(
@@ -331,6 +400,7 @@ exports.addComment = async (req, res) => {
 
     res.status(201).json({
       message: "Comment added.",
+      moderated: wasModerated,
       comment,
     });
   } catch (error) {

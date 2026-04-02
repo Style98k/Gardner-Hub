@@ -2114,7 +2114,14 @@
           alert(result.data.message || 'Failed to create topic.');
           return;
         }
-        alert('Topic created successfully!');
+        
+        // Show moderation notice if content was filtered
+        if (result.data.moderated) {
+          alert('Topic created successfully!\n\nAcademic Decorum: Your post was automatically moderated to ensure professional language.');
+        } else {
+          alert('Topic created successfully!');
+        }
+        
         closeNewPostModal();
         loadCategory(getCurrentUser());
       })
@@ -2428,7 +2435,14 @@
           alert(result.data.message || 'Failed to upload material.');
           return;
         }
-        alert('Learning material uploaded successfully!');
+        
+        // Show moderation notice if content was filtered
+        if (result.data.moderated) {
+          alert('Learning material uploaded successfully!\n\nAcademic Decorum: Your content was automatically moderated to ensure professional language.');
+        } else {
+          alert('Learning material uploaded successfully!');
+        }
+        
         closeMaterialModal();
         // Reload materials within the current view if available
         if (materialNav.step >= getTotalSteps()) {
@@ -2940,7 +2954,14 @@
           alert(result.data.message || 'Failed to create discussion post.');
           return;
         }
-        alert('Discussion post created successfully!');
+        
+        // Show moderation notice if content was filtered
+        if (result.data.moderated) {
+          alert('Discussion post created successfully!\n\nAcademic Decorum: Your post was automatically moderated to ensure professional language.');
+        } else {
+          alert('Discussion post created successfully!');
+        }
+        
         closeAcademicModal();
         loadCategory(getCurrentUser());
       })

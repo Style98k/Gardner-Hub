@@ -261,6 +261,8 @@ function renderAuditLogs(logs) {
     signup:  { bg: 'bg-emerald-500/15', text: 'text-emerald-400', label: 'Signup',  icon: '&#x1F464;' },
     thread:  { bg: 'bg-blue-500/15',    text: 'text-blue-400',    label: 'Thread',  icon: '&#x1F4AC;' },
     inquiry: { bg: 'bg-purple-500/15',   text: 'text-purple-400',  label: 'Inquiry', icon: '&#x1F4CB;' },
+    MODERATION: { bg: 'bg-orange-500/15', text: 'text-orange-400', label: 'Moderation', icon: '&#x1F6A8;' },
+    password_reset: { bg: 'bg-yellow-500/15', text: 'text-yellow-400', label: 'Password', icon: '&#x1F511;' },
   };
 
   feed.innerHTML = logs.map(function (log) {
@@ -277,6 +279,12 @@ function renderAuditLogs(logs) {
         break;
       case 'inquiry':
         description = 'New inquiry <span class="text-white font-medium">' + escapeHtml(log.label) + '</span> by ' + escapeHtml(log.meta);
+        break;
+      case 'MODERATION':
+        description = '<span class="text-orange-300 font-medium">' + escapeHtml(log.label) + '</span> — ' + escapeHtml(log.meta);
+        break;
+      case 'password_reset':
+        description = escapeHtml(log.label);
         break;
       default:
         description = escapeHtml(log.label);
