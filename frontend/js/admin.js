@@ -89,12 +89,11 @@ function loadStats() {
       return res.json();
     })
     .then(function (data) {
+      // Update only the 4 essential stat cards
       document.getElementById('statTotalUsers').textContent = data.totalUsers || 0;
       document.getElementById('statStudents').textContent = data.totalStudents || 0;
       document.getElementById('statFaculty').textContent = data.totalFaculty || 0;
       document.getElementById('statThreads').textContent = data.totalThreads || 0;
-      document.getElementById('statInquiries').textContent = data.totalInquiries || 0;
-      document.getElementById('statPending').textContent = data.pendingInquiriesCount || 0;
     })
     .catch(function (err) {
       console.error('Failed to load stats:', err);
@@ -120,52 +119,70 @@ function loadUsers() {
     .catch(function (err) {
       console.error('Failed to load users:', err);
       document.getElementById('usersTableBody').innerHTML =
-        '<tr><td colspan="6" class="px-5 py-12 text-center text-slate-500 dark:text-gray-600 italic text-xs">Unable to load users.</td></tr>';
+        '<tr><td colspan="5" class="px-5 py-12 text-center text-slate-400 dark:text-gray-600 italic text-sm">Unable to load users.</td></tr>';
     });
 }
 
 function renderUsers(users) {
   var tbody = document.getElementById('usersTableBody');
   if (!users.length) {
-    tbody.innerHTML = '<tr><td colspan="6" class="px-5 py-12 text-center text-slate-500 dark:text-gray-600 italic text-xs">No users found.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" class="px-5 py-12 text-center text-slate-400 dark:text-gray-600 italic text-sm">No users found.</td></tr>';
     return;
   }
 
   var roleBadge = {
-    admin:   'bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-white',
-    faculty: 'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400',
-    student: 'bg-blue-100 dark:bg-blue-500/15 text-blue-700 dark:text-blue-400',
+    admin:   'bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-gray-300',
+    faculty: 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400',
+    student: 'bg-blue-50 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400',
   };
 
   tbody.innerHTML = users.map(function (u) {
     var badge = roleBadge[u.role] || roleBadge.student;
     var joined = u.created_at ? new Date(u.created_at).toLocaleDateString() : '—';
     var isAdmin = u.role === 'admin';
+    var initial = (u.full_name || 'U').charAt(0).toUpperCase();
+
+    // Avatar colors based on role
+    var avatarBg = {
+      admin: 'bg-slate-600',
+      faculty: 'bg-emerald-600',
+      student: 'bg-blue-600',
+    };
+    var bg = avatarBg[u.role] || avatarBg.student;
 
     // Action buttons — disabled for admin accounts
     var actions = isAdmin
-      ? '<span class="text-[10px] text-slate-400 dark:text-gray-600 italic">Protected</span>'
+      ? '<span class="text-[11px] text-slate-400 dark:text-gray-600 italic">Protected</span>'
       : '<div class="flex items-center justify-end gap-1">' +
           '<button onclick="deleteUser(' + u.id + ', \'' + escapeHtml(u.full_name).replace(/'/g, "\\'") + '\')" ' +
-            'class="p-1.5 rounded-lg hover:bg-red-500/20 text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors" title="Delete user">' +
-            '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">' +
+            'class="p-1.5 rounded-lg bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-500 dark:text-red-400 transition-all" title="Delete user">' +
+            '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">' +
               '<path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>' +
             '</svg>' +
           '</button>' +
           '<button onclick="resetPassword(' + u.id + ', \'' + escapeHtml(u.full_name).replace(/'/g, "\\'") + '\')" ' +
-            'class="p-1.5 rounded-lg hover:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300 transition-colors" title="Reset password">' +
-            '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">' +
+            'class="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 transition-all" title="Reset password">' +
+            '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">' +
               '<path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>' +
             '</svg>' +
           '</button>' +
         '</div>';
 
-    return '<tr class="border-b border-slate-200 dark:border-gray-800/60 hover:bg-slate-50 dark:hover:bg-gray-800/40 transition-colors">' +
-      '<td class="px-5 py-3 font-medium text-slate-800 dark:text-white">' + escapeHtml(u.full_name) + '</td>' +
-      '<td class="px-5 py-3 text-slate-600 dark:text-gray-400">' + escapeHtml(u.email) + '</td>' +
-      '<td class="px-5 py-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ' + badge + '">' + u.role + '</span></td>' +
-      '<td class="px-5 py-3 text-slate-500 dark:text-gray-500 font-mono text-[11px]">' + escapeHtml(u.school_id || '—') + '</td>' +
-      '<td class="px-5 py-3 text-slate-500 dark:text-gray-500">' + joined + '</td>' +
+    return '<tr class="hover:bg-slate-50 dark:hover:bg-gray-800/50 transition-colors">' +
+      '<td class="px-5 py-3">' +
+        '<div class="flex items-center gap-3">' +
+          '<div class="w-9 h-9 rounded-lg ' + bg + ' flex items-center justify-center flex-shrink-0">' +
+            '<span class="text-white font-medium text-sm">' + initial + '</span>' +
+          '</div>' +
+          '<div class="min-w-0">' +
+            '<p class="font-medium text-slate-900 dark:text-white truncate text-sm">' + escapeHtml(u.full_name) + '</p>' +
+            '<p class="text-[11px] text-slate-500 dark:text-gray-400 truncate">' + escapeHtml(u.email) + '</p>' +
+          '</div>' +
+        '</div>' +
+      '</td>' +
+      '<td class="px-5 py-3"><span class="px-2 py-1 rounded-md text-[11px] font-medium ' + badge + '">' + u.role + '</span></td>' +
+      '<td class="px-5 py-3 text-slate-500 dark:text-gray-500 font-mono text-xs hidden md:table-cell">' + escapeHtml(u.school_id || '—') + '</td>' +
+      '<td class="px-5 py-3 text-slate-500 dark:text-gray-500 text-xs hidden lg:table-cell">' + joined + '</td>' +
       '<td class="px-5 py-3 text-right">' + actions + '</td>' +
     '</tr>';
   }).join('');
@@ -244,7 +261,7 @@ function loadAuditLogs() {
     .catch(function (err) {
       console.error('Failed to load audit logs:', err);
       document.getElementById('activityFeed').innerHTML =
-        '<div class="px-5 py-12 text-center text-gray-600 italic text-xs">Unable to load activity.</div>';
+        '<div class="px-4 py-10 text-center text-slate-400 dark:text-gray-600 italic text-xs">Unable to load activity.</div>';
     });
 }
 
@@ -252,36 +269,37 @@ function renderAuditLogs(logs) {
   var feed = document.getElementById('activityFeed');
 
   if (!logs.length) {
-    feed.innerHTML = '<div class="px-5 py-12 text-center text-gray-600 italic text-xs">No recent activity.</div>';
+    feed.innerHTML = '<div class="px-4 py-10 text-center text-slate-400 dark:text-gray-600 italic text-xs">No recent activity.</div>';
     return;
   }
 
-  // Badge config per type
+  // Compact badge config per type
   var badgeConfig = {
-    signup:  { bg: 'bg-emerald-500/15', text: 'text-emerald-400', label: 'Signup',  icon: '&#x1F464;' },
-    thread:  { bg: 'bg-blue-500/15',    text: 'text-blue-400',    label: 'Thread',  icon: '&#x1F4AC;' },
-    inquiry: { bg: 'bg-purple-500/15',   text: 'text-purple-400',  label: 'Inquiry', icon: '&#x1F4CB;' },
-    MODERATION: { bg: 'bg-orange-500/15', text: 'text-orange-400', label: 'Moderation', icon: '&#x1F6A8;' },
-    password_reset: { bg: 'bg-yellow-500/15', text: 'text-yellow-400', label: 'Password', icon: '&#x1F511;' },
+    signup:  { bg: 'bg-emerald-100 dark:bg-emerald-500/20', text: 'text-emerald-600 dark:text-emerald-400', icon: '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>' },
+    thread:  { bg: 'bg-blue-100 dark:bg-blue-500/20', text: 'text-blue-600 dark:text-blue-400', icon: '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>' },
+    inquiry: { bg: 'bg-violet-100 dark:bg-violet-500/20', text: 'text-violet-600 dark:text-violet-400', icon: '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>' },
+    MODERATION: { bg: 'bg-orange-100 dark:bg-orange-500/20', text: 'text-orange-600 dark:text-orange-400', icon: '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>' },
+    password_reset: { bg: 'bg-amber-100 dark:bg-amber-500/20', text: 'text-amber-600 dark:text-amber-400', icon: '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>' },
   };
 
   feed.innerHTML = logs.map(function (log) {
     var cfg = badgeConfig[log.type] || badgeConfig.signup;
     var ago = timeAgo(log.created_at);
 
+    // Compact description
     var description = '';
     switch (log.type) {
       case 'signup':
-        description = 'New ' + (log.meta || 'user') + ' registered: <span class="text-white font-medium">' + escapeHtml(log.label) + '</span>';
+        description = '<span class="font-medium text-slate-800 dark:text-white">' + escapeHtml(log.label) + '</span> joined';
         break;
       case 'thread':
-        description = 'New thread in <span class="text-white font-medium">' + escapeHtml(log.meta) + '</span>: ' + escapeHtml(log.label);
+        description = 'Thread in <span class="font-medium">' + escapeHtml(log.meta) + '</span>';
         break;
       case 'inquiry':
-        description = 'New inquiry <span class="text-white font-medium">' + escapeHtml(log.label) + '</span> by ' + escapeHtml(log.meta);
+        description = 'Inquiry by <span class="font-medium">' + escapeHtml(log.meta) + '</span>';
         break;
       case 'MODERATION':
-        description = '<span class="text-orange-300 font-medium">' + escapeHtml(log.label) + '</span> — ' + escapeHtml(log.meta);
+        description = '<span class="font-medium text-orange-600 dark:text-orange-400">' + escapeHtml(log.label) + '</span>';
         break;
       case 'password_reset':
         description = escapeHtml(log.label);
@@ -290,16 +308,11 @@ function renderAuditLogs(logs) {
         description = escapeHtml(log.label);
     }
 
-    return '<div class="px-5 py-3 flex items-start gap-3 hover:bg-slate-50 dark:hover:bg-gray-800/40 transition-colors border-b border-slate-200 dark:border-transparent last:border-b-0">' +
-      '<div class="mt-0.5 flex-shrink-0">' +
-        '<span class="inline-flex items-center justify-center w-7 h-7 rounded-lg ' + cfg.bg + ' text-xs">' + cfg.icon + '</span>' +
-      '</div>' +
+    return '<div class="px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-gray-800/50 transition-colors border-b border-slate-100 dark:border-gray-800 last:border-b-0">' +
+      '<div class="w-7 h-7 rounded-lg ' + cfg.bg + ' flex items-center justify-center flex-shrink-0 ' + cfg.text + '">' + cfg.icon + '</div>' +
       '<div class="flex-1 min-w-0">' +
-        '<p class="text-xs text-slate-800 dark:text-gray-300 leading-relaxed">' + description + '</p>' +
-        '<div class="flex items-center gap-2 mt-1">' +
-          '<span class="inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider ' + cfg.bg + ' ' + cfg.text + '">' + cfg.label + '</span>' +
-          '<span class="text-[10px] text-slate-500 dark:text-gray-600">' + ago + '</span>' +
-        '</div>' +
+        '<p class="text-xs text-slate-600 dark:text-gray-300 truncate">' + description + '</p>' +
+        '<p class="text-[10px] text-slate-400 dark:text-gray-500 mt-0.5">' + ago + '</p>' +
       '</div>' +
     '</div>';
   }).join('');
