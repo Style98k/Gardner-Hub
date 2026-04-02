@@ -120,21 +120,21 @@ function loadUsers() {
     .catch(function (err) {
       console.error('Failed to load users:', err);
       document.getElementById('usersTableBody').innerHTML =
-        '<tr><td colspan="6" class="px-5 py-12 text-center text-gray-600 italic text-xs">Unable to load users.</td></tr>';
+        '<tr><td colspan="6" class="px-5 py-12 text-center text-slate-500 dark:text-gray-600 italic text-xs">Unable to load users.</td></tr>';
     });
 }
 
 function renderUsers(users) {
   var tbody = document.getElementById('usersTableBody');
   if (!users.length) {
-    tbody.innerHTML = '<tr><td colspan="6" class="px-5 py-12 text-center text-gray-600 italic text-xs">No users found.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" class="px-5 py-12 text-center text-slate-500 dark:text-gray-600 italic text-xs">No users found.</td></tr>';
     return;
   }
 
   var roleBadge = {
-    admin:   'bg-white/10 text-white',
-    faculty: 'bg-emerald-500/15 text-emerald-400',
-    student: 'bg-blue-500/15 text-blue-400',
+    admin:   'bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-white',
+    faculty: 'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400',
+    student: 'bg-blue-100 dark:bg-blue-500/15 text-blue-700 dark:text-blue-400',
   };
 
   tbody.innerHTML = users.map(function (u) {
@@ -144,28 +144,28 @@ function renderUsers(users) {
 
     // Action buttons — disabled for admin accounts
     var actions = isAdmin
-      ? '<span class="text-[10px] text-gray-600 italic">Protected</span>'
+      ? '<span class="text-[10px] text-slate-400 dark:text-gray-600 italic">Protected</span>'
       : '<div class="flex items-center justify-end gap-1">' +
           '<button onclick="deleteUser(' + u.id + ', \'' + escapeHtml(u.full_name).replace(/'/g, "\\'") + '\')" ' +
-            'class="p-1.5 rounded-lg hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-colors" title="Delete user">' +
+            'class="p-1.5 rounded-lg hover:bg-red-500/20 text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors" title="Delete user">' +
             '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">' +
               '<path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>' +
             '</svg>' +
           '</button>' +
           '<button onclick="resetPassword(' + u.id + ', \'' + escapeHtml(u.full_name).replace(/'/g, "\\'") + '\')" ' +
-            'class="p-1.5 rounded-lg hover:bg-yellow-500/20 text-yellow-400 hover:text-yellow-300 transition-colors" title="Reset password">' +
+            'class="p-1.5 rounded-lg hover:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300 transition-colors" title="Reset password">' +
             '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">' +
               '<path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>' +
             '</svg>' +
           '</button>' +
         '</div>';
 
-    return '<tr class="border-b border-gray-800/60 hover:bg-gray-800/40 transition-colors">' +
-      '<td class="px-5 py-3 font-medium text-white">' + escapeHtml(u.full_name) + '</td>' +
-      '<td class="px-5 py-3 text-gray-400">' + escapeHtml(u.email) + '</td>' +
+    return '<tr class="border-b border-slate-200 dark:border-gray-800/60 hover:bg-slate-50 dark:hover:bg-gray-800/40 transition-colors">' +
+      '<td class="px-5 py-3 font-medium text-slate-800 dark:text-white">' + escapeHtml(u.full_name) + '</td>' +
+      '<td class="px-5 py-3 text-slate-600 dark:text-gray-400">' + escapeHtml(u.email) + '</td>' +
       '<td class="px-5 py-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ' + badge + '">' + u.role + '</span></td>' +
-      '<td class="px-5 py-3 text-gray-500 font-mono text-[11px]">' + escapeHtml(u.school_id || '—') + '</td>' +
-      '<td class="px-5 py-3 text-gray-500">' + joined + '</td>' +
+      '<td class="px-5 py-3 text-slate-500 dark:text-gray-500 font-mono text-[11px]">' + escapeHtml(u.school_id || '—') + '</td>' +
+      '<td class="px-5 py-3 text-slate-500 dark:text-gray-500">' + joined + '</td>' +
       '<td class="px-5 py-3 text-right">' + actions + '</td>' +
     '</tr>';
   }).join('');
@@ -290,15 +290,15 @@ function renderAuditLogs(logs) {
         description = escapeHtml(log.label);
     }
 
-    return '<div class="px-5 py-3 flex items-start gap-3 hover:bg-gray-800/40 transition-colors">' +
+    return '<div class="px-5 py-3 flex items-start gap-3 hover:bg-slate-50 dark:hover:bg-gray-800/40 transition-colors border-b border-slate-200 dark:border-transparent last:border-b-0">' +
       '<div class="mt-0.5 flex-shrink-0">' +
         '<span class="inline-flex items-center justify-center w-7 h-7 rounded-lg ' + cfg.bg + ' text-xs">' + cfg.icon + '</span>' +
       '</div>' +
       '<div class="flex-1 min-w-0">' +
-        '<p class="text-xs text-gray-300 leading-relaxed">' + description + '</p>' +
+        '<p class="text-xs text-slate-800 dark:text-gray-300 leading-relaxed">' + description + '</p>' +
         '<div class="flex items-center gap-2 mt-1">' +
           '<span class="inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider ' + cfg.bg + ' ' + cfg.text + '">' + cfg.label + '</span>' +
-          '<span class="text-[10px] text-gray-600">' + ago + '</span>' +
+          '<span class="text-[10px] text-slate-500 dark:text-gray-600">' + ago + '</span>' +
         '</div>' +
       '</div>' +
     '</div>';

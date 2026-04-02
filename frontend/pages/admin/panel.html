@@ -18,15 +18,18 @@
   <script src="../../js/theme.js"></script>
 
   <style>
-    /* Force dark command-center aesthetic */
-    html { color-scheme: dark; }
-    body { background: #000 !important; }
+    /* Theme-aware color scheme */
+    html.dark { color-scheme: dark; }
 
-    /* Custom scrollbar for activity feed */
+    /* Custom scrollbar for activity feed - Light Mode */
     .feed-scroll::-webkit-scrollbar { width: 4px; }
     .feed-scroll::-webkit-scrollbar-track { background: transparent; }
-    .feed-scroll::-webkit-scrollbar-thumb { background: #374151; border-radius: 999px; }
-    .feed-scroll::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+    .feed-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+    .feed-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    /* Custom scrollbar for activity feed - Dark Mode */
+    html.dark .feed-scroll::-webkit-scrollbar-thumb { background: #374151; }
+    html.dark .feed-scroll::-webkit-scrollbar-thumb:hover { background: #4b5563; }
 
     /* Subtle pulse for live indicator */
     @keyframes livePulse {
@@ -37,7 +40,7 @@
   </style>
 </head>
 
-<body class="font-sans text-gray-200 min-h-screen bg-black">
+<body class="font-sans text-gray-800 dark:text-gray-200 min-h-screen bg-slate-50 dark:bg-black transition-colors duration-300">
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <!-- AUTH GUARD — redirect non-admins immediately                         -->
@@ -54,7 +57,7 @@
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <!-- TOP BAR                                                               -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <header class="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
+  <header class="sticky top-0 z-50 bg-gardner dark:bg-black/80 backdrop-blur-md border-b border-gardner-light dark:border-gray-800 transition-colors duration-300">
     <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-14">
 
@@ -62,21 +65,21 @@
         <div class="flex items-center gap-4">
           <div class="flex items-center gap-3">
             <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow">
-              <span class="text-black font-extrabold text-sm">G</span>
+              <span class="text-gardner dark:text-black font-extrabold text-sm">G</span>
             </div>
             <div class="hidden sm:block">
               <h1 class="text-sm font-bold text-white leading-none">Command Center</h1>
-              <p class="text-[11px] text-gray-500 leading-tight">The Gardner Hub</p>
+              <p class="text-[11px] text-gray-300 dark:text-gray-500 leading-tight">The Gardner Hub</p>
             </div>
           </div>
 
-          <div class="hidden md:flex items-center gap-3 pl-4 border-l border-gray-800">
-            <div class="w-7 h-7 rounded-full bg-gray-800 flex items-center justify-center">
+          <div class="hidden md:flex items-center gap-3 pl-4 border-l border-white/20 dark:border-gray-800">
+            <div class="w-7 h-7 rounded-full bg-white/20 dark:bg-gray-800 flex items-center justify-center">
               <span id="topBarInitial" class="text-white text-xs font-semibold">A</span>
             </div>
             <div>
               <p id="topBarName" class="text-xs font-medium text-white leading-none">Administrator</p>
-              <p id="topBarEmail" class="text-[11px] text-gray-500 leading-tight">admin@email.com</p>
+              <p id="topBarEmail" class="text-[11px] text-gray-300 dark:text-gray-500 leading-tight">admin@email.com</p>
             </div>
             <span class="ml-1 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 rounded-full">Admin</span>
           </div>
@@ -85,19 +88,19 @@
         <!-- Right: Actions -->
         <div class="flex items-center gap-2">
           <!-- Live indicator -->
-          <div class="hidden sm:flex items-center gap-1.5 mr-2 px-2 py-1 rounded-full bg-gray-900 border border-gray-800">
+          <div class="hidden sm:flex items-center gap-1.5 mr-2 px-2 py-1 rounded-full bg-white/10 dark:bg-gray-900 border border-white/20 dark:border-gray-800">
             <span class="live-dot w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-            <span class="text-[10px] text-gray-400 font-medium uppercase tracking-wide">Live</span>
+            <span class="text-[10px] text-gray-200 dark:text-gray-400 font-medium uppercase tracking-wide">Live</span>
           </div>
 
           <a href="../forum/hub.html"
-             class="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold text-white bg-indigo-600 border border-indigo-500 rounded-lg hover:bg-indigo-500 shadow-sm shadow-indigo-500/25 transition-colors duration-200">
+             class="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold text-white bg-gardner-light dark:bg-indigo-600 border border-white/20 dark:border-indigo-500 rounded-lg hover:bg-white/20 dark:hover:bg-indigo-500 shadow-sm transition-colors duration-200">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
             Go to Forum Hub
           </a>
 
           <button onclick="logout()"
-                  class="px-3 py-1.5 text-xs font-medium text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg hover:bg-red-500/20 hover:text-red-300 transition-colors duration-200">
+                  class="px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg hover:bg-red-500/20 hover:text-red-500 dark:hover:text-red-300 transition-colors duration-200">
             Logout
           </button>
         </div>
@@ -113,40 +116,40 @@
     <!-- ─── Stats Row ─────────────────────────────────────────────────────── -->
     <section>
       <div class="flex items-center gap-2 mb-3">
-        <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500">System Overview</h2>
-        <div class="flex-1 h-px bg-gray-800"></div>
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-gardner dark:text-gray-500">System Overview</h2>
+        <div class="flex-1 h-px bg-slate-200 dark:bg-gray-800"></div>
       </div>
 
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         <!-- Total Users -->
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
-          <p class="text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-1">Total Users</p>
-          <p id="statTotalUsers" class="text-2xl font-bold text-white">—</p>
+        <div class="bg-white dark:bg-gray-900 border border-blue-50 dark:border-gray-800 rounded-xl p-4 shadow-sm dark:shadow-none transition-colors duration-300">
+          <p class="text-[11px] font-medium text-gardner dark:text-gray-500 uppercase tracking-wider mb-1">Total Users</p>
+          <p id="statTotalUsers" class="text-2xl font-bold text-slate-800 dark:text-white">—</p>
         </div>
         <!-- Students -->
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
-          <p class="text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-1">Students</p>
-          <p id="statStudents" class="text-2xl font-bold text-blue-400">—</p>
+        <div class="bg-white dark:bg-gray-900 border border-blue-50 dark:border-gray-800 rounded-xl p-4 shadow-sm dark:shadow-none transition-colors duration-300">
+          <p class="text-[11px] font-medium text-gardner dark:text-gray-500 uppercase tracking-wider mb-1">Students</p>
+          <p id="statStudents" class="text-2xl font-bold text-blue-600 dark:text-blue-400">—</p>
         </div>
         <!-- Faculty -->
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
-          <p class="text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-1">Faculty</p>
-          <p id="statFaculty" class="text-2xl font-bold text-emerald-400">—</p>
+        <div class="bg-white dark:bg-gray-900 border border-blue-50 dark:border-gray-800 rounded-xl p-4 shadow-sm dark:shadow-none transition-colors duration-300">
+          <p class="text-[11px] font-medium text-gardner dark:text-gray-500 uppercase tracking-wider mb-1">Faculty</p>
+          <p id="statFaculty" class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">—</p>
         </div>
         <!-- Threads -->
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
-          <p class="text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-1">Threads</p>
-          <p id="statThreads" class="text-2xl font-bold text-purple-400">—</p>
+        <div class="bg-white dark:bg-gray-900 border border-blue-50 dark:border-gray-800 rounded-xl p-4 shadow-sm dark:shadow-none transition-colors duration-300">
+          <p class="text-[11px] font-medium text-gardner dark:text-gray-500 uppercase tracking-wider mb-1">Threads</p>
+          <p id="statThreads" class="text-2xl font-bold text-purple-600 dark:text-purple-400">—</p>
         </div>
         <!-- Inquiries -->
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
-          <p class="text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-1">Inquiries</p>
-          <p id="statInquiries" class="text-2xl font-bold text-yellow-400">—</p>
+        <div class="bg-white dark:bg-gray-900 border border-blue-50 dark:border-gray-800 rounded-xl p-4 shadow-sm dark:shadow-none transition-colors duration-300">
+          <p class="text-[11px] font-medium text-gardner dark:text-gray-500 uppercase tracking-wider mb-1">Inquiries</p>
+          <p id="statInquiries" class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">—</p>
         </div>
         <!-- Pending -->
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
-          <p class="text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-1">Pending</p>
-          <p id="statPending" class="text-2xl font-bold text-orange-400">—</p>
+        <div class="bg-white dark:bg-gray-900 border border-blue-50 dark:border-gray-800 rounded-xl p-4 shadow-sm dark:shadow-none transition-colors duration-300">
+          <p class="text-[11px] font-medium text-gardner dark:text-gray-500 uppercase tracking-wider mb-1">Pending</p>
+          <p id="statPending" class="text-2xl font-bold text-orange-600 dark:text-orange-400">—</p>
         </div>
       </div>
     </section>
@@ -155,19 +158,19 @@
     <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
       <!-- ── Left Column: User Management ─────────────────────────────────── -->
-      <div class="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+      <div class="lg:col-span-2 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-sm dark:shadow-none transition-colors duration-300">
         <!-- Header -->
-        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-800">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-gray-800">
           <div class="flex items-center gap-2">
-            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 text-gardner dark:text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
             </svg>
-            <h3 class="text-sm font-semibold text-white">User Management</h3>
-            <span id="userCount" class="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-800 text-gray-400 font-medium">0</span>
+            <h3 class="text-sm font-semibold text-slate-800 dark:text-white">User Management</h3>
+            <span id="userCount" class="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-400 font-medium">0</span>
           </div>
 
           <select id="roleFilter" onchange="filterUsers()"
-                  class="text-xs bg-gray-800 border border-gray-700 text-gray-300 rounded-lg px-2.5 py-1.5 focus:ring-1 focus:ring-gray-600 focus:outline-none">
+                  class="text-xs bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 text-slate-700 dark:text-gray-300 rounded-lg px-2.5 py-1.5 focus:ring-1 focus:ring-gardner dark:focus:ring-gray-600 focus:outline-none transition-colors duration-300">
             <option value="all">All Roles</option>
             <option value="student">Students</option>
             <option value="faculty">Faculty</option>
@@ -178,7 +181,7 @@
         <!-- Table -->
         <div class="overflow-x-auto">
           <table class="w-full text-xs text-left">
-            <thead class="text-[10px] uppercase tracking-wider text-gray-500 border-b border-gray-800 bg-gray-900/50">
+            <thead class="text-[10px] uppercase tracking-wider text-slate-600 dark:text-gray-500 border-b border-slate-200 dark:border-gray-800 bg-slate-100 dark:bg-gray-900/50">
               <tr>
                 <th class="px-5 py-3">Name</th>
                 <th class="px-5 py-3">Email</th>
@@ -188,9 +191,9 @@
                 <th class="px-5 py-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody id="usersTableBody">
+            <tbody id="usersTableBody" class="text-slate-700 dark:text-gray-300">
               <tr>
-                <td colspan="6" class="px-5 py-12 text-center text-gray-600 italic text-xs">Loading users…</td>
+                <td colspan="6" class="px-5 py-12 text-center text-slate-500 dark:text-gray-600 italic text-xs">Loading users…</td>
               </tr>
             </tbody>
           </table>
@@ -198,21 +201,21 @@
       </div>
 
       <!-- ── Right Column: System Activity Feed ──────────────────────────── -->
-      <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden flex flex-col">
+      <div class="bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl overflow-hidden flex flex-col shadow-sm dark:shadow-none transition-colors duration-300">
         <!-- Header -->
-        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-800">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-gray-800">
           <div class="flex items-center gap-2">
-            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 text-gardner dark:text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
             </svg>
-            <h3 class="text-sm font-semibold text-white">Activity Feed</h3>
+            <h3 class="text-sm font-semibold text-slate-800 dark:text-white">Activity Feed</h3>
           </div>
           <span class="live-dot w-2 h-2 rounded-full bg-emerald-400" title="Live data"></span>
         </div>
 
         <!-- Feed Items -->
-        <div id="activityFeed" class="feed-scroll flex-1 overflow-y-auto max-h-[600px] divide-y divide-gray-800/60">
-          <div class="px-5 py-12 text-center text-gray-600 italic text-xs">Loading activity…</div>
+        <div id="activityFeed" class="feed-scroll flex-1 overflow-y-auto max-h-[600px] divide-y divide-slate-200 dark:divide-gray-800/60">
+          <div class="px-5 py-12 text-center text-slate-500 dark:text-gray-600 italic text-xs">Loading activity…</div>
         </div>
       </div>
 
