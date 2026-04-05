@@ -352,15 +352,14 @@
         </div>
 
         <form id="academicForm" onsubmit="submitAcademicPost(event)">
-          <!-- Title -->
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title <span class="text-red-500">*</span></label>
-            <input type="text" id="academicTitle" required class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="An interesting title…">
+          <!-- Caption (Primary Input - Facebook/Threads style) -->
+          <div class="mb-4" id="academicContentWrap">
+            <textarea id="academicContent" rows="4" required class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white text-base leading-relaxed focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white dark:focus:bg-gray-800 resize-none transition-colors duration-200" placeholder="What's on your mind? Share your thoughts or ask a question..."></textarea>
           </div>
 
           <!-- Post Flair (Tag) -->
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Post Flair <span class="text-red-500">*</span></label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Post Flair <span class="text-red-500">*</span></label>
             <div class="flex flex-wrap gap-2" id="flairSelector">
               <button type="button" onclick="selectFlair('Lessons')" class="flair-btn px-3 py-1.5 rounded-full text-xs font-semibold border-2 border-indigo-300 dark:border-indigo-600 text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-800/30 transition-colors duration-200" data-flair="Lessons">
                 📘 Lessons
@@ -377,16 +376,10 @@
 
           <!-- Sub-Topic Dropdown (hidden by default, shows for Lessons/Q&A) -->
           <div id="subTopicContainer" class="mb-4 hidden">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Select Specific Topic <span class="text-red-500">*</span></label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select Specific Topic <span class="text-red-500">*</span></label>
             <select id="subTopicDropdown" class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
               <option value="">Select a topic...</option>
             </select>
-          </div>
-
-          <!-- Content -->
-          <div class="mb-4" id="academicContentWrap">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content <span class="text-red-500">*</span></label>
-            <textarea id="academicContent" rows="5" required class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-y" placeholder="Share your thoughts, questions, or insights…"></textarea>
           </div>
 
           <!-- Image Upload (hidden by default, shown on Image tab) -->
@@ -2861,11 +2854,15 @@
       var token = localStorage.getItem('gardnerHub_token');
       var submitBtn = document.getElementById('academicSubmitBtn');
 
-      var title = document.getElementById('academicTitle').value.trim();
       var content = document.getElementById('academicContent').value.trim();
       var flair = document.getElementById('academicFlair').value;
       var subTopic = document.getElementById('subTopicDropdown').value;
       var imageInput = document.getElementById('academicImage');
+
+      if (!content) {
+        alert('Please write something to share.');
+        return;
+      }
 
       if (!flair) {
         alert('Please select a Post Flair (Lessons, Q&A, or School Org).');
@@ -2878,10 +2875,8 @@
         return;
       }
 
-      if (!title || !content) {
-        alert('Title and content are required.');
-        return;
-      }
+      // Auto-generate title from caption (first 50 characters)
+      var title = content.length <= 50 ? content : content.substring(0, 47) + '...';
 
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg><span>Posting...</span>';
