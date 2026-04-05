@@ -309,3 +309,79 @@ exports.getComments = async (req, res) => {
     res.status(500).json({ message: "Server error." });
   }
 };
+
+// ─── Update Announcement (Edit Post) ─────────────────────────────────────────
+exports.updateAnnouncement = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const userRole = req.user.role;
+    const { content: rawContent } = req.body;
+
+    if (!rawContent || !rawContent.trim()) {
+      return res.status(400).json({ message: "Content is required." });
+    }
+
+    // Verify the announcement exists and get author
+    const [postRows] = await pool.query(
+      "SELECT id, author_id, category FROM forum_threads WHERE id = ? AND category = 'announcements'",
+      [id]
+    );
+
+    if (postRows.length === 0) {
+      return res.status(404).json({ message: "Announcement not found." });
+    }
+
+    // Security check: only the author OR admin can edit
+    const isAuthor = postRows[0].author_id === userId;
+    const isAdmin = userRole === "admin";
+    
+    if (!isAuthor && !isAdmin) {
+      return res.status(403).json({ message: "Unauthorized. You can only edit your own posts." });
+    }
+
+    // Check for bad words before sanitizing
+    const wasModerated = containsBadWords(rawContent.trim());
+
+    // Sanitize user-generated content
+    const content = cleanText(rawContent.trim());
+
+    // Update the announcement (updated_at auto-updates via MySQL)
+    await pool.query(
+      "UPDATE forum_threads SET content = ? WHERE id = ?",
+      [content, id]
+    );
+
+    // Log moderation event if bad words were detected
+    if (wasModerated) {
+      try {
+        const [userRow] = await pool.query("SELECT full_name FROM users WHERE id = ?", [userId]);
+        const userName = userRow.length > 0 ? userRow[0].full_name : "Unknown User";
+        await pool.query(
+          "INSERT INTO audit_logs (type, label, meta) VALUES (?, ?, ?)",
+          ["MODERATION", "Profanity Detected", `${userName} | Official Announcements (Edit)`]
+        );
+      } catch (logErr) {
+        console.error("Audit log insert error (moderation):", logErr);
+      }
+    }
+
+    // Fetch updated announcement with author info
+    const [updatedRows] = await pool.query(
+      `SELECT t.*, u.full_name AS author_name, u.role AS author_role, u.profile_photo AS author_photo
+       FROM forum_threads t
+       JOIN users u ON t.author_id = u.id
+       WHERE t.id = ?`,
+      [id]
+    );
+
+    res.json({
+      message: "Announcement updated successfully.",
+      moderated: wasModerated,
+      announcement: updatedRows[0],
+    });
+  } catch (error) {
+    console.error("Update announcement error:", error);
+    res.status(500).json({ message: "Server error." });
+  }
+};

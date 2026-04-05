@@ -10,6 +10,7 @@ const {
   getThread,
   createPost,
   deleteThread,
+  updateThread,
   addComment,
   getComments,
   toggleThreadLike,
@@ -76,6 +77,9 @@ router.post("/threads", verifyToken, upload.single("image"), createThread);
 
 // GET /api/forum/threads/:id — get thread + nested comments (optional auth for like status)
 router.get("/threads/:id", optionalAuth, getThread);
+
+// PUT /api/forum/threads/:id — update thread (auth required, author only)
+router.put("/threads/:id", verifyToken, updateThread);
 
 // POST /api/forum/threads/:id/posts — reply to a thread (auth required)
 router.post("/threads/:id/posts", verifyToken, createPost);

@@ -11,6 +11,7 @@ const {
   toggleLike,
   addComment,
   getComments,
+  updateAnnouncement,
 } = require("../controllers/postController");
 
 // ─── Multer config for announcement images ──────────────────────────────────
@@ -73,6 +74,9 @@ router.post("/announcements", verifyToken, upload.single("image"), createOfficia
 
 // GET /api/posts/announcements/:id — single announcement detail
 router.get("/announcements/:id", optionalAuth, getAnnouncementDetail);
+
+// PUT /api/posts/announcements/:id — update announcement (auth required, author only)
+router.put("/announcements/:id", verifyToken, updateAnnouncement);
 
 // POST /api/posts/announcements/:id/like — toggle like (auth required)
 router.post("/announcements/:id/like", verifyToken, toggleLike);
