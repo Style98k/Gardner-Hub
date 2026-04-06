@@ -15,7 +15,7 @@ const badWordsList = [
   'puta', 'putangina', 'pota', 'potangina', 'tangina', 'taena', 'tena',
   'gago', 'gaga', 'gagu',
   'tanga', 'tange', 'tangna',
-  'bobo', 'boba', 'bubu',
+  'bobo', 'boba', 'bubu', 'obob',
   'hayop', 'hayup', 'ayop',
   'ulol', 'olol', 'ulul',
   'inutil', 'imbisil',
@@ -34,7 +34,14 @@ const badWordsList = [
   'animal', 'bruha', 'bruhang',
   'puke', 'pokpok', 'malandi',
   'kantot', 'kantut', 'jakol', 'jabol',
-  'titi', 'tite', 'pepe', 'etits', 'betlog'
+  'titi', 'tite', 'pepe', 'etits', 'betlog', 'ogag', 'atup', 'ampot', 'amputa', 'enaet', 'anignat',
+    'monggoloid', 'mongoloid', 'abnoy', 'timang', 'tungaw', 'ugok',
+    'kys', 'stfu', 'gtfo',
+    'iyot', 'hindot', 'burat', 'bayag', 'tamod', 'manyak', 'manyakis', 'kepyas', 'bilat', 'utin', 'pucha', 'puchangina', 'potek', 'paktay',
+    'shunga', 'syonga', 'bugok', 'tungak', 'buang', 
+    'wtf', 'wth', 'lmao', 'lmfao', 'bs',
+    'porn', 'porno', 'cum', 'jizz', 'horny', 'libog', 'uhaw',
+    'bayot', 'bading', 'bakla', 'silahis'
 ];
 
 /**
