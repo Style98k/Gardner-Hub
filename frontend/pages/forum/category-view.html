@@ -1376,12 +1376,12 @@
         '</button>';
       }
 
-      // Check if post was edited (updated_at > created_at by more than 1 minute)
+      // Check if post was edited (updated_at > created_at by more than 2 seconds)
       var editedLabel = '';
       if (thread.updated_at && thread.created_at) {
         var created = new Date(thread.created_at).getTime();
         var updated = new Date(thread.updated_at).getTime();
-        if (updated - created > 60000) { // More than 1 minute difference
+        if (updated - created > 2000) { // More than 2 seconds difference
           editedLabel = '<span class="text-xs text-gray-400 dark:text-gray-500 italic">(edited)</span>';
         }
       }
@@ -3022,6 +3022,8 @@
     }
 
     // ─── Edit Post Modal Functions ────────────────────────────────────────────────
+    var editPostOriginalContent = ''; // Store original content for comparison
+
     function openEditPostModalById(postId, category) {
       // Get content from the data attribute on the post card
       var postCard = document.querySelector('[data-thread-id="' + postId + '"]');
@@ -3036,7 +3038,10 @@
       var textarea = document.getElementById('editPostContent');
       var temp = document.createElement('div');
       temp.innerHTML = currentContent;
-      textarea.value = temp.textContent || temp.innerText || '';
+      var decodedContent = temp.textContent || temp.innerText || '';
+      textarea.value = decodedContent;
+      // Store original content for comparison on save
+      editPostOriginalContent = decodedContent.trim();
       document.getElementById('editPostModal').classList.remove('hidden');
     }
 
@@ -3045,6 +3050,7 @@
       document.getElementById('editPostContent').value = '';
       document.getElementById('editPostId').value = '';
       document.getElementById('editPostCategory').value = '';
+      editPostOriginalContent = '';
     }
 
     function submitEditPost() {
@@ -3057,6 +3063,12 @@
       if (!content) {
         alert('Content cannot be empty.');
         return;
+      }
+
+      // Check if content was actually changed
+      if (content === editPostOriginalContent) {
+        closeEditPostModal();
+        return; // No changes made, silently close modal
       }
 
       if (!token) {
