@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Official Announcements — The Gardner Hub</title>
+  <link rel="icon" type="image/png" href="../../assets/image/nobglogo.png" />
 
   <!-- Google Font: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -533,7 +534,7 @@
           '</button>'
         : '';
 
-      return '<div class="slide-up bg-white dark:bg-gray-900 rounded-xl border-t-4 border-[#00334e] dark:border-gray-800 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden" data-announcement-id="' + a.id + '" data-announcement-content="' + escapeHtml(a.content).replace(/"/g, '&quot;') + '" style="animation-delay:' + (idx * 50) + 'ms" onclick="openDetail(' + a.id + ')">' +
+      return '<div class="slide-up bg-white dark:bg-gray-900 rounded-xl border border-[#00334e]/30 hover:border-[#00334e] dark:border-gray-800 dark:hover:border-gray-600 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden" data-announcement-id="' + a.id + '" data-announcement-content="' + escapeHtml(a.content).replace(/"/g, '&quot;') + '" style="animation-delay:' + (idx * 50) + 'ms" onclick="openDetail(' + a.id + ')">' +
         '<div class="p-5">' +
           // Flair Tag + Edit button
           '<div class="flex items-center justify-between mb-3">' +

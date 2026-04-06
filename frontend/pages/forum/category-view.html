@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Category View — The Gardner Hub</title>
+  <link rel="icon" type="image/png" href="../../assets/image/nobglogo.png" />
 
   <!-- Google Font: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1389,7 +1390,7 @@
         '</button>';
       }
 
-      return '<div class="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800 hover:shadow-lg transition-shadow duration-200 cursor-pointer" data-thread-id="' + thread.id + '" data-thread-content="' + escapeHtml(thread.content).replace(/"/g, '&quot;') + '" onclick="viewThread(' + thread.id + ')">' +
+      return '<div class="bg-white dark:bg-gray-900 rounded-xl p-6 border border-[#00334e]/30 hover:border-[#00334e] dark:border-gray-800 dark:hover:border-gray-600 hover:shadow-lg transition-all duration-300 cursor-pointer" data-thread-id="' + thread.id + '" data-thread-content="' + escapeHtml(thread.content).replace(/"/g, '&quot;') + '" onclick="viewThread(' + thread.id + ')">' +
         '<div class="flex items-start justify-between mb-3">' +
           '<div class="flex-1">' +
             '<div class="flex items-center flex-wrap gap-2 mb-2">' +
