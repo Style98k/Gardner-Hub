@@ -150,10 +150,24 @@ function renderUsers(users) {
     };
     var bg = avatarBg[u.role] || avatarBg.student;
 
+    // Suspend/Reactivate button config based on current status
+    var isSuspended = u.status === 'pending';
+    var suspendBtnClass = isSuspended
+      ? 'p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 transition-all'
+      : 'p-1.5 rounded-lg bg-orange-50 dark:bg-orange-500/10 hover:bg-orange-100 dark:hover:bg-orange-500/20 text-orange-500 dark:text-orange-400 transition-all';
+    var suspendBtnTitle = isSuspended ? 'Reactivate user' : 'Suspend user';
+    var suspendBtnIcon = isSuspended
+      ? '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+      : '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>';
+
     // Action buttons — disabled for admin accounts
     var actions = isAdmin
       ? '<span class="text-[11px] text-slate-400 dark:text-gray-600 italic">Protected</span>'
       : '<div class="flex items-center justify-end gap-1">' +
+          '<button onclick="toggleUserStatus(' + u.id + ', \'' + u.status + '\')" ' +
+            'class="' + suspendBtnClass + '" title="' + suspendBtnTitle + '">' +
+            suspendBtnIcon +
+          '</button>' +
           '<button onclick="deleteUser(' + u.id + ', \'' + escapeHtml(u.full_name).replace(/'/g, "\\'") + '\')" ' +
             'class="p-1.5 rounded-lg bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-500 dark:text-red-400 transition-all" title="Delete user">' +
             '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">' +
@@ -194,6 +208,36 @@ function filterUsers() {
   renderUsers(filtered);
   var countEl = document.getElementById('userCount');
   if (countEl) countEl.textContent = filtered.length;
+}
+
+// ── Toggle User Status (Suspend / Reactivate) ───────────────────────────────
+
+function toggleUserStatus(id, currentStatus) {
+  var isSuspended = currentStatus === 'pending';
+  var actionLabel = isSuspended ? 'reactivate' : 'suspend';
+  var confirmMsg = isSuspended
+    ? 'Reactivate this user? They will regain full access to the platform.'
+    : 'Suspend this user? They will be immediately blocked from logging in or using the platform.';
+
+  if (!confirm(confirmMsg)) return;
+
+  fetch(API_BASE + '/admin/users/' + id + '/status', {
+    method: 'PATCH',
+    headers: authHeaders(),
+  })
+    .then(function (res) { return res.json().then(function (d) { return { ok: res.ok, data: d }; }); })
+    .then(function (result) {
+      if (!result.ok) {
+        alert(result.data.message || 'Failed to ' + actionLabel + ' user.');
+        return;
+      }
+      // Refresh the user table to reflect the new status
+      loadUsers();
+      loadAuditLogs();
+    })
+    .catch(function () {
+      alert('Network error. Could not ' + actionLabel + ' user.');
+    });
 }
 
 // ── Delete User ──────────────────────────────────────────────────────────────
@@ -286,6 +330,23 @@ function renderAuditLogs(logs) {
     var cfg = badgeConfig[log.type] || badgeConfig.signup;
     var ago = timeAgo(log.created_at);
 
+    // Determine if this item is clickable (thread or MODERATION types)
+    var isClickable = log.type === 'thread' || log.type === 'MODERATION';
+    var clickAttr = '';
+    var cursorClass = '';
+    
+    if (isClickable) {
+      if (log.type === 'thread') {
+        // For threads, use the log.id as postId and log.meta as category
+        clickAttr = ' onclick="openReviewModal(' + log.id + ', \'' + escapeHtml(log.meta || 'academic') + '\')"';
+      } else if (log.type === 'MODERATION') {
+        // For moderation logs, we need to find the post - meta contains "userName | Category"
+        // We'll open a search modal or just show the moderation details
+        clickAttr = ' onclick="openModerationDetail(\'' + escapeHtml(log.label).replace(/'/g, "\\'") + '\', \'' + escapeHtml(log.meta).replace(/'/g, "\\'") + '\')"';
+      }
+      cursorClass = ' cursor-pointer';
+    }
+
     // Compact description
     var description = '';
     switch (log.type) {
@@ -308,14 +369,173 @@ function renderAuditLogs(logs) {
         description = escapeHtml(log.label);
     }
 
-    return '<div class="px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-gray-800/50 transition-colors border-b border-slate-100 dark:border-gray-800 last:border-b-0">' +
+    // Add review indicator for clickable items
+    var reviewIndicator = isClickable 
+      ? '<svg class="w-3.5 h-3.5 text-slate-300 dark:text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>'
+      : '';
+
+    return '<div class="px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-gray-800/50 transition-colors border-b border-slate-100 dark:border-gray-800 last:border-b-0' + cursorClass + '"' + clickAttr + '>' +
       '<div class="w-7 h-7 rounded-lg ' + cfg.bg + ' flex items-center justify-center flex-shrink-0 ' + cfg.text + '">' + cfg.icon + '</div>' +
       '<div class="flex-1 min-w-0">' +
         '<p class="text-xs text-slate-600 dark:text-gray-300 truncate">' + description + '</p>' +
         '<p class="text-[10px] text-slate-400 dark:text-gray-500 mt-0.5">' + ago + '</p>' +
       '</div>' +
+      reviewIndicator +
     '</div>';
   }).join('');
+}
+
+// ── Review Modal Functions ───────────────────────────────────────────────────
+
+var currentReviewPostId = null;
+var currentReviewCategory = null;
+
+function openReviewModal(postId, category) {
+  currentReviewPostId = postId;
+  currentReviewCategory = category;
+  
+  var modal = document.getElementById('reviewModal');
+  var content = document.getElementById('reviewModalContent');
+  
+  // Show loading state
+  content.innerHTML = '<div class="flex items-center justify-center py-12"><svg class="w-6 h-6 animate-spin text-slate-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>';
+  
+  // Show modal
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  document.body.style.overflow = 'hidden';
+  
+  // Fetch post details
+  var endpoint = category === 'announcements' 
+    ? API_BASE + '/posts/announcements/' + postId
+    : API_BASE + '/forum/threads/' + postId;
+  
+  fetch(endpoint, { headers: authHeaders() })
+    .then(function(res) {
+      if (!res.ok) throw new Error('Post not found');
+      return res.json();
+    })
+    .then(function(data) {
+      var post = data.announcement || data.thread;
+      if (!post) throw new Error('Post data missing');
+      renderReviewContent(post, category);
+    })
+    .catch(function(err) {
+      content.innerHTML = '<div class="text-center py-12"><svg class="w-10 h-10 text-slate-300 dark:text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg><p class="text-slate-500 dark:text-gray-400 text-sm">Unable to load post content.</p><p class="text-slate-400 dark:text-gray-500 text-xs mt-1">The post may have been deleted.</p></div>';
+    });
+}
+
+function renderReviewContent(post, category) {
+  var content = document.getElementById('reviewModalContent');
+  
+  var categoryLabel = category.charAt(0).toUpperCase() + category.slice(1);
+  if (category === 'academic') categoryLabel = 'Academic Discussion';
+  if (category === 'announcements') categoryLabel = 'Official Announcements';
+  
+  var roleBadgeClass = {
+    admin: 'bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-gray-300',
+    faculty: 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400',
+    student: 'bg-blue-50 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400',
+  };
+  var badge = roleBadgeClass[post.author_role] || roleBadgeClass.student;
+  
+  // Build image HTML if present
+  var imageHtml = '';
+  if (post.image_url) {
+    var imgPath = category === 'announcements' 
+      ? API_BASE.replace('/api', '') + '/uploads/announcements/' + post.image_url
+      : API_BASE.replace('/api', '') + '/uploads/academic/' + post.image_url;
+    imageHtml = '<div class="mt-4 rounded-lg overflow-hidden border border-slate-200 dark:border-gray-700"><img src="' + imgPath + '" alt="Post image" class="w-full max-h-64 object-cover" onerror="this.parentElement.style.display=\'none\'"></div>';
+  }
+  
+  // Format date
+  var postDate = new Date(post.created_at).toLocaleDateString('en-US', { 
+    month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' 
+  });
+  
+  content.innerHTML = 
+    '<div class="space-y-4">' +
+      '<!-- Author Info -->' +
+      '<div class="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-gray-800">' +
+        '<div class="w-10 h-10 rounded-lg bg-slate-600 flex items-center justify-center">' +
+          '<span class="text-white font-semibold">' + (post.author_name || 'U').charAt(0).toUpperCase() + '</span>' +
+        '</div>' +
+        '<div class="flex-1 min-w-0">' +
+          '<p class="font-medium text-slate-900 dark:text-white truncate">' + escapeHtml(post.author_name || 'Unknown User') + '</p>' +
+          '<div class="flex items-center gap-2 mt-0.5">' +
+            '<span class="px-2 py-0.5 rounded text-[10px] font-medium ' + badge + '">' + (post.author_role || 'student') + '</span>' +
+            '<span class="text-[11px] text-slate-400 dark:text-gray-500">' + postDate + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<!-- Category Badge -->' +
+      '<div class="flex items-center gap-2">' +
+        '<span class="px-2.5 py-1 rounded-lg text-xs font-medium bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-400">' + categoryLabel + '</span>' +
+        (post.tag ? '<span class="px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400">' + escapeHtml(post.tag) + '</span>' : '') +
+      '</div>' +
+      '<!-- Title -->' +
+      (post.title ? '<h4 class="text-lg font-semibold text-slate-900 dark:text-white">' + escapeHtml(post.title) + '</h4>' : '') +
+      '<!-- Content -->' +
+      '<div class="bg-slate-50 dark:bg-gray-800/50 rounded-lg p-4 max-h-48 overflow-y-auto custom-scroll">' +
+        '<p class="text-sm text-slate-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">' + escapeHtml(post.content) + '</p>' +
+      '</div>' +
+      imageHtml +
+    '</div>';
+}
+
+function closeReviewModal() {
+  var modal = document.getElementById('reviewModal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+  document.body.style.overflow = '';
+  currentReviewPostId = null;
+  currentReviewCategory = null;
+}
+
+function deleteReviewedPost() {
+  if (!currentReviewPostId || !currentReviewCategory) return;
+  
+  if (!confirm('Are you sure you want to permanently delete this post?\n\nThis action cannot be undone.')) {
+    return;
+  }
+  
+  var endpoint = currentReviewCategory === 'announcements' 
+    ? API_BASE + '/posts/announcements/' + currentReviewPostId
+    : API_BASE + '/forum/threads/' + currentReviewPostId;
+  
+  fetch(endpoint, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  })
+    .then(function(res) { return res.json().then(function(d) { return { ok: res.ok, data: d }; }); })
+    .then(function(result) {
+      if (!result.ok) {
+        alert(result.data.message || 'Failed to delete post.');
+        return;
+      }
+      alert('Post deleted successfully.');
+      closeReviewModal();
+      // Refresh stats and activity feed
+      loadStats();
+      loadAuditLogs();
+    })
+    .catch(function() {
+      alert('Network error. Could not delete post.');
+    });
+}
+
+function openModerationDetail(label, meta) {
+  // For moderation logs, show a simple alert with the details
+  // meta format: "UserName | Category"
+  var parts = meta.split(' | ');
+  var userName = parts[0] || 'Unknown';
+  var categoryName = parts[1] || 'Unknown Category';
+  
+  alert('Moderation Event\n\n' +
+    'Type: ' + label + '\n' +
+    'User: ' + userName + '\n' +
+    'Category: ' + categoryName + '\n\n' +
+    'The content was automatically filtered. To review user activity, use the User Management panel.');
 }
 
 // ── Bootstrap ────────────────────────────────────────────────────────────────

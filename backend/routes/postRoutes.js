@@ -12,6 +12,8 @@ const {
   addComment,
   getComments,
   updateAnnouncement,
+  deleteAnnouncement,
+  deleteComment,
 } = require("../controllers/postController");
 
 // ─── Multer config for announcement images ──────────────────────────────────
@@ -78,6 +80,9 @@ router.get("/announcements/:id", optionalAuth, getAnnouncementDetail);
 // PUT /api/posts/announcements/:id — update announcement (auth required, author only)
 router.put("/announcements/:id", verifyToken, updateAnnouncement);
 
+// DELETE /api/posts/announcements/:id — delete announcement (auth required, author or admin)
+router.delete("/announcements/:id", verifyToken, deleteAnnouncement);
+
 // POST /api/posts/announcements/:id/like — toggle like (auth required)
 router.post("/announcements/:id/like", verifyToken, toggleLike);
 
@@ -86,5 +91,8 @@ router.get("/announcements/:id/comments", getComments);
 
 // POST /api/posts/announcements/:id/comments — add comment (auth required)
 router.post("/announcements/:id/comments", verifyToken, addComment);
+
+// DELETE /api/posts/comments/:commentId — delete comment (auth required, author or admin)
+router.delete("/comments/:commentId", verifyToken, deleteComment);
 
 module.exports = router;

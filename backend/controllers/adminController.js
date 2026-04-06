@@ -70,8 +70,19 @@ exports.getAuditLogs = async (req, res) => {
         FROM audit_logs
         WHERE type = 'password_reset'
       )
+      UNION ALL
+      (
+        SELECT
+          id,
+          type          COLLATE utf8mb4_general_ci        AS type,
+          label         COLLATE utf8mb4_general_ci        AS label,
+          meta          COLLATE utf8mb4_general_ci        AS meta,
+          created_at
+        FROM audit_logs
+        WHERE type = 'MODERATION'
+      )
       ORDER BY created_at DESC
-      LIMIT 10
+      LIMIT 20
     `;
 
     const [rows] = await pool.query(query);
@@ -129,6 +140,55 @@ exports.resetUserPassword = async (req, res) => {
     res.json({ message: 'Password reset to default successfully.' });
   } catch (error) {
     console.error('Reset password error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// ─── Toggle User Status (Suspend/Reactivate) ────────────────────────────────
+exports.toggleUserStatus = async (req, res) => {
+  try {
+    const targetId = Number(req.params.id);
+    const adminId = req.user.id;
+
+    // Prevent self-suspension
+    if (targetId === adminId) {
+      return res.status(400).json({ message: 'You cannot suspend your own account.' });
+    }
+
+    // Get target user info
+    const [[target]] = await pool.query('SELECT id, role, status, full_name FROM users WHERE id = ?', [targetId]);
+    if (!target) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Block suspending other admins
+    if (target.role === 'admin') {
+      return res.status(403).json({ message: 'Cannot suspend an admin account.' });
+    }
+
+    // Toggle status: approved <-> pending
+    const newStatus = target.status === 'approved' ? 'pending' : 'approved';
+    const action = newStatus === 'pending' ? 'suspended' : 'reactivated';
+
+    await pool.query('UPDATE users SET status = ? WHERE id = ?', [newStatus, targetId]);
+
+    // Get admin name for audit log
+    const [[admin]] = await pool.query('SELECT full_name FROM users WHERE id = ?', [adminId]);
+    const adminName = admin ? admin.full_name : 'Admin';
+
+    // Audit log entry
+    await pool.query(
+      'INSERT INTO audit_logs (type, label, meta) VALUES (?, ?, ?)',
+      ['user_status', `${adminName} ${action} user ${target.full_name}`, target.full_name]
+    );
+
+    res.json({ 
+      message: `User ${action} successfully.`,
+      newStatus: newStatus,
+      action: action
+    });
+  } catch (error) {
+    console.error('Toggle user status error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

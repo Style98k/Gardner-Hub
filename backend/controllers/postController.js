@@ -385,3 +385,65 @@ exports.updateAnnouncement = async (req, res) => {
     res.status(500).json({ message: "Server error." });
   }
 };
+
+// ─── Delete Announcement ─────────────────────────────────────────────────────
+exports.deleteAnnouncement = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const userRole = req.user.role;
+
+    // Check announcement exists and get author
+    const [postRows] = await pool.query(
+      "SELECT id, author_id FROM forum_threads WHERE id = ? AND category = 'announcements'",
+      [id]
+    );
+    if (postRows.length === 0) {
+      return res.status(404).json({ message: "Announcement not found" });
+    }
+
+    // Only author or admin can delete
+    if (postRows[0].author_id !== userId && userRole !== "admin") {
+      return res.status(403).json({ message: "Not authorized to delete this announcement" });
+    }
+
+    // Delete associated comments first, then the announcement
+    await pool.query("DELETE FROM post_comments WHERE post_id = ?", [id]);
+    await pool.query("DELETE FROM post_likes WHERE post_id = ?", [id]);
+    await pool.query("DELETE FROM forum_threads WHERE id = ?", [id]);
+    
+    res.json({ message: "Announcement deleted" });
+  } catch (error) {
+    console.error("Delete announcement error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// ─── Delete Comment ─────────────────────────────────────────────────────────
+exports.deleteComment = async (req, res) => {
+  try {
+    const { commentId } = req.params;
+    const userId = req.user.id;
+    const userRole = req.user.role;
+
+    // Check comment exists and get author
+    const [commentRows] = await pool.query(
+      "SELECT id, user_id FROM post_comments WHERE id = ?",
+      [commentId]
+    );
+    if (commentRows.length === 0) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    // Only author or admin can delete
+    if (commentRows[0].user_id !== userId && userRole !== "admin") {
+      return res.status(403).json({ message: "Not authorized to delete this comment" });
+    }
+
+    await pool.query("DELETE FROM post_comments WHERE id = ?", [commentId]);
+    res.json({ message: "Comment deleted" });
+  } catch (error) {
+    console.error("Delete comment error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

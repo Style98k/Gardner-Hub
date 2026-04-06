@@ -84,6 +84,14 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
+    // Check if user is suspended (status !== 'approved')
+    if (user.status !== 'approved') {
+      return res.status(403).json({ 
+        message: "Your account has been suspended. Please contact the System Administrator.",
+        suspended: true
+      });
+    }
+
     // Generate JWT token (includes department for access control)
     const token = jwt.sign(
       { id: user.id, role: user.role, department_course: user.department_course },
@@ -264,7 +272,7 @@ exports.resetPassword = async (req, res) => {
 exports.listUsers = async (req, res) => {
   try {
     const [rows] = await pool.query(
-      "SELECT id, full_name, email, school_id, role, department_course, profile_photo, show_school_id, created_at FROM users ORDER BY created_at DESC"
+      "SELECT id, full_name, email, school_id, role, department_course, profile_photo, show_school_id, status, created_at FROM users ORDER BY created_at DESC"
     );
     res.json({ users: rows });
   } catch (error) {

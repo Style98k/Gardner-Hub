@@ -15,6 +15,7 @@ const {
   getComments,
   toggleThreadLike,
   toggleCommentLike,
+  deleteComment,
 } = require("../controllers/forumController");
 
 // ─── Optional auth middleware ────────────────────────────────────────────────
@@ -94,6 +95,9 @@ router.get("/threads/:id/comments", optionalAuth, getComments);
 
 // POST /api/forum/threads/:id/comments — add comment (supports parent_id for threading)
 router.post("/threads/:id/comments", verifyToken, addComment);
+
+// DELETE /api/forum/comments/:commentId — delete comment (auth required, author or admin)
+router.delete("/comments/:commentId", verifyToken, deleteComment);
 
 // ─── Reaction Routes (Heart) ────────────────────────────────────────────────
 

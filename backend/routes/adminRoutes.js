@@ -6,6 +6,7 @@ const {
   getAuditLogs,
   deleteUser,
   resetUserPassword,
+  toggleUserStatus,
 } = require('../controllers/adminController');
 
 // All routes require admin role
@@ -22,5 +23,8 @@ router.delete('/users/:id', deleteUser);
 
 // POST /api/admin/users/:id/reset-password
 router.post('/users/:id/reset-password', resetUserPassword);
+
+// PATCH /api/admin/users/:id/status — toggle suspend/reactivate
+router.patch('/users/:id/status', toggleUserStatus);
 
 module.exports = router;

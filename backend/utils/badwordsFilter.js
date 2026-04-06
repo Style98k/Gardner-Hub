@@ -6,7 +6,7 @@
 // Comprehensive list of bad words (English and Tagalog)
 const badWordsList = [
   // English bad words
-  'fuck', 'shit', 'ass', 'asshole', 'bitch', 'bastard', 'damn', 'crap',
+  'fuck', 'shit', 'asshole', 'bitch', 'bastard', 'damn', 'crap',
   'dick', 'cock', 'pussy', 'cunt', 'whore', 'slut', 'fag', 'faggot',
   'nigger', 'nigga', 'retard', 'motherfucker', 'fucker', 'bullshit',
   'piss', 'douche', 'douchebag', 'jackass', 'dipshit', 'shithead',

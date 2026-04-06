@@ -677,3 +677,33 @@ exports.deleteThread = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+// ─── Delete Comment ─────────────────────────────────────────────────────────
+exports.deleteComment = async (req, res) => {
+  try {
+    const { commentId } = req.params;
+    const userId = req.user.id;
+    const userRole = req.user.role;
+
+    // Check comment exists and get author
+    const [commentRows] = await pool.query(
+      "SELECT id, user_id FROM post_comments WHERE id = ?",
+      [commentId]
+    );
+    if (commentRows.length === 0) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    // Only author or admin can delete
+    if (commentRows[0].user_id !== userId && userRole !== "admin") {
+      return res.status(403).json({ message: "Not authorized to delete this comment" });
+    }
+
+    // Delete the comment and all its replies (nested comments)
+    await pool.query("DELETE FROM post_comments WHERE id = ? OR parent_id = ?", [commentId, commentId]);
+    res.json({ message: "Comment deleted" });
+  } catch (error) {
+    console.error("Delete comment error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
