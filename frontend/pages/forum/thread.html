@@ -144,9 +144,6 @@
             <span id="threadFlair" class="hidden ml-auto inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold"></span>
           </div>
 
-          <!-- Title -->
-          <h1 id="threadTitle" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-3"></h1>
-
           <!-- Content -->
           <div id="threadBody" class="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap"></div>
 
@@ -319,7 +316,6 @@
           badge.className = 'ml-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ' + getRoleBadgeClass(t.author_role);
 
           document.getElementById('threadDate').textContent = timeAgo(t.created_at);
-          document.getElementById('threadTitle').textContent = t.title;
           document.getElementById('threadBody').textContent = t.content;
 
           // Flair
