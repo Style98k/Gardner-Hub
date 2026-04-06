@@ -12,7 +12,7 @@ const CATEGORY_PERMISSIONS = {
 // ─── Get Threads by Category ─────────────────────────────────────────────────
 exports.getThreads = async (req, res) => {
   try {
-    const { category } = req.query;
+    const { category, search, sort } = req.query;
     const userId = req.user ? req.user.id : null;
 
     let query = `
@@ -32,12 +32,37 @@ exports.getThreads = async (req, res) => {
     `;
     const params = userId ? [userId] : [];
 
+    // Build WHERE clause
+    const conditions = [];
     if (category) {
-      query += " WHERE t.category = ?";
+      conditions.push("t.category = ?");
       params.push(category);
     }
+    if (search && search.trim()) {
+      conditions.push("(t.content LIKE ? OR t.title LIKE ?)");
+      const searchTerm = `%${search.trim()}%`;
+      params.push(searchTerm, searchTerm);
+    }
+    if (conditions.length > 0) {
+      query += " WHERE " + conditions.join(" AND ");
+    }
 
-    query += " ORDER BY t.updated_at DESC";
+    // Sorting logic
+    switch (sort) {
+      case 'Oldest First':
+        query += " ORDER BY t.created_at ASC";
+        break;
+      case 'Most Popular':
+        query += " ORDER BY t.like_count DESC, t.created_at DESC";
+        break;
+      case 'Most Comments':
+        query += " ORDER BY comment_count DESC, t.created_at DESC";
+        break;
+      case 'Latest Posts':
+      default:
+        query += " ORDER BY t.created_at DESC";
+        break;
+    }
 
     const [rows] = await pool.query(query, params);
     res.json({ threads: rows });
