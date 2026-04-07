@@ -406,11 +406,13 @@ function renderAuditLogsTable(logs) {
     // Extract user name from label or meta
     var userName = '—';
     var details = '—';
+    var userNameClickable = false;
     
     switch (log.type) {
       case 'signup':
         userName = escapeHtml(log.label || 'Unknown');
-        details = 'New user registration';
+        details = '<span class="inline-flex items-center gap-1.5"><span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>New user registration</span>';
+        userNameClickable = log.user_id ? true : false;
         break;
       case 'thread':
         userName = 'Thread Author';
@@ -433,8 +435,13 @@ function renderAuditLogsTable(logs) {
         details = escapeHtml(log.meta || '—');
     }
     
+    // Create clickable username for signup logs
+    var userNameHtml = userNameClickable 
+      ? '<button onclick="viewRegistrantDetails(' + log.user_id + ')" class="text-sm text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium hover:underline transition-colors cursor-pointer">' + userName + '</button>'
+      : '<span class="text-sm text-slate-700 dark:text-gray-300">' + userName + '</span>';
+    
     // Determine if clickable
-    var isClickable = log.type === 'thread' || log.type === 'MODERATION';
+    var isClickable = log.type === 'thread' || log.type === 'MODERATION' || log.type === 'signup';
     var dataAttrs = '';
     var actionBtn = '<span class="text-[11px] text-slate-400 dark:text-gray-600 italic">—</span>';
     
@@ -446,6 +453,15 @@ function renderAuditLogsTable(logs) {
         var metaBase64 = btoa(unescape(encodeURIComponent(log.meta || '')));
         dataAttrs = ' data-log-type="MODERATION" data-log-label="' + escapeHtml(log.label) + '" data-log-meta-b64="' + metaBase64 + '"';
         actionBtn = '<button class="activity-table-review-btn px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-orange-600 hover:bg-orange-700 transition-all shadow-sm">Review</button>';
+      } else if (log.type === 'signup' && log.user_id) {
+        dataAttrs = ' data-log-type="signup" data-user-id="' + log.user_id + '"';
+        actionBtn = '<button class="activity-table-view-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-700 transition-all shadow-sm">' +
+          '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">' +
+            '<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>' +
+            '<path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>' +
+          '</svg>' +
+          '<span>View</span>' +
+        '</button>';
       }
     }
     
@@ -457,7 +473,7 @@ function renderAuditLogsTable(logs) {
         '</div>' +
       '</td>' +
       '<td class="px-5 py-3">' +
-        '<span class="text-sm text-slate-700 dark:text-gray-300">' + userName + '</span>' +
+        userNameHtml +
       '</td>' +
       '<td class="px-5 py-3">' +
         '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium ' + cfg.bg + ' ' + cfg.text + '">' +
@@ -481,7 +497,23 @@ function renderAuditLogsTable(logs) {
 
 // Handle clicks on activity logs table rows
 function handleActivityTableClick(e) {
+  // Check for review button
   var btn = e.target.closest('.activity-table-review-btn');
+  
+  // Check for view details button (signup)
+  var viewBtn = e.target.closest('.activity-table-view-btn');
+  
+  if (viewBtn) {
+    var row = viewBtn.closest('.activity-log-table-row');
+    if (row && row.getAttribute('data-log-type') === 'signup') {
+      var userId = row.getAttribute('data-user-id');
+      if (userId) {
+        viewRegistrantDetails(parseInt(userId));
+      }
+    }
+    return;
+  }
+  
   if (!btn) return;
   
   var row = btn.closest('.activity-log-table-row');
@@ -892,6 +924,174 @@ function deleteModerationContent() {
     .catch(function() {
       alert('Network error. Could not delete content.');
     });
+}
+
+// ── Registrant Details Modal Functions ───────────────────────────────────────
+
+function viewRegistrantDetails(userId) {
+  if (!userId) {
+    console.error('No user ID provided');
+    return;
+  }
+  
+  var modal = document.getElementById('registrantDetailsModal');
+  var content = document.getElementById('registrantModalContent');
+  
+  if (!modal || !content) {
+    console.error('Registrant modal elements not found');
+    return;
+  }
+  
+  // Show loading state
+  content.innerHTML = '<div class="flex items-center justify-center py-12"><svg class="w-6 h-6 animate-spin text-emerald-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>';
+  
+  // Show modal
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  document.body.style.overflow = 'hidden';
+  
+  // Fetch user details using the profile endpoint
+  fetch(API_BASE + '/auth/profile/' + userId, { headers: authHeaders() })
+    .then(function(res) {
+      if (!res.ok) throw new Error('User not found');
+      return res.json();
+    })
+    .then(function(data) {
+      var user = data.user;
+      if (!user) throw new Error('User data missing');
+      renderRegistrantDetails(user);
+    })
+    .catch(function(err) {
+      console.error('Failed to fetch user details:', err);
+      content.innerHTML = '<div class="text-center py-12"><svg class="w-10 h-10 text-slate-300 dark:text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg><p class="text-slate-500 dark:text-gray-400 text-sm">Unable to load user details.</p><p class="text-slate-400 dark:text-gray-500 text-xs mt-1">The user may have been deleted.</p></div>';
+    });
+}
+
+function renderRegistrantDetails(user) {
+  var content = document.getElementById('registrantModalContent');
+  if (!content) return;
+  
+  // Format role badge
+  var roleBadgeConfig = {
+    student: { bg: 'bg-blue-100 dark:bg-blue-500/20', text: 'text-blue-700 dark:text-blue-400', label: 'Student' },
+    faculty: { bg: 'bg-emerald-100 dark:bg-emerald-500/20', text: 'text-emerald-700 dark:text-emerald-400', label: 'Faculty' },
+    admin: { bg: 'bg-slate-100 dark:bg-gray-700', text: 'text-slate-700 dark:text-gray-300', label: 'Administrator' }
+  };
+  var roleCfg = roleBadgeConfig[user.role] || roleBadgeConfig.student;
+  
+  // Format registration date
+  var regDate = new Date(user.created_at);
+  var formattedDate = regDate.toLocaleDateString('en-US', { 
+    weekday: 'long',
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric'
+  });
+  var formattedTime = regDate.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+  
+  // Build profile photo or initial avatar
+  var avatarHtml;
+  if (user.profile_photo) {
+    var photoUrl = API_BASE.replace('/api', '') + '/uploads/profile_photos/' + user.profile_photo;
+    avatarHtml = '<img src="' + photoUrl + '" alt="Profile" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML=\'<span class=\\\'text-white font-bold text-2xl\\\'>' + (user.full_name || 'U').charAt(0).toUpperCase() + '</span>\'">';
+  } else {
+    avatarHtml = '<span class="text-white font-bold text-2xl">' + (user.full_name || 'U').charAt(0).toUpperCase() + '</span>';
+  }
+  
+  content.innerHTML = 
+    '<div class="space-y-5">' +
+      '<!-- User Avatar & Name Header -->' +
+      '<div class="flex items-center gap-4 pb-5 border-b border-slate-100 dark:border-gray-800">' +
+        '<div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/30 overflow-hidden">' +
+          avatarHtml +
+        '</div>' +
+        '<div class="flex-1 min-w-0">' +
+          '<h4 class="text-lg font-bold text-slate-900 dark:text-white truncate">' + escapeHtml(user.full_name || 'Unknown User') + '</h4>' +
+          '<div class="flex items-center gap-2 mt-1.5">' +
+            '<span class="px-2.5 py-1 rounded-lg text-xs font-semibold ' + roleCfg.bg + ' ' + roleCfg.text + '">' + roleCfg.label + '</span>' +
+            '<span class="text-[11px] text-slate-400 dark:text-gray-500">ID: ' + user.id + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      
+      '<!-- User Details Grid -->' +
+      '<div class="grid grid-cols-1 gap-4">' +
+        
+        '<!-- School/Employee ID -->' +
+        '<div class="flex items-start gap-3 p-3 rounded-xl bg-slate-50 dark:bg-gray-800/50 border border-slate-100 dark:border-gray-700/50">' +
+          '<div class="w-9 h-9 rounded-lg bg-violet-100 dark:bg-violet-500/20 flex items-center justify-center flex-shrink-0">' +
+            '<svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">' +
+              '<path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>' +
+            '</svg>' +
+          '</div>' +
+          '<div class="flex-1 min-w-0">' +
+            '<p class="text-[11px] font-medium text-slate-500 dark:text-gray-400 uppercase tracking-wide">School/Employee ID</p>' +
+            '<p class="text-sm font-semibold text-slate-900 dark:text-white mt-0.5">' + escapeHtml(user.school_id || '—') + '</p>' +
+          '</div>' +
+        '</div>' +
+        
+        '<!-- Email -->' +
+        '<div class="flex items-start gap-3 p-3 rounded-xl bg-slate-50 dark:bg-gray-800/50 border border-slate-100 dark:border-gray-700/50">' +
+          '<div class="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center flex-shrink-0">' +
+            '<svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">' +
+              '<path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>' +
+            '</svg>' +
+          '</div>' +
+          '<div class="flex-1 min-w-0">' +
+            '<p class="text-[11px] font-medium text-slate-500 dark:text-gray-400 uppercase tracking-wide">Email</p>' +
+            '<p class="text-sm font-semibold text-slate-900 dark:text-white mt-0.5 truncate">' + escapeHtml(user.email || '—') + '</p>' +
+          '</div>' +
+        '</div>' +
+        
+        '<!-- Department/Course -->' +
+        '<div class="flex items-start gap-3 p-3 rounded-xl bg-slate-50 dark:bg-gray-800/50 border border-slate-100 dark:border-gray-700/50">' +
+          '<div class="w-9 h-9 rounded-lg bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center flex-shrink-0">' +
+            '<svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">' +
+              '<path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>' +
+            '</svg>' +
+          '</div>' +
+          '<div class="flex-1 min-w-0">' +
+            '<p class="text-[11px] font-medium text-slate-500 dark:text-gray-400 uppercase tracking-wide">' + (user.role === 'faculty' ? 'Department' : 'Course/Program') + '</p>' +
+            '<p class="text-sm font-semibold text-slate-900 dark:text-white mt-0.5">' + escapeHtml(user.department_course || 'Not specified') + '</p>' +
+          '</div>' +
+        '</div>' +
+        
+        '<!-- Registration Date -->' +
+        '<div class="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-500/10 dark:to-teal-500/10 border border-emerald-200 dark:border-emerald-500/20">' +
+          '<div class="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-500/30 flex items-center justify-center flex-shrink-0">' +
+            '<svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">' +
+              '<path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>' +
+            '</svg>' +
+          '</div>' +
+          '<div class="flex-1 min-w-0">' +
+            '<p class="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">Registration Date</p>' +
+            '<p class="text-sm font-semibold text-emerald-800 dark:text-emerald-200 mt-0.5">' + formattedDate + '</p>' +
+            '<p class="text-[11px] text-emerald-600 dark:text-emerald-400">' + formattedTime + '</p>' +
+          '</div>' +
+        '</div>' +
+        
+      '</div>' +
+      
+      '<!-- Security Badge -->' +
+      '<div class="flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-gray-800">' +
+        '<svg class="w-4 h-4 text-slate-400 dark:text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">' +
+          '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>' +
+        '</svg>' +
+        '<span class="text-[11px] text-slate-400 dark:text-gray-500">User identity verified • Secure profile data</span>' +
+      '</div>' +
+    '</div>';
+}
+
+function closeRegistrantModal() {
+  var modal = document.getElementById('registrantDetailsModal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+  document.body.style.overflow = '';
 }
 
 // ── Bootstrap ────────────────────────────────────────────────────────────────

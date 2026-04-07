@@ -35,7 +35,8 @@ exports.getAuditLogs = async (req, res) => {
           'signup'                                        AS type,
           full_name   COLLATE utf8mb4_general_ci          AS label,
           role        COLLATE utf8mb4_general_ci          AS meta,
-          created_at
+          created_at,
+          id                                              AS user_id
         FROM users
       )
       UNION ALL
@@ -45,7 +46,8 @@ exports.getAuditLogs = async (req, res) => {
           'thread'                                        AS type,
           title       COLLATE utf8mb4_general_ci          AS label,
           category    COLLATE utf8mb4_general_ci          AS meta,
-          created_at
+          created_at,
+          NULL                                            AS user_id
         FROM forum_threads
       )
       UNION ALL
@@ -55,7 +57,8 @@ exports.getAuditLogs = async (req, res) => {
           'inquiry'                                       AS type,
           CONCAT('DR-', dr.id) COLLATE utf8mb4_general_ci AS label,
           u.full_name           COLLATE utf8mb4_general_ci AS meta,
-          dr.created_at
+          dr.created_at,
+          dr.student_id                                   AS user_id
         FROM document_requests dr
         JOIN users u ON dr.student_id = u.id
       )
@@ -66,7 +69,8 @@ exports.getAuditLogs = async (req, res) => {
           'password_reset'                                AS type,
           label         COLLATE utf8mb4_general_ci        AS label,
           meta          COLLATE utf8mb4_general_ci        AS meta,
-          created_at
+          created_at,
+          NULL                                            AS user_id
         FROM audit_logs
         WHERE type = 'password_reset'
       )
@@ -77,7 +81,8 @@ exports.getAuditLogs = async (req, res) => {
           type          COLLATE utf8mb4_general_ci        AS type,
           label         COLLATE utf8mb4_general_ci        AS label,
           meta          COLLATE utf8mb4_general_ci        AS meta,
-          created_at
+          created_at,
+          NULL                                            AS user_id
         FROM audit_logs
         WHERE type = 'MODERATION'
       )

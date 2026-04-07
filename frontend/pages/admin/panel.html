@@ -622,6 +622,55 @@
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- REGISTRANT DETAILS MODAL (For Signup User Details)                      -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <div id="registrantDetailsModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" onclick="if(event.target === this) closeRegistrantModal()">
+    <!-- Backdrop with blur -->
+    <div class="absolute inset-0 bg-slate-900/60 dark:bg-black/70 backdrop-blur-sm"></div>
+    
+    <!-- Modal Container -->
+    <div class="relative w-full max-w-lg bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-gray-800 overflow-hidden transform transition-all">
+      <!-- Header with Emerald Theme for New Users -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-emerald-200 dark:border-emerald-500/30 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-500/10 dark:to-teal-500/10">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/30">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-emerald-900 dark:text-emerald-200">User Details</h3>
+            <p class="text-[11px] text-emerald-700 dark:text-emerald-400/80">Registration information</p>
+          </div>
+        </div>
+        <button onclick="closeRegistrantModal()" class="p-2 rounded-lg text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-200 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Content Area -->
+      <div id="registrantModalContent" class="px-6 py-5 max-h-[60vh] overflow-y-auto custom-scroll">
+        <!-- Dynamic content loaded by JS -->
+        <div class="flex items-center justify-center py-12">
+          <svg class="w-6 h-6 animate-spin text-emerald-500" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </div>
+      </div>
+      
+      <!-- Footer -->
+      <div class="px-6 py-4 border-t border-slate-100 dark:border-gray-800 bg-slate-50 dark:bg-gray-900/50">
+        <button onclick="closeRegistrantModal()" class="w-full px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script src="../../js/admin.js"></script>
 </body>
 </html>
