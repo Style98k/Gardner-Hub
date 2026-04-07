@@ -87,7 +87,7 @@ exports.getAuditLogs = async (req, res) => {
         WHERE type = 'MODERATION'
       )
       ORDER BY created_at DESC
-      LIMIT 20
+      LIMIT 100
     `;
 
     const [rows] = await pool.query(query);
