@@ -1012,7 +1012,6 @@ function renderRegistrantDetails(user) {
           '<h4 class="text-lg font-bold text-slate-900 dark:text-white truncate">' + escapeHtml(user.full_name || 'Unknown User') + '</h4>' +
           '<div class="flex items-center gap-2 mt-1.5">' +
             '<span class="px-2.5 py-1 rounded-lg text-xs font-semibold ' + roleCfg.bg + ' ' + roleCfg.text + '">' + roleCfg.label + '</span>' +
-            '<span class="text-[11px] text-slate-400 dark:text-gray-500">ID: ' + user.id + '</span>' +
           '</div>' +
         '</div>' +
       '</div>' +
