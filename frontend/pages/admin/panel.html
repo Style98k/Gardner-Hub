@@ -55,9 +55,17 @@
     .nav-item.active {
       background: linear-gradient(135deg, #00334e 0%, #004d73 100%);
       color: white;
+      border-left: 3px solid #00bfff;
     }
     html.dark .nav-item.active {
       background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+      border-left: 3px solid #38bdf8;
+    }
+
+    /* Section transition effects */
+    #userManagementSection,
+    #activityLogsSection {
+      transition: opacity 0.3s ease-in-out;
     }
   </style>
 </head>
@@ -171,6 +179,22 @@
             </button>
           </div>
         </div>
+        
+        <!-- Mobile Navigation Tabs -->
+        <div class="flex border-t border-slate-200 dark:border-gray-800">
+          <button id="mobileNavUsers" onclick="setMobileActiveNav('users')" class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gardner dark:text-gardner-light border-b-2 border-gardner dark:border-gardner-light transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            Users
+          </button>
+          <button id="mobileNavActivity" onclick="setMobileActiveNav('activity')" class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-500 dark:text-gray-400 border-b-2 border-transparent hover:text-slate-700 dark:hover:text-gray-300 transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+            </svg>
+            Activity
+          </button>
+        </div>
       </header>
 
       <div class="p-6 lg:p-8 space-y-6">
@@ -247,11 +271,11 @@
           </div>
         </section>
 
-        <!-- ─── User Management (70%) + Activity Feed (30%) ─────────────────── -->
-        <section class="grid grid-cols-1 xl:grid-cols-10 gap-6">
-          
-          <!-- User Management Table (70%) -->
-          <div class="xl:col-span-7 bg-white dark:bg-gray-900 rounded-xl border border-slate-200 dark:border-gray-800 overflow-hidden">
+        <!-- ═══════════════════════════════════════════════════════════════════════ -->
+        <!-- USER MANAGEMENT SECTION (Full Width)                                   -->
+        <!-- ═══════════════════════════════════════════════════════════════════════ -->
+        <section id="userManagementSection" class="transition-all duration-300 ease-in-out">
+          <div class="bg-white dark:bg-gray-900 rounded-xl border border-slate-200 dark:border-gray-800 overflow-hidden">
             <!-- Header -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4 border-b border-slate-200 dark:border-gray-800">
               <div class="flex items-center gap-3">
@@ -273,7 +297,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                   </svg>
                   <input type="text" id="userSearch" onkeyup="searchUsers()" placeholder="Search users..." 
-                         class="w-40 pl-9 pr-3 py-2 text-sm bg-slate-50 dark:bg-gray-800 border-0 rounded-lg text-slate-700 dark:text-gray-300 placeholder-slate-400 focus:ring-2 focus:ring-gardner/50">
+                         class="w-40 sm:w-56 pl-9 pr-3 py-2 text-sm bg-slate-50 dark:bg-gray-800 border-0 rounded-lg text-slate-700 dark:text-gray-300 placeholder-slate-400 focus:ring-2 focus:ring-gardner/50">
                 </div>
                 
                 <!-- Role Filter -->
@@ -288,7 +312,7 @@
             </div>
 
             <!-- Table -->
-            <div class="overflow-x-auto custom-scroll max-h-[480px]">
+            <div class="overflow-x-auto custom-scroll max-h-[600px]">
               <table class="w-full text-sm">
                 <thead class="text-[11px] uppercase tracking-wider text-slate-500 dark:text-gray-500 bg-slate-50 dark:bg-gray-800/50 sticky top-0">
                   <tr>
@@ -315,31 +339,73 @@
               </table>
             </div>
           </div>
+        </section>
 
-          <!-- Activity Feed (30%) -->
-          <div class="xl:col-span-3 bg-white dark:bg-gray-900 rounded-xl border border-slate-200 dark:border-gray-800 overflow-hidden flex flex-col">
+        <!-- ═══════════════════════════════════════════════════════════════════════ -->
+        <!-- ACTIVITY LOGS SECTION (Full Width, Hidden by Default)                  -->
+        <!-- ═══════════════════════════════════════════════════════════════════════ -->
+        <section id="activityLogsSection" class="hidden transition-all duration-300 ease-in-out">
+          <div class="bg-white dark:bg-gray-900 rounded-xl border border-slate-200 dark:border-gray-800 overflow-hidden">
             <!-- Header -->
-            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-gray-800">
-              <div class="flex items-center gap-2">
-                <div class="w-7 h-7 rounded-lg bg-violet-100 dark:bg-violet-500/20 flex items-center justify-center">
-                  <svg class="w-3.5 h-3.5 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4 border-b border-slate-200 dark:border-gray-800">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-violet-100 dark:bg-violet-500/20 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                   </svg>
                 </div>
-                <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Activity</h3>
+                <div>
+                  <h3 class="text-base font-semibold text-slate-900 dark:text-white">Activity Logs</h3>
+                  <p class="text-[11px] text-slate-500 dark:text-gray-400">Full platform activity history</p>
+                </div>
               </div>
-              <span class="live-dot w-2 h-2 rounded-full bg-emerald-500" title="Live"></span>
+
+              <div class="flex items-center gap-3">
+                <!-- Activity Type Filter -->
+                <select id="activityTypeFilter" onchange="filterActivityLogs()"
+                        class="text-sm bg-slate-50 dark:bg-gray-800 border-0 text-slate-700 dark:text-gray-300 rounded-lg px-3 py-2 font-medium focus:ring-2 focus:ring-violet-500/50">
+                  <option value="all">All Activity</option>
+                  <option value="signup">Signups</option>
+                  <option value="thread">Threads</option>
+                  <option value="inquiry">Inquiries</option>
+                  <option value="MODERATION">Moderation</option>
+                  <option value="password_reset">Password Resets</option>
+                </select>
+                
+                <!-- Live Indicator -->
+                <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-gray-800">
+                  <span class="live-dot w-2 h-2 rounded-full bg-emerald-500"></span>
+                  <span class="text-xs font-medium text-slate-600 dark:text-gray-400">Live</span>
+                </div>
+              </div>
             </div>
 
-            <!-- Feed Items (Compact) -->
-            <div id="activityFeed" class="custom-scroll flex-1 overflow-y-auto max-h-[420px]">
-              <div class="px-4 py-10 text-center text-slate-400 dark:text-gray-600 italic text-xs">
-                <svg class="w-5 h-5 animate-spin mx-auto mb-2" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Loading…
-              </div>
+            <!-- Activity Logs Table -->
+            <div class="overflow-x-auto custom-scroll max-h-[600px]">
+              <table class="w-full text-sm">
+                <thead class="text-[11px] uppercase tracking-wider text-slate-500 dark:text-gray-500 bg-slate-50 dark:bg-gray-800/50 sticky top-0">
+                  <tr>
+                    <th class="px-5 py-3 text-left font-semibold">Time</th>
+                    <th class="px-5 py-3 text-left font-semibold">User</th>
+                    <th class="px-5 py-3 text-left font-semibold">Activity Type</th>
+                    <th class="px-5 py-3 text-left font-semibold hidden md:table-cell">Details</th>
+                    <th class="px-5 py-3 text-right font-semibold">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="activityLogsTableBody" class="divide-y divide-slate-100 dark:divide-gray-800">
+                  <tr>
+                    <td colspan="5" class="px-5 py-12 text-center text-slate-400 dark:text-gray-600 italic text-sm">
+                      <div class="flex flex-col items-center gap-2">
+                        <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Loading activity logs…</span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </section>
@@ -352,14 +418,95 @@
   <!-- SCRIPTS                                                               -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <script>
-    // Navigation state management
+    // Navigation state management with section switching
     function setActiveNav(btn, section) {
+      // Update nav button styling
       document.querySelectorAll('.nav-item').forEach(function(item) {
         item.classList.remove('active');
         item.classList.add('text-slate-600', 'dark:text-gray-400');
       });
       btn.classList.add('active');
       btn.classList.remove('text-slate-600', 'dark:text-gray-400');
+
+      // Get section elements
+      var userSection = document.getElementById('userManagementSection');
+      var activitySection = document.getElementById('activityLogsSection');
+
+      // Switch sections with smooth transitions
+      if (section === 'users') {
+        activitySection.classList.add('hidden');
+        userSection.classList.remove('hidden');
+        // Fade in effect
+        userSection.style.opacity = '0';
+        setTimeout(function() { userSection.style.opacity = '1'; }, 10);
+      } else if (section === 'activity') {
+        userSection.classList.add('hidden');
+        activitySection.classList.remove('hidden');
+        // Fade in effect
+        activitySection.style.opacity = '0';
+        setTimeout(function() { activitySection.style.opacity = '1'; }, 10);
+        // Load activity logs when switching to activity section
+        if (typeof loadAuditLogsTable === 'function') {
+          loadAuditLogsTable();
+        }
+      }
+    }
+
+    // Mobile navigation handler
+    function setMobileActiveNav(section) {
+      var usersBtn = document.getElementById('mobileNavUsers');
+      var activityBtn = document.getElementById('mobileNavActivity');
+      var userSection = document.getElementById('userManagementSection');
+      var activitySection = document.getElementById('activityLogsSection');
+
+      // Also sync desktop nav
+      var desktopNavItems = document.querySelectorAll('.nav-item');
+      desktopNavItems.forEach(function(item) {
+        item.classList.remove('active');
+        item.classList.add('text-slate-600', 'dark:text-gray-400');
+      });
+
+      if (section === 'users') {
+        // Update mobile tabs styling
+        usersBtn.classList.add('text-gardner', 'dark:text-gardner-light', 'border-gardner', 'dark:border-gardner-light');
+        usersBtn.classList.remove('text-slate-500', 'dark:text-gray-400', 'border-transparent');
+        activityBtn.classList.remove('text-gardner', 'dark:text-gardner-light', 'border-gardner', 'dark:border-gardner-light');
+        activityBtn.classList.add('text-slate-500', 'dark:text-gray-400', 'border-transparent');
+
+        // Update desktop nav
+        if (desktopNavItems[0]) {
+          desktopNavItems[0].classList.add('active');
+          desktopNavItems[0].classList.remove('text-slate-600', 'dark:text-gray-400');
+        }
+
+        // Switch sections
+        activitySection.classList.add('hidden');
+        userSection.classList.remove('hidden');
+        userSection.style.opacity = '0';
+        setTimeout(function() { userSection.style.opacity = '1'; }, 10);
+      } else if (section === 'activity') {
+        // Update mobile tabs styling
+        activityBtn.classList.add('text-gardner', 'dark:text-gardner-light', 'border-gardner', 'dark:border-gardner-light');
+        activityBtn.classList.remove('text-slate-500', 'dark:text-gray-400', 'border-transparent');
+        usersBtn.classList.remove('text-gardner', 'dark:text-gardner-light', 'border-gardner', 'dark:border-gardner-light');
+        usersBtn.classList.add('text-slate-500', 'dark:text-gray-400', 'border-transparent');
+
+        // Update desktop nav
+        if (desktopNavItems[1]) {
+          desktopNavItems[1].classList.add('active');
+          desktopNavItems[1].classList.remove('text-slate-600', 'dark:text-gray-400');
+        }
+
+        // Switch sections
+        userSection.classList.add('hidden');
+        activitySection.classList.remove('hidden');
+        activitySection.style.opacity = '0';
+        setTimeout(function() { activitySection.style.opacity = '1'; }, 10);
+        // Load activity logs
+        if (typeof loadAuditLogsTable === 'function') {
+          loadAuditLogsTable();
+        }
+      }
     }
 
     // Search users function

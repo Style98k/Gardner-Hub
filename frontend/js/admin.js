@@ -294,6 +294,8 @@ function resetPassword(id, name) {
 // ── Audit Logs / Activity Feed ───────────────────────────────────────────────
 
 var activityFeedClickListenerAdded = false;
+var allAuditLogs = []; // Store all logs for filtering
+var activityLogsTableClickListenerAdded = false;
 
 function loadAuditLogs() {
   fetch(API_BASE + '/admin/audit-logs', { headers: authHeaders() })
@@ -302,94 +304,206 @@ function loadAuditLogs() {
       return res.json();
     })
     .then(function (data) {
-      renderAuditLogs(data.logs || []);
+      allAuditLogs = data.logs || [];
+      // Render both the table view (for Activity Logs section)
+      renderAuditLogsTable(allAuditLogs);
     })
     .catch(function (err) {
       console.error('Failed to load audit logs:', err);
-      document.getElementById('activityFeed').innerHTML =
-        '<div class="px-4 py-10 text-center text-slate-400 dark:text-gray-600 italic text-xs">Unable to load activity.</div>';
+      var tableBody = document.getElementById('activityLogsTableBody');
+      if (tableBody) {
+        tableBody.innerHTML = '<tr><td colspan="5" class="px-5 py-12 text-center text-slate-400 dark:text-gray-600 italic text-sm">Unable to load activity logs.</td></tr>';
+      }
     });
 }
 
-function renderAuditLogs(logs) {
-  var feed = document.getElementById('activityFeed');
+// Load audit logs specifically for the table view
+function loadAuditLogsTable() {
+  fetch(API_BASE + '/admin/audit-logs', { headers: authHeaders() })
+    .then(function (res) {
+      if (!res.ok) throw new Error('Audit logs fetch failed');
+      return res.json();
+    })
+    .then(function (data) {
+      allAuditLogs = data.logs || [];
+      renderAuditLogsTable(allAuditLogs);
+    })
+    .catch(function (err) {
+      console.error('Failed to load audit logs:', err);
+      var tableBody = document.getElementById('activityLogsTableBody');
+      if (tableBody) {
+        tableBody.innerHTML = '<tr><td colspan="5" class="px-5 py-12 text-center text-slate-400 dark:text-gray-600 italic text-sm">Unable to load activity logs.</td></tr>';
+      }
+    });
+}
 
-  if (!logs.length) {
-    feed.innerHTML = '<div class="px-4 py-10 text-center text-slate-400 dark:text-gray-600 italic text-xs">No recent activity.</div>';
+// Filter activity logs by type
+function filterActivityLogs() {
+  var filterEl = document.getElementById('activityTypeFilter');
+  if (!filterEl) return;
+  
+  var filterType = filterEl.value;
+  var filteredLogs = filterType === 'all' 
+    ? allAuditLogs 
+    : allAuditLogs.filter(function(log) { return log.type === filterType; });
+  
+  renderAuditLogsTable(filteredLogs);
+}
+
+// Render activity logs as a professional table
+function renderAuditLogsTable(logs) {
+  var tableBody = document.getElementById('activityLogsTableBody');
+  if (!tableBody) return;
+
+  if (!logs || !logs.length) {
+    tableBody.innerHTML = '<tr><td colspan="5" class="px-5 py-12 text-center text-slate-400 dark:text-gray-600 italic text-sm">No activity logs found.</td></tr>';
     return;
   }
 
-  // Compact badge config per type
-  var badgeConfig = {
-    signup:  { bg: 'bg-emerald-100 dark:bg-emerald-500/20', text: 'text-emerald-600 dark:text-emerald-400', icon: '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>' },
-    thread:  { bg: 'bg-blue-100 dark:bg-blue-500/20', text: 'text-blue-600 dark:text-blue-400', icon: '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>' },
-    inquiry: { bg: 'bg-violet-100 dark:bg-violet-500/20', text: 'text-violet-600 dark:text-violet-400', icon: '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>' },
-    MODERATION: { bg: 'bg-orange-100 dark:bg-orange-500/20', text: 'text-orange-600 dark:text-orange-400', icon: '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>' },
-    password_reset: { bg: 'bg-amber-100 dark:bg-amber-500/20', text: 'text-amber-600 dark:text-amber-400', icon: '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>' },
+  // Badge configuration for activity types
+  var typeBadgeConfig = {
+    signup: { 
+      label: 'Signup', 
+      bg: 'bg-emerald-100 dark:bg-emerald-500/20', 
+      text: 'text-emerald-700 dark:text-emerald-400',
+      icon: '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>'
+    },
+    thread: { 
+      label: 'Thread', 
+      bg: 'bg-blue-100 dark:bg-blue-500/20', 
+      text: 'text-blue-700 dark:text-blue-400',
+      icon: '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>'
+    },
+    inquiry: { 
+      label: 'Inquiry', 
+      bg: 'bg-violet-100 dark:bg-violet-500/20', 
+      text: 'text-violet-700 dark:text-violet-400',
+      icon: '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+    },
+    MODERATION: { 
+      label: 'Moderation', 
+      bg: 'bg-orange-100 dark:bg-orange-500/20', 
+      text: 'text-orange-700 dark:text-orange-400',
+      icon: '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>'
+    },
+    password_reset: { 
+      label: 'Password Reset', 
+      bg: 'bg-amber-100 dark:bg-amber-500/20', 
+      text: 'text-amber-700 dark:text-amber-400',
+      icon: '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>'
+    }
   };
 
-  feed.innerHTML = logs.map(function (log, idx) {
-    var cfg = badgeConfig[log.type] || badgeConfig.signup;
-    var ago = timeAgo(log.created_at);
-
-    // Determine if this item is clickable (thread or MODERATION types)
+  tableBody.innerHTML = logs.map(function(log) {
+    var cfg = typeBadgeConfig[log.type] || { label: log.type, bg: 'bg-slate-100 dark:bg-gray-700', text: 'text-slate-700 dark:text-gray-300', icon: '' };
+    
+    // Format time
+    var logDate = new Date(log.created_at);
+    var timeStr = logDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    var dateStr = logDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    var fullTime = dateStr + ', ' + timeStr;
+    
+    // Extract user name from label or meta
+    var userName = '—';
+    var details = '—';
+    
+    switch (log.type) {
+      case 'signup':
+        userName = escapeHtml(log.label || 'Unknown');
+        details = 'New user registration';
+        break;
+      case 'thread':
+        userName = 'Thread Author';
+        details = 'Posted in <span class="font-medium text-blue-600 dark:text-blue-400">' + escapeHtml(log.meta || 'academic') + '</span>';
+        break;
+      case 'inquiry':
+        userName = escapeHtml(log.meta || 'Unknown');
+        details = 'Submitted inquiry';
+        break;
+      case 'MODERATION':
+        userName = escapeHtml(log.label || 'System');
+        details = '<span class="text-orange-600 dark:text-orange-400">Content flagged</span>';
+        break;
+      case 'password_reset':
+        userName = escapeHtml(log.label || 'Admin');
+        details = 'Password was reset';
+        break;
+      default:
+        userName = escapeHtml(log.label || '—');
+        details = escapeHtml(log.meta || '—');
+    }
+    
+    // Determine if clickable
     var isClickable = log.type === 'thread' || log.type === 'MODERATION';
     var dataAttrs = '';
-    var cursorClass = '';
+    var actionBtn = '<span class="text-[11px] text-slate-400 dark:text-gray-600 italic">—</span>';
     
     if (isClickable) {
       if (log.type === 'thread') {
-        // For threads, use data attributes
         dataAttrs = ' data-log-type="thread" data-log-id="' + log.id + '" data-log-meta="' + escapeHtml(log.meta || 'academic') + '"';
+        actionBtn = '<button class="activity-table-review-btn px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-sm">Review</button>';
       } else if (log.type === 'MODERATION') {
-        // For moderation logs, store meta as base64 to avoid quote issues with JSON
         var metaBase64 = btoa(unescape(encodeURIComponent(log.meta || '')));
         dataAttrs = ' data-log-type="MODERATION" data-log-label="' + escapeHtml(log.label) + '" data-log-meta-b64="' + metaBase64 + '"';
+        actionBtn = '<button class="activity-table-review-btn px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-orange-600 hover:bg-orange-700 transition-all shadow-sm">Review</button>';
       }
-      cursorClass = ' cursor-pointer';
     }
-
-    // Compact description
-    var description = '';
-    switch (log.type) {
-      case 'signup':
-        description = '<span class="font-medium text-slate-800 dark:text-white">' + escapeHtml(log.label) + '</span> joined';
-        break;
-      case 'thread':
-        description = 'Thread in <span class="font-medium">' + escapeHtml(log.meta) + '</span>';
-        break;
-      case 'inquiry':
-        description = 'Inquiry by <span class="font-medium">' + escapeHtml(log.meta) + '</span>';
-        break;
-      case 'MODERATION':
-        description = '<span class="font-medium text-orange-600 dark:text-orange-400">' + escapeHtml(log.label) + '</span>';
-        break;
-      case 'password_reset':
-        description = escapeHtml(log.label);
-        break;
-      default:
-        description = escapeHtml(log.label);
-    }
-
-    // Add review indicator for clickable items
-    var reviewIndicator = isClickable 
-      ? '<svg class="w-3.5 h-3.5 text-slate-300 dark:text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>'
-      : '';
-
-    return '<div class="activity-log-item px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-gray-800/50 transition-colors border-b border-slate-100 dark:border-gray-800 last:border-b-0' + cursorClass + '"' + dataAttrs + '>' +
-      '<div class="w-7 h-7 rounded-lg ' + cfg.bg + ' flex items-center justify-center flex-shrink-0 ' + cfg.text + '">' + cfg.icon + '</div>' +
-      '<div class="flex-1 min-w-0">' +
-        '<p class="text-xs text-slate-600 dark:text-gray-300 truncate">' + description + '</p>' +
-        '<p class="text-[10px] text-slate-400 dark:text-gray-500 mt-0.5">' + ago + '</p>' +
-      '</div>' +
-      reviewIndicator +
-    '</div>';
+    
+    return '<tr class="activity-log-table-row hover:bg-slate-50 dark:hover:bg-gray-800/50 transition-colors"' + dataAttrs + '>' +
+      '<td class="px-5 py-3">' +
+        '<div class="flex flex-col">' +
+          '<span class="text-sm font-medium text-slate-900 dark:text-white">' + timeStr + '</span>' +
+          '<span class="text-[11px] text-slate-400 dark:text-gray-500">' + dateStr + '</span>' +
+        '</div>' +
+      '</td>' +
+      '<td class="px-5 py-3">' +
+        '<span class="text-sm text-slate-700 dark:text-gray-300">' + userName + '</span>' +
+      '</td>' +
+      '<td class="px-5 py-3">' +
+        '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium ' + cfg.bg + ' ' + cfg.text + '">' +
+          cfg.icon +
+          cfg.label +
+        '</span>' +
+      '</td>' +
+      '<td class="px-5 py-3 hidden md:table-cell">' +
+        '<span class="text-sm text-slate-600 dark:text-gray-400">' + details + '</span>' +
+      '</td>' +
+      '<td class="px-5 py-3 text-right">' + actionBtn + '</td>' +
+    '</tr>';
   }).join('');
   
   // Attach click handler only once via event delegation
-  if (!activityFeedClickListenerAdded) {
-    feed.addEventListener('click', handleActivityLogClick);
-    activityFeedClickListenerAdded = true;
+  if (!activityLogsTableClickListenerAdded) {
+    tableBody.addEventListener('click', handleActivityTableClick);
+    activityLogsTableClickListenerAdded = true;
+  }
+}
+
+// Handle clicks on activity logs table rows
+function handleActivityTableClick(e) {
+  var btn = e.target.closest('.activity-table-review-btn');
+  if (!btn) return;
+  
+  var row = btn.closest('.activity-log-table-row');
+  if (!row) return;
+  
+  var logType = row.getAttribute('data-log-type');
+  if (!logType) return;
+  
+  if (logType === 'thread') {
+    var postId = row.getAttribute('data-log-id');
+    var category = row.getAttribute('data-log-meta') || 'academic';
+    openReviewModal(parseInt(postId), category);
+  } else if (logType === 'MODERATION') {
+    var label = row.getAttribute('data-log-label');
+    var metaBase64 = row.getAttribute('data-log-meta-b64');
+    var meta = '';
+    try {
+      meta = decodeURIComponent(escape(atob(metaBase64)));
+    } catch (err) {
+      meta = '';
+    }
+    openModerationDetail(label, meta);
   }
 }
 
