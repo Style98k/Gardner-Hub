@@ -539,9 +539,9 @@
 
       var hasReplies = comment.replies && comment.replies.length > 0;
 
-      // Check if current user can delete this comment (author or admin)
+      // Check if current user can delete this comment (ONLY admin)
       var user = getCurrentUser();
-      var canDelete = user && (user.id === comment.user_id || user.role === 'admin');
+      var canDelete = user && user.role === 'admin';
       var deleteBtnHtml = '';
       if (canDelete) {
         deleteBtnHtml = '<button onclick="event.stopPropagation(); deleteComment(' + comment.id + ')" class="flex items-center space-x-1 text-gray-400 dark:text-gray-500 hover:text-red-500 transition-colors duration-200 group" title="Delete comment">' +

@@ -52,9 +52,16 @@ exports.createOfficialAnnouncement = async (req, res) => {
       try {
         const [userRow] = await pool.query("SELECT full_name FROM users WHERE id = ?", [authorId]);
         const userName = userRow.length > 0 ? userRow[0].full_name : "Unknown User";
+        const metaData = JSON.stringify({
+          id: result.insertId,
+          type: "thread",
+          author: userName,
+          category: "announcements",
+          content: content.substring(0, 150)
+        });
         await pool.query(
           "INSERT INTO audit_logs (type, label, meta) VALUES (?, ?, ?)",
-          ["MODERATION", "Profanity Detected", `${userName} | Official Announcements`]
+          ["MODERATION", "Profanity Detected", metaData]
         );
       } catch (logErr) {
         console.error("Audit log insert error (moderation):", logErr);
@@ -260,9 +267,17 @@ exports.addComment = async (req, res) => {
       try {
         const [userRow] = await pool.query("SELECT full_name FROM users WHERE id = ?", [userId]);
         const userName = userRow.length > 0 ? userRow[0].full_name : "Unknown User";
+        const metaData = JSON.stringify({
+          id: result.insertId,
+          threadId: parseInt(id),
+          type: "comment",
+          author: userName,
+          category: "announcements",
+          content: content.substring(0, 150)
+        });
         await pool.query(
           "INSERT INTO audit_logs (type, label, meta) VALUES (?, ?, ?)",
-          ["MODERATION", "Profanity Detected", `${userName} | Official Announcements (Comment)`]
+          ["MODERATION", "Profanity Detected", metaData]
         );
       } catch (logErr) {
         console.error("Audit log insert error (moderation):", logErr);
@@ -357,9 +372,16 @@ exports.updateAnnouncement = async (req, res) => {
       try {
         const [userRow] = await pool.query("SELECT full_name FROM users WHERE id = ?", [userId]);
         const userName = userRow.length > 0 ? userRow[0].full_name : "Unknown User";
+        const metaData = JSON.stringify({
+          id: parseInt(id),
+          type: "thread",
+          author: userName,
+          category: "announcements",
+          content: content.substring(0, 150)
+        });
         await pool.query(
           "INSERT INTO audit_logs (type, label, meta) VALUES (?, ?, ?)",
-          ["MODERATION", "Profanity Detected", `${userName} | Official Announcements (Edit)`]
+          ["MODERATION", "Profanity Detected", metaData]
         );
       } catch (logErr) {
         console.error("Audit log insert error (moderation):", logErr);

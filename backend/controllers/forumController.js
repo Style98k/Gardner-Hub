@@ -132,9 +132,16 @@ exports.createThread = async (req, res) => {
         const [userRow] = await pool.query("SELECT full_name FROM users WHERE id = ?", [authorId]);
         const userName = userRow.length > 0 ? userRow[0].full_name : "Unknown User";
         const categoryLabel = category === "academic" ? "Academic Discussion" : category.charAt(0).toUpperCase() + category.slice(1);
+        const metaData = JSON.stringify({
+          id: result.insertId,
+          type: "thread",
+          author: userName,
+          category: category,
+          content: content.substring(0, 150)
+        });
         await pool.query(
           "INSERT INTO audit_logs (type, label, meta) VALUES (?, ?, ?)",
-          ["MODERATION", "Profanity Detected", `${userName} | ${categoryLabel}`]
+          ["MODERATION", "Profanity Detected", metaData]
         );
       } catch (logErr) {
         console.error("Audit log insert error (moderation):", logErr);
@@ -290,9 +297,17 @@ exports.createPost = async (req, res) => {
         const [userRow] = await pool.query("SELECT full_name FROM users WHERE id = ?", [authorId]);
         const userName = userRow.length > 0 ? userRow[0].full_name : "Unknown User";
         const categoryLabel = threadRows[0].category === "academic" ? "Academic Discussion (Reply)" : threadRows[0].category + " (Reply)";
+        const metaData = JSON.stringify({
+          id: result.insertId,
+          threadId: parseInt(id),
+          type: "reply",
+          author: userName,
+          category: threadRows[0].category,
+          content: content.substring(0, 150)
+        });
         await pool.query(
           "INSERT INTO audit_logs (type, label, meta) VALUES (?, ?, ?)",
-          ["MODERATION", "Profanity Detected", `${userName} | ${categoryLabel}`]
+          ["MODERATION", "Profanity Detected", metaData]
         );
       } catch (logErr) {
         console.error("Audit log insert error (moderation):", logErr);
@@ -379,9 +394,17 @@ exports.addComment = async (req, res) => {
         const [userRow] = await pool.query("SELECT full_name FROM users WHERE id = ?", [userId]);
         const userName = userRow.length > 0 ? userRow[0].full_name : "Unknown User";
         const categoryLabel = threadRows[0].category === "academic" ? "Academic Discussion (Comment)" : threadRows[0].category + " (Comment)";
+        const metaData = JSON.stringify({
+          id: result.insertId,
+          threadId: parseInt(id),
+          type: "comment",
+          author: userName,
+          category: threadRows[0].category,
+          content: content.substring(0, 150)
+        });
         await pool.query(
           "INSERT INTO audit_logs (type, label, meta) VALUES (?, ?, ?)",
-          ["MODERATION", "Profanity Detected", `${userName} | ${categoryLabel}`]
+          ["MODERATION", "Profanity Detected", metaData]
         );
       } catch (logErr) {
         console.error("Audit log insert error (moderation):", logErr);
