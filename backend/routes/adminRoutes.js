@@ -7,6 +7,7 @@ const {
   deleteUser,
   resetUserPassword,
   toggleUserStatus,
+  getModerationLogs,
 } = require('../controllers/adminController');
 
 // All routes require admin role
@@ -26,5 +27,8 @@ router.post('/users/:id/reset-password', resetUserPassword);
 
 // PATCH /api/admin/users/:id/status — toggle suspend/reactivate
 router.patch('/users/:id/status', toggleUserStatus);
+
+// GET /api/admin/moderation-logs — behavior alerts
+router.get('/moderation-logs', getModerationLogs);
 
 module.exports = router;

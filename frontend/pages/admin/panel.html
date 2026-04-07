@@ -64,7 +64,8 @@
 
     /* Section transition effects */
     #userManagementSection,
-    #activityLogsSection {
+    #activityLogsSection,
+    #behaviorAlertsSection {
       transition: opacity 0.3s ease-in-out;
     }
   </style>
@@ -133,6 +134,13 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
           </svg>
           Activity Logs
+        </button>
+
+        <button onclick="setActiveNav(this, 'alerts')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 dark:text-gray-400 transition-all duration-200 hover:bg-slate-100 dark:hover:bg-gray-800">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          Behavior Alerts
         </button>
       </nav>
 
@@ -205,13 +213,9 @@
             <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Dashboard</h1>
             <p class="text-sm text-slate-500 dark:text-gray-400 mt-0.5">Monitor platform performance and user activity</p>
           </div>
-          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-gray-800">
-            <span class="live-dot w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span class="text-xs font-medium text-slate-600 dark:text-gray-400">Live</span>
-          </div>
         </div>
 
-        <!-- ─── Statistics Cards (4 Essential) ──────────────────────────────── -->
+        <!-- ─── Statistics Cards (4 Essential) ────────────────────────────────-->
         <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
           
           <!-- Total Users -->
@@ -410,6 +414,64 @@
           </div>
         </section>
 
+        <!-- ═══════════════════════════════════════════════════════════════════════ -->
+        <!-- BEHAVIOR ALERTS SECTION (Full Width, Hidden by Default)                -->
+        <!-- ═══════════════════════════════════════════════════════════════════════ -->
+        <section id="behaviorAlertsSection" class="hidden transition-all duration-300 ease-in-out">
+          <div class="bg-white dark:bg-gray-900 rounded-xl border border-slate-200 dark:border-gray-800 overflow-hidden">
+            <!-- Header -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4 border-b border-slate-200 dark:border-gray-800">
+              <div class="flex items-center gap-3">
+                <div class="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                  <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-base font-semibold text-slate-900 dark:text-white">Behavior Alerts</h3>
+                  <p class="text-[11px] text-slate-500 dark:text-gray-400">Flagged content and policy violations</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="alertCount" class="text-xs font-medium text-slate-500 dark:text-gray-400">0 alerts</span>
+                <button onclick="loadBehaviorAlerts()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-gray-800 rounded-lg transition-colors">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                  </svg>
+                  Refresh
+                </button>
+              </div>
+            </div>
+
+            <!-- Behavior Alerts Table -->
+            <div class="overflow-x-auto custom-scroll max-h-[600px]">
+              <table class="w-full text-sm">
+                <thead class="text-[11px] uppercase tracking-wider text-slate-500 dark:text-gray-500 bg-slate-50 dark:bg-gray-800/50 sticky top-0">
+                  <tr>
+                    <th class="px-5 py-3 text-left font-semibold">Timestamp</th>
+                    <th class="px-5 py-3 text-left font-semibold">User Name</th>
+                    <th class="px-5 py-3 text-left font-semibold">Role</th>
+                    <th class="px-5 py-3 text-left font-semibold">Category</th>
+                    <th class="px-5 py-3 text-left font-semibold">Flagged Content</th>
+                  </tr>
+                </thead>
+                <tbody id="behaviorAlertsTableBody" class="divide-y divide-slate-100 dark:divide-gray-800">
+                  <tr>
+                    <td colspan="5" class="px-5 py-12 text-center text-slate-400 dark:text-gray-600 italic text-sm">
+                      <div class="flex flex-col items-center gap-2">
+                        <svg class="w-8 h-8 text-slate-300 dark:text-gray-700" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/>
+                        </svg>
+                        <span>No behavior alerts found</span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
       </div>
     </main>
   </div>
@@ -431,16 +493,20 @@
       // Get section elements
       var userSection = document.getElementById('userManagementSection');
       var activitySection = document.getElementById('activityLogsSection');
+      var alertsSection = document.getElementById('behaviorAlertsSection');
+
+      // Hide all sections first
+      userSection.classList.add('hidden');
+      activitySection.classList.add('hidden');
+      alertsSection.classList.add('hidden');
 
       // Switch sections with smooth transitions
       if (section === 'users') {
-        activitySection.classList.add('hidden');
         userSection.classList.remove('hidden');
         // Fade in effect
         userSection.style.opacity = '0';
         setTimeout(function() { userSection.style.opacity = '1'; }, 10);
       } else if (section === 'activity') {
-        userSection.classList.add('hidden');
         activitySection.classList.remove('hidden');
         // Fade in effect
         activitySection.style.opacity = '0';
@@ -448,6 +514,15 @@
         // Load activity logs when switching to activity section
         if (typeof loadAuditLogsTable === 'function') {
           loadAuditLogsTable();
+        }
+      } else if (section === 'alerts') {
+        alertsSection.classList.remove('hidden');
+        // Fade in effect
+        alertsSection.style.opacity = '0';
+        setTimeout(function() { alertsSection.style.opacity = '1'; }, 10);
+        // Load behavior alerts when switching to alerts section
+        if (typeof loadBehaviorAlerts === 'function') {
+          loadBehaviorAlerts();
         }
       }
     }

@@ -197,3 +197,20 @@ exports.toggleUserStatus = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+// ─── Get Moderation Logs (Behavior Alerts) ─────────────────────────────────────
+exports.getModerationLogs = async (req, res) => {
+  try {
+    const [logs] = await pool.query(`
+      SELECT id, type, label, meta, created_at
+      FROM audit_logs
+      WHERE type = 'MODERATION'
+      ORDER BY created_at DESC
+    `);
+
+    res.json({ logs });
+  } catch (error) {
+    console.error('Get moderation logs error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};

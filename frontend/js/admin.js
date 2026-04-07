@@ -1093,6 +1093,105 @@ function closeRegistrantModal() {
   document.body.style.overflow = '';
 }
 
+// ── Behavior Alerts ─────────────────────────────────────────────────────────
+
+function loadBehaviorAlerts() {
+  var tableBody = document.getElementById('behaviorAlertsTableBody');
+  var alertCountEl = document.getElementById('alertCount');
+  
+  if (!tableBody) return;
+  
+  // Show loading state
+  tableBody.innerHTML = '<tr><td colspan="5" class="px-5 py-12 text-center text-slate-400 dark:text-gray-600 italic text-sm">' +
+    '<div class="flex flex-col items-center gap-2">' +
+    '<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">' +
+    '<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>' +
+    '<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>' +
+    '</svg><span>Loading behavior alerts…</span></div></td></tr>';
+  
+  fetch(API_BASE + '/admin/moderation-logs', { headers: authHeaders() })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      renderBehaviorAlerts(data.logs || []);
+    })
+    .catch(function(err) {
+      console.error('Failed to load behavior alerts:', err);
+      tableBody.innerHTML = '<tr><td colspan="5" class="px-5 py-12 text-center text-slate-400 dark:text-gray-600 italic text-sm">Unable to load behavior alerts.</td></tr>';
+      if (alertCountEl) alertCountEl.textContent = '0 alerts';
+    });
+}
+
+function renderBehaviorAlerts(logs) {
+  var tableBody = document.getElementById('behaviorAlertsTableBody');
+  var alertCountEl = document.getElementById('alertCount');
+  
+  if (!tableBody) return;
+  
+  if (!logs || !logs.length) {
+    tableBody.innerHTML = '<tr><td colspan="5" class="px-5 py-12 text-center text-slate-400 dark:text-gray-600 italic text-sm">' +
+      '<div class="flex flex-col items-center gap-2">' +
+      '<svg class="w-8 h-8 text-slate-300 dark:text-gray-700" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">' +
+      '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/>' +
+      '</svg><span>No behavior alerts found</span></div></td></tr>';
+    if (alertCountEl) alertCountEl.textContent = '0 alerts';
+    return;
+  }
+  
+  if (alertCountEl) alertCountEl.textContent = logs.length + ' alert' + (logs.length === 1 ? '' : 's');
+  
+  tableBody.innerHTML = logs.map(function(log) {
+    // Parse the meta JSON to extract author, category, and content
+    var meta = {};
+    try {
+      meta = typeof log.meta === 'string' ? JSON.parse(log.meta) : (log.meta || {});
+    } catch (e) {
+      meta = {};
+    }
+    
+    var userName = meta.author || 'Unknown User';
+    var category = meta.category || 'General';
+    var flaggedContent = meta.content || log.label || '';
+    var role = meta.type || 'user';
+    var timestamp = timeAgo(log.created_at);
+    var categoryClass = getCategoryClass(category);
+    var roleClass = getRoleClass(role);
+    
+    return '<tr class="hover:bg-slate-50 dark:hover:bg-gray-800/50 transition-colors">' +
+      '<td class="px-5 py-3 text-xs text-slate-500 dark:text-gray-400 whitespace-nowrap">' + escapeHtml(timestamp) + '</td>' +
+      '<td class="px-5 py-3 font-medium text-slate-800 dark:text-gray-200">' + escapeHtml(userName) + '</td>' +
+      '<td class="px-5 py-3"><span class="px-2 py-0.5 text-[10px] font-semibold uppercase rounded-full ' + roleClass + '">' + escapeHtml(role) + '</span></td>' +
+      '<td class="px-5 py-3"><span class="px-2 py-0.5 text-[10px] font-semibold uppercase rounded-full ' + categoryClass + '">' + escapeHtml(category) + '</span></td>' +
+      '<td class="px-5 py-3 text-sm text-slate-600 dark:text-gray-400 max-w-xs truncate" title="' + escapeHtml(flaggedContent) + '">' + escapeHtml(flaggedContent) + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+function getCategoryClass(category) {
+  var categoryLower = (category || '').toLowerCase();
+  if (categoryLower.includes('academic')) {
+    return 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400';
+  } else if (categoryLower.includes('announcement')) {
+    return 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400';
+  } else if (categoryLower.includes('social') || categoryLower.includes('events')) {
+    return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400';
+  } else if (categoryLower.includes('material') || categoryLower.includes('learning')) {
+    return 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400';
+  }
+  return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400';
+}
+
+function getRoleClass(role) {
+  var roleLower = (role || '').toLowerCase();
+  if (roleLower.includes('thread')) {
+    return 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400';
+  } else if (roleLower.includes('reply') || roleLower.includes('comment')) {
+    return 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400';
+  } else if (roleLower.includes('post')) {
+    return 'bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400';
+  }
+  return 'bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-400';
+}
+
 // ── Bootstrap ────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', function () {
